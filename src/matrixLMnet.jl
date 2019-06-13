@@ -2,6 +2,8 @@ module matrixLMnet
 
 
 using matrixLM
+import matrixLM.calc_preds!, matrixLM.calc_preds!, 
+    matrixLM.calc_resid, matrixLM.calc_resid!
 
 using DataFrames
 using Distributed
@@ -12,7 +14,7 @@ using Statistics
 using MLBase
 
 
-export Response, Predictors, RawData, get_X, get_Z, get_Y, 
+export Response, Predictors, RawData, get_X, get_Z, get_Y, contr, 
     add_intercept, remove_intercept, shuffle_rows, shuffle_cols,
     cd!, cd_active!, ista!, fista!, fista_bt!, admm!, 
     Mlmnet, mlmnet, coef, coef_2d, predict, fitted, resid, 
