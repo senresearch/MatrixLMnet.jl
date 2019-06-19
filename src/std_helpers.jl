@@ -28,7 +28,7 @@ function standardize!(A::AbstractArray{Float64,2}, isIntercept::Bool)
     # Obtain and divide by the column L2 norms
     norms = Array{Float64}(undef, 1, size(A,2)) 
     for j in 1:size(A,2)
-        norms[j] = LinearAlgebra.norm(A[:,j])
+        norms[j] = norm(A[:,j])
         A[:,j] = A[:,j]/norms[j]
     end
     

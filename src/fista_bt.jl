@@ -166,8 +166,7 @@ function outer_update_fista_bt!(B::AbstractArray{Float64,2},
     # While condition not satisfied, shrink step size and update coefficient
     # estimates until the condition is met
     while (0.5 * sum(abs2, resid_B) > 0.5 * sum(abs2, resid) + 
-             LinearAlgebra.dot(B-A, transpose(grad)) + 
-             (0.5/stepsize[1])*LinearAlgebra.dot(B-A, B-A))
+             dot(B-A, transpose(grad)) + (0.5/stepsize[1])*dot(B-A, B-A))
         
         if looped== false # First time entering while loop
             # Update residuals based on extrapolated coefficients 

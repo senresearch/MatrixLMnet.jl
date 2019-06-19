@@ -2,13 +2,15 @@ module matrixLMnet
 
 
 using matrixLM
-import matrixLM.calc_preds!, matrixLM.calc_preds!, 
+import matrixLM.calc_preds, matrixLM.calc_preds!, 
     matrixLM.calc_resid, matrixLM.calc_resid!
 
 using DataFrames
 using Distributed
 using LinearAlgebra
 using LinearAlgebra.BLAS
+import LinearAlgebra.mul!, LinearAlgebra.norm, LinearAlgebra.dot, 
+     LinearAlgebra.diagm, LinearAlgebra.eigmin, LinearAlgebra.eigmax
 using Random
 using Statistics
 using MLBase

@@ -135,17 +135,17 @@ function update_admm!(B::AbstractArray{Float64,2},
     B[regXidx,regZidx] = prox1(B, rho*lambda, Qx, Qz)[regXidx,regZidx]
     
     # Dual updates
-    B2 .+= B0 .- B
+    B2 .+= rho.*(B0 .- B)
     
     # Transform coefficients back to original space
-    LinearAlgebra.mul!(QxBQz, Qx*B, transpose(Qz)) 
+    mul!(QxBQz, Qx*B, transpose(Qz)) 
     # Update residuals
     calc_resid!(resid, X, Y, Z, QxBQz) 
 end
 
 
 """
-    admm!(X, Y, Z, lambda, B, regXidx, regZidx, reg, norms; 
+    admm!(X, Y, Z, lambda, B, regXidx, regZidx, reg, norms, Qx, Qz, U, L; 
           isVerbose, stepsize, rho, thresh, maxiter)
 
 Performs ADMM.  
@@ -165,6 +165,11 @@ Performs ADMM.
   coefficients
 - norms = 2d array of floats consisting of the norms corresponding to each 
   coefficient or `nothing`
+- Qx = 2d array of floats consisting of the eigenvectors of X
+- Qz = 2d array of floats consisting of the eeigenvectors of Z
+- U = 2d array of floats consisting of the transformed Y matrix
+- L = 2d array of floats consisting of the kronecker product of the 
+  eigenvalues of X and Z
 
 # Keyword arguments
 
@@ -173,6 +178,8 @@ Performs ADMM.
 - stepsize = float; step size for updates (irrelevant for ADMM). 
   Defaults to `0.01`. 
 - rho = float; parameter thata controls ADMM tuning. Defaults to `1.0`. 
+- setRho = boolean flag indicating whether the ADMM tuning parameter `rho` 
+  should be calculated. Defaults to `true`.
 - thresh = threshold at which the coefficients are considered to have 
   converged, a floating scalar. Defaults to `10^(-7)`. 
 - maxiter = maximum number of update iterations. Defaults to `10^10`. 
@@ -193,29 +200,31 @@ function admm!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
                Z::AbstractArray{Float64,2}, lambda::Float64, 
                B::AbstractArray{Float64,2}, 
                regXidx::AbstractArray{Int64,1}, 
-               regZidx::AbstractArray{Int64,1}, reg::BitArray{2}, norms; 
-               isVerbose::Bool=true, stepsize::Float64=0.01, rho::Float64=1.0, 
+               regZidx::AbstractArray{Int64,1}, reg::BitArray{2}, norms, 
+               Qx::AbstractArray{Float64,2}, Qz::AbstractArray{Float64,2}, 
+               U::AbstractArray{Float64,2}, L::AbstractArray{Float64,2}; 
+               isVerbose::Bool=true, stepsize::Float64=0.01, 
+               rho::Float64=1.0, setRho::Bool=true, 
                thresh::Float64=10.0^(-7), maxiter::Int=10^10)
     
-    # Eigenfactorization of X
-    eigX = eigen(transpose(X)*X)
-    Qx = eigX.vectors
-    Lx = eigX.values
-    
-    # Eigenfactorization of Z
-    eigZ = eigen(transpose(Z)*Z)
-    Qz = eigZ.vectors
-    Lz = eigZ.values
-    
-    # Transformed Y
-    X1 = X*Qx
-    Z1 = Z*Qz
-    U = transpose(X1) * Y * Z1
-    # Kronecker product of eigenvalues of X and Z
-    L = kron(Lx, transpose(Lz))
-    
+    # Set the ADMM tuning parameter, rho
+    if setRho == true 
+        # Get smallest and largest eigenvalues
+        mineig = minimum(L)
+        maxeig = maximum(L)
+        
+        # Set the value of rho
+        if lambda < mineig 
+            rho = mineig # sqrt(lambda * mineig)
+        elseif lambda > maxeig
+            rho = maxeig # sqrt(lambda * maxeig)
+        else 
+            rho = lambda
+        end
+    end
+
     # Calculate residuals 
-    resid = resid = calc_resid(X, Y, Z, B)
+    resid = calc_resid(X, Y, Z, B)
     # Store coefficients from previous iteration ??
     B0 = prox2(B, rho, U, L) # copy(B) 
     # Store extrapolated coefficients ??

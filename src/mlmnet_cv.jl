@@ -26,10 +26,10 @@ mutable struct Mlmnet_cv
     # for each lambda
     propZero::Array{Float64, 2} 
     
-    Mlmnet_cv(MLMNets, lambdas, data, rowFolds, colFolds) = 
+    Mlmnet_cv(MLMNets, lambdas, data, rowFolds, colFolds, dig) = 
         new(MLMNets, lambdas, data, rowFolds, colFolds, 
             calc_mse(MLMNets, data, lambdas, rowFolds, colFolds), 
-            calc_prop_zero(MLMNets, lambdas,))
+            calc_prop_zero(MLMNets, lambdas; dig=dig))
 end
 
 
@@ -37,7 +37,7 @@ end
     mlmnet_cv(fun, data, lambdas, rowFolds, colFolds; 
               isXIntercept, isZIntercept, isXReg, isZReg, 
               isXInterceptReg, isZInterceptReg, isStandardize, isVerbose, 
-              stepsize, setStepsize, funArgs...)
+              stepsize, setStepsize, dig, funArgs...)
 
 Performs cross-validation for `mlmnet` using row and column folds from user 
 input. 
@@ -77,11 +77,12 @@ input.
   should be standardized (to mean 0, standard deviation 1). Defaults to `true`.
 - isVerbose = boolean flag indicating whether or not to print messages.  
   Defaults to `true`. 
-- setStepsize = boolean flag indicating whether the fixed step size should be 
-  calculated (for `ista!` and `fista!`). Defaults to `true`.
 - stepsize = float; step size for updates (irrelevant for coordinate 
   descent and when `setStepsize` is set to `true` for `ista!` and `fista!`). 
   Defaults to `0.01`. 
+- setStepsize = boolean flag indicating whether the fixed step size should be 
+  calculated (for `ista!` and `fista!`). Defaults to `true`.
+- dig = integer; digits of precision for zero coefficients. Defaults to 12. 
 - funArgs = variable keyword arguments to be passed into `fun`
 
 # Value
@@ -103,7 +104,8 @@ function mlmnet_cv(fun::Function, data::RawData,
                    isZReg::BitArray{1}=trues(size(get_Z(data),2)), 
                    isXInterceptReg::Bool=false, isZInterceptReg::Bool=false, 
                    isStandardize::Bool=true, isVerbose::Bool=true, 
-                   stepsize::Float64=0.01, setStepsize=true, funArgs...)
+                   stepsize::Float64=0.01, setStepsize::Bool=true, 
+                   dig::Int64=12, funArgs...)
     
     # Number of folds
     nFolds = length(rowFolds)
@@ -140,7 +142,7 @@ function mlmnet_cv(fun::Function, data::RawData,
                                               setStepsize=setStepsize, 
                                               funArgs...), dataFolds)
     
-    return Mlmnet_cv(MLMNets, lambdas, data, rowFolds, colFolds)
+    return Mlmnet_cv(MLMNets, lambdas, data, rowFolds, colFolds, dig)
 end
 
 
@@ -148,7 +150,7 @@ end
     mlmnet_cv(fun, data, lambdas, rowFolds, nColFolds; 
               isXIntercept, isZIntercept, isXReg, isZReg, 
               isXInterceptReg, isZInterceptReg, isStandardize, isVerbose, 
-              stepsize, setStepsize, funArgs...)
+              stepsize, setStepsize, dig, funArgs...)
 
 Performs cross-validation for `mlmnet` using row folds from user input and 
 non-overlapping column folds randomly generated using a call to `make_folds`. 
@@ -187,10 +189,12 @@ Calls the base `mlmnet_cv` function.
   should be standardized (to mean 0, standard deviation 1). Defaults to `true`.
 - isVerbose = boolean flag indicating whether or not to print messages.  
   Defaults to `true`. 
+- stepsize = float; step size for updates (irrelevant for coordinate 
+  descent and when `setStepsize` is set to `true` for `ista!` and `fista!`). 
+  Defaults to `0.01`. 
 - setStepsize = boolean flag indicating whether the fixed step size should be 
   calculated (for `ista!` and `fista!`). Defaults to `true`.
-- stepsize = float; step size for updates 
-  (irrelevant for coordinate descent). Defaults to `0.01`. 
+- dig = integer; digits of precision for zero coefficients. Defaults to 12. 
 - funArgs = variable keyword arguments to be passed into `fun`
 
 # Value
@@ -210,7 +214,8 @@ function mlmnet_cv(fun::Function, data::RawData,
                    isZReg::BitArray{1}=trues(size(get_Z(data),2)), 
                    isXInterceptReg::Bool=false, isZInterceptReg::Bool=false, 
                    isStandardize::Bool=true, isVerbose::Bool=true, 
-                   stepsize::Float64=0.01, setStepsize=true, funArgs...)
+                   stepsize::Float64=0.01, setStepsize::Bool=true, 
+                   dig::Int64=12, funArgs...)
     
     # Generate random column folds
     colFolds = make_folds(data.m, nColFolds, length(rowFolds))
@@ -223,7 +228,7 @@ function mlmnet_cv(fun::Function, data::RawData,
               isXInterceptReg=isXInterceptReg, 
               isZInterceptReg=isZInterceptReg, 
               isVerbose=isVerbose, isStandardize=isStandardize, 
-              stepsize=stepsize, setStepsize=setStepsize, funArgs...)
+              stepsize=stepsize, setStepsize=setStepsize, dig=dig, funArgs...)
 end
 
 
@@ -231,7 +236,7 @@ end
     mlmnet_cv(fun, data, lambdas, nRowFolds, colFolds; 
               isXIntercept, isZIntercept, isXReg, isZReg, 
               isXInterceptReg, isZInterceptReg, isStandardize, isVerbose, 
-              stepsize, setStepsize, funArgs...)
+              stepsize, setStepsize, dig, funArgs...)
 
 Performs cross-validation for `mlmnet` using non-overlapping row folds 
 randomly generated using a call to `make_folds` and column folds from user 
@@ -270,10 +275,12 @@ input. Calls the base `mlmnet_cv` function.
   should be standardized (to mean 0, standard deviation 1). Defaults to `true`.
 - isVerbose = boolean flag indicating whether or not to print messages.  
   Defaults to `true`. 
+- stepsize = float; step size for updates (irrelevant for coordinate 
+  descent and when `setStepsize` is set to `true` for `ista!` and `fista!`). 
+  Defaults to `0.01`. 
 - setStepsize = boolean flag indicating whether the fixed step size should be 
   calculated (for `ista!` and `fista!`). Defaults to `true`.
-- stepsize = float; step size for updates 
-  (irrelevant for coordinate descent). Defaults to `0.01`. 
+- dig = integer; digits of precision for zero coefficients. Defaults to 12. 
 - funArgs = variable keyword arguments to be passed into `fun`
 
 # Value
@@ -293,7 +300,8 @@ function mlmnet_cv(fun::Function, data::RawData,
                    isZReg::BitArray{1}=trues(size(get_Z(data),2)), 
                    isXInterceptReg::Bool=false, isZInterceptReg::Bool=false, 
                    isStandardize::Bool=true, isVerbose::Bool=true, 
-                   stepsize::Float64=0.01, setStepsize=true, funArgs...)
+                   stepsize::Float64=0.01, setStepsize::Bool=true, 
+                   dig::Int64=12, funArgs...)
     
     # Generate random row folds
     rowFolds = make_folds(data.n, nRowFolds, length(colFolds))
@@ -306,7 +314,7 @@ function mlmnet_cv(fun::Function, data::RawData,
               isXInterceptReg=isXInterceptReg, 
               isZInterceptReg=isZInterceptReg, 
               isVerbose=isVerbose, isStandardize=isStandardize, 
-              stepsize=stepsize, setStepsize=setStepsize, funArgs...)
+              stepsize=stepsize, setStepsize=setStepsize, dig=dig, funArgs...)
 end
 
 
@@ -314,7 +322,7 @@ end
     mlmnet_cv(fun, data, lambdas, nRowFolds, nColFolds; 
               isXIntercept, isZIntercept, isXReg, isZReg, 
               isXInterceptReg, isZInterceptReg, isStandardize, isVerbose, 
-              stepsize, setStepsize, funArgs...)
+              stepsize, setStepsize, dig, funArgs...)
 
 Performs cross-validation for `mlmnet` using non-overlapping row and column 
 folds randomly generated using calls to `make_folds`. Calls the base 
@@ -353,10 +361,12 @@ folds randomly generated using calls to `make_folds`. Calls the base
   should be standardized (to mean 0, standard deviation 1). Defaults to `true`.
 - isVerbose = boolean flag indicating whether or not to print messages.  
   Defaults to `true`. 
+- stepsize = float; step size for updates (irrelevant for coordinate 
+  descent and when `setStepsize` is set to `true` for `ista!` and `fista!`). 
+  Defaults to `0.01`. 
 - setStepsize = boolean flag indicating whether the fixed step size should be 
   calculated (for `ista!` and `fista!`). Defaults to `true`.
-- stepsize = float; step size for updates 
-  (irrelevant for coordinate descent). Defaults to `0.01`. 
+- dig = integer; digits of precision for zero coefficients. Defaults to 12. 
 - funArgs = variable keyword arguments to be passed into `fun`
 
 # Value
@@ -390,7 +400,8 @@ function mlmnet_cv(fun::Function, data::RawData, lambdas::Array{Float64,1},
                    isZReg::BitArray{1}=trues(size(get_Z(data),2)), 
                    isXInterceptReg::Bool=false, isZInterceptReg::Bool=false, 
                    isStandardize::Bool=true, isVerbose::Bool=true, 
-                   stepsize::Float64=0.01, setStepsize=true, funArgs...)
+                   stepsize::Float64=0.01, setStepsize::Bool=true, 
+                   dig::Int64=12, funArgs...)
 	
     # Generate random row and column folds
     rowFolds = make_folds(data.n, nRowFolds, max(nRowFolds, nColFolds))
@@ -404,5 +415,5 @@ function mlmnet_cv(fun::Function, data::RawData, lambdas::Array{Float64,1},
               isXInterceptReg=isXInterceptReg, 
               isZInterceptReg=isZInterceptReg, 
               isVerbose=isVerbose, isStandardize=isStandardize, 
-              stepsize=stepsize, setStepsize=setStepsize, funArgs...)
+              stepsize=stepsize, setStepsize=setStepsize, dig=dig, funArgs...)
 end

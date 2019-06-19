@@ -172,7 +172,7 @@ end
 
 
 """
-    calc_prop_zero(MLMNets, lambdas)
+    calc_prop_zero(MLMNets, lambdas, dig)
 
 Calculates proportion of zero interaction coefficients for each of the CV 
 folds for each lambda. 
@@ -183,6 +183,10 @@ folds for each lambda.
 - lambdas = 1d array of floats consisting of lambda penalties used to 
   generate MLMNets
 
+# Keyword arguments 
+
+- dig = integer; digits of precision for zero coefficients. Defaults to 12. 
+
 # Value
 
 2d array of floats with dimensions equal to the number of lambdas by the 
@@ -190,7 +194,8 @@ number of folds.
 
 """
 function calc_prop_zero(MLMNets::AbstractArray{Mlmnet,1}, 
-                        lambdas::AbstractArray{Float64,1})
+                        lambdas::AbstractArray{Float64,1}; 
+                        dig::Int64=12)
     
     # Number of folds
     nFolds = length(MLMNets)
@@ -210,7 +215,8 @@ function calc_prop_zero(MLMNets::AbstractArray{Mlmnet,1},
         for i in 1:length(lambdas)
             # Proportion of zero interaction coefficients for lambda i and 
             # fold j  
-            propZero[i,j] = mean(coef(MLMNets[j])[i,xIdx,zIdx].==0) 
+            propZero[i,j] = mean(round.(coef(MLMNets[j])[i,xIdx,zIdx], 
+                                        digits=dig) .== 0) 
         end
     end
 

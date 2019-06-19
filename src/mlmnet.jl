@@ -60,9 +60,11 @@ standardization and backtransforming.
 
 """
 function mlmnet_pathwise(fun::Function, X::AbstractArray{Float64,2}, 
-                         Y::AbstractArray{Float64,2}, Z::AbstractArray{Float64,2}, 
+                         Y::AbstractArray{Float64,2}, 
+                         Z::AbstractArray{Float64,2}, 
                          lambdas::AbstractArray{Float64,1},  
-                         regXidx::AbstractArray{Int64,1}, regZidx::AbstractArray{Int64,1}, 
+                         regXidx::AbstractArray{Int64,1}, 
+                         regZidx::AbstractArray{Int64,1}, 
                          reg::BitArray{2}, norms; isVerbose::Bool=true, 
                          stepsize::Float64=0.01, funArgs...)
 
@@ -81,12 +83,42 @@ function mlmnet_pathwise(fun::Function, X::AbstractArray{Float64,2},
     # Start with coefficients initalized at zero for the largest lambda value
     startB = zeros(size(X,2), size(Z,2))
 
+    # Pre-compute eigenvalues and eigenvectors for ADMM
+    if string(fun)[(end-4):end] == "admm!" 
+        # Eigenfactorization of X
+        XTX = transpose(X)*X
+        eigX = eigen(XTX)
+        Qx = eigX.vectors
+        Lx = eigX.values
+        
+        # Eigenfactorization of Z
+        ZTZ = transpose(Z)*Z
+        eigZ = eigen(ZTZ)
+        Qz = eigZ.vectors
+        Lz = eigZ.values
+    
+        # Transformed Y
+        X1 = X*Qx
+        Z1 = Z*Qz
+        U = transpose(X1) * Y * Z1
+
+        # Kronecker product of eigenvalues of X and Z
+        L = kron(Lx, transpose(Lz))
+    end
+
     # Iterate through the path of lambdas
     for i=1:length(lambdas) 
         # Get L1-penalty estimates by updating the coefficients from previous 
         # iteration in place
-        fun(X, Y, Z, lambdas[i], startB, regXidx, regZidx, reg, norms; 
-            isVerbose=isVerbose, stepsize=stepsize, funArgs...)
+        if string(fun)[(end-4):end] != "admm!" 
+            fun(X, Y, Z, lambdas[i], startB, regXidx, regZidx, reg, norms; 
+                isVerbose=isVerbose, stepsize=stepsize, funArgs...)
+        else
+            fun(X, Y, Z, lambdas[i], startB, regXidx, regZidx, reg, norms, 
+                Qx, Qz, U, L; 
+                isVerbose=isVerbose, stepsize=stepsize, funArgs...)
+        end
+
         # Assign a slice of coeffs to the current coefficient estimates
         coeffs[i,:,:] = startB 
     end
@@ -133,11 +165,11 @@ order. If they are not in descending order, they will be sorted.
   should be standardized (to mean 0, standard deviation 1). Defaults to `true`.
 - isVerbose = boolean flag indicating whether or not to print messages.  
   Defaults to `true`. 
-- setStepsize = boolean flag indicating whether the fixed step size should be 
-  calculated (for `ista!` and `fista!`). Defaults to `true`.
 - stepsize = float; step size for updates (irrelevant for coordinate 
   descent and when `setStepsize` is set to `true` for `ista!` and `fista!`). 
   Defaults to `0.01`. 
+- setStepsize = boolean flag indicating whether the fixed step size should be 
+  calculated (for `ista!` and `fista!`). Defaults to `true`.
 - funArgs = variable keyword arguments to be passed into `fun`
 
 # Value
@@ -168,7 +200,7 @@ function mlmnet(fun::Function, data::RawData, lambdas::AbstractArray{Float64,1};
                 isZReg::BitArray{1}=trues(data.q),     
                 isXInterceptReg::Bool=false, isZInterceptReg::Bool=false, 
                 isStandardize::Bool=true, isVerbose::Bool=true, 
-                stepsize::Float64=0.01, setStepsize=true, funArgs...)
+                stepsize::Float64=0.01, setStepsize::Bool=true, funArgs...)
     
     # Ensure that isXReg and isZReg have same length as columns of X and Z
     if length(isXReg) != data.p
@@ -257,23 +289,17 @@ function mlmnet(fun::Function, data::RawData, lambdas::AbstractArray{Float64,1};
             # Standardizing X and Z results in complex eigenvalues
             # Hack is to add diagonal matrix where the diagonal is random 
             # normal noise
-            stepsize = 1/max(LinearAlgebra.eigmax(XTX + 
-                               LinearAlgebra.diagm(0 => 
+            stepsize = 1/max(eigmax(XTX + diagm(0 => 
                                  1.0 .+ randn(data.p)/1000)) * 
-                             LinearAlgebra.eigmax(ZTZ + 
-                               LinearAlgebra.diagm(0 => 
+                             eigmax(ZTZ + diagm(0 => 
                                  1.0 .+ randn(data.q)/1000)), 
-                             LinearAlgebra.eigmin(XTX + 
-                               LinearAlgebra.diagm(0 => 
+                             eigmin(XTX + diagm(0 => 
                                  1.0 .+ randn(data.p)/1000)) * 
-                             LinearAlgebra.eigmin(ZTZ + 
-                               LinearAlgebra.diagm(0 => 
+                             eigmin(ZTZ + diagm(0 => 
                                  1.0 .+ randn(data.q)/1000)))
   	    else 
-            stepsize = 1/max(LinearAlgebra.eigmax(XTX) * 
-                               LinearAlgebra.eigmax(ZTZ),
-                             LinearAlgebra.eigmin(XTX) * 
-                               LinearAlgebra.eigmin(ZTZ))
+            stepsize = 1/max(eigmax(XTX) * eigmax(ZTZ),
+                             eigmin(XTX) * eigmin(ZTZ))
         end
         
         println_verbose(string("Fixed step size set to ", stepsize), 
