@@ -102,7 +102,7 @@ function mlmnet_pathwise(fun::Function, X::AbstractArray{Float64,2},
         Z1 = Z*Qz
         U = transpose(X1) * Y * Z1
 
-        # Kronecker product of eigenvalues of X and Z
+        # Kronecker product of eigenvalues of Z and X
         L = kron(Lx, transpose(Lz))
     end
 

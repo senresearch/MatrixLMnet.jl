@@ -61,7 +61,7 @@ Proximal (soft-thresholding) operator when not incorporating the norms
 - b2sign = sign of b + stepsize*gradient, a float
 - lambda = lambda penalty , a float
 - norm = Nothing
-- stepsize = step size to multiply updates, a float. Defaults to 1.0
+- stepsize = step size to multiply updates, a float
 
 # Value 
 
@@ -69,9 +69,35 @@ A floating scalar
 
 """
 function prox(b::Float64, gradient::Float64, b2sign::Float64, 
-              lambda::Float64, norm::Nothing, stepsize::Float64=1.0)
+              lambda::Float64, norm::Nothing, stepsize::Float64)
     
     return max(0.0, b2sign*b - stepsize * (b2sign*gradient + lambda)) * b2sign
+end
+
+
+"""
+    prox(b, gradient, b2sign, lambda, norm, stepsize)
+
+Proximal (soft-thresholding) operator when not incorporating the norms 
+(norms=1) and step size is 1
+
+# Arguments 
+
+- b = coefficient to update, a float
+- gradient = gradient of b, a float
+- b2sign = sign of b + stepsize*gradient, a float
+- lambda = lambda penalty , a float
+- norm = Nothing
+
+# Value 
+
+A floating scalar
+
+"""
+function prox(b::Float64, gradient::Float64, b2sign::Float64, 
+              lambda::Float64, norm::Nothing)
+    
+    return max(0.0, b2sign*b - (b2sign*gradient + lambda)) * b2sign
 end
 
 
@@ -87,7 +113,7 @@ Proximal (soft-thresholding) operator
 - b2sign = sign of b + stepsize*gradient, a float
 - lambda = lambda penalty , a float
 - norm = norm corresponding to b, a float
-- stepsize = step size to multiply updates, a float. Defaults to 1.0
+- stepsize = step size to multiply updates, a float
 
 # Value 
 
@@ -95,10 +121,35 @@ A floating scalar
 
 """
 function prox(b::Float64, gradient::Float64, b2sign::Float64, 
-              lambda::Float64, norm::Float64, stepsize::Float64=1.0)
+              lambda::Float64, norm::Float64, stepsize::Float64)
     
     return max(0.0, b2sign*b - stepsize * (b2sign*gradient + lambda)/norm) *
              b2sign
+end
+
+
+"""
+    prox(b, gradient, b2sign, lambda, norm, stepsize)
+
+Proximal (soft-thresholding) operator when step size is 1
+
+# Arguments 
+
+- b = coefficient to update, a float
+- gradient = gradient of b, a float
+- b2sign = sign of b + stepsize*gradient, a float
+- lambda = lambda penalty , a float
+- norm = norm corresponding to b, a float
+
+# Value 
+
+A floating scalar
+
+"""
+function prox(b::Float64, gradient::Float64, b2sign::Float64, 
+              lambda::Float64, norm::Float64)
+    
+    return max(0.0, b2sign*b - (b2sign*gradient + lambda)/norm) * b2sign
 end
 
 

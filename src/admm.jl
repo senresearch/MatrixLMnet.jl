@@ -5,7 +5,7 @@ Proximal operator for the L1 norm updates in ADMM.
 
 # Arguments 
 
-- V = 2d array of floats consisting of the values to update
+- v = float; value to update
 - lambda = lambda penalty, a floating scalar
 
 # Value 
@@ -13,35 +13,11 @@ Proximal operator for the L1 norm updates in ADMM.
 2d array of floats
 
 """
-function prox1(V::Array{Float64,2}, lambda::Float64)
 
-    return max.(0.0, abs.(V).-lambda) .* sign.(V)
-end    
+function prox1(v::Float64, lambda::Float64)
 
-
-"""
-    prox1(V, lambda, Qx, Qz)
-
-Proximal operator for the L1 norm updates in ADMM when Qx and Qz are 
-orthogonal matrices. 
-
-# Arguments 
-
-- V = 2d array of floats consisting of the values to update
-- lambda = lambda penalty, a floating scalar
-- Qx = 2d array of floats consisting of the eigenvectors of X
-- Qz = 2d array of floats consisting of the eeigenvectors of Z
-
-# Value 
-
-2d array of floats
-
-"""
-function prox1(V::Array{Float64,2}, lambda::Float64,
-               Qx::Array{Float64,2}, Qz::Array{Float64,2})
-    
-    return transpose(Qx) * prox1(Qx*V*transpose(Qz), lambda) * Qz
-end    
+    return max(0.0, abs(v)-lambda) * sign(v)
+end
 
 
 """
@@ -51,21 +27,21 @@ Proximal operator for the L2 norm updates in ADMM.
 
 # Arguments 
 
-- V = 2d array of floats consisting of the values to update
-- rho = float; parameter thata controls ADMM tuning. 
-- U = 2d array of floats consisting of the transformed Y matrix
-- L = 2d array of floats consisting of the kronecker product of the 
-  eigenvalues of X and Z
+- v = float; value to update
+- rho = float; parameter that controls ADMM tuning. 
+- u = float; corresponding transformed Y
+- l = float; corresponding eigenvalue
 
 # Value 
 
 2d array of floats
 
 """
-function prox2(V::Array{Float64,2}, rho::Float64, 
-               U::Array{Float64,2}, L::Array{Float64,2})
 
-    return (V .+ rho.*U) ./ (1.0 .+ rho.*L)
+function prox2(v::Float64, rho::Float64, 
+               u::Float64, l::Float64)
+    
+    return (u + rho*v) / (l + rho)
 end
 
 
@@ -89,14 +65,22 @@ Updates coefficient estimates in place for each ADMM iteration.
 - Z = 2d array of floats consisting of the column covariates, with all 
   categorical variables coded in appropriate contrasts
 - Qx = 2d array of floats consisting of the eigenvectors of X
-- Qz = 2d array of floats consisting of the eeigenvectors of Z
+- Qz = 2d array of floats consisting of the eigenvectors of Z
 - U = 2d array of floats consisting of the transformed Y matrix
 - L = 2d array of floats consisting of the kronecker product of the 
   eigenvalues of X and Z
 - lambda = lambda penalty, a floating scalar
 - regXidx = 1d array of indices corresponding to regularized X covariates
 - regZidx = 1d array of indices corresponding to regularized Z covariates
-- rho = float; parameter thata controls ADMM tuning. 
+- rho = float; parameter that controls ADMM tuning. 
+- r = 2d array of floats consisting of the primal residuals. 
+- s = 2d array of floats consisting of the dual residuals. 
+- tau_incr = float; parameter that controls the factor at which rho increases. 
+  Defaults to 2.0. 
+- tau_decr = float; parameter that controls the factor at which rho decreases. 
+  Defaults to 2.0. 
+- mu = float; parameter that controls the factor at which the primal and dual 
+  residuals should be within each other. Defaults to 10.0. 
 
 # Value
 
@@ -113,7 +97,6 @@ criteria is less than the threshold `thresh`.
 function update_admm!(B::AbstractArray{Float64,2}, 
                       B0::AbstractArray{Float64,2}, 
                       B2::AbstractArray{Float64,2}, 
-                      QxBQz::AbstractArray{Float64,2}, 
                       resid::AbstractArray{Float64,2}, 
                       X::AbstractArray{Float64,2}, 
                       Y::AbstractArray{Float64,2}, 
@@ -124,23 +107,46 @@ function update_admm!(B::AbstractArray{Float64,2},
                       L::AbstractArray{Float64,2}, 
                       lambda::Float64, 
                       regXidx::AbstractArray{Int64,1}, 
-                      regZidx::AbstractArray{Int64,1}, rho::Float64)
+                      regZidx::AbstractArray{Int64,1}, 
+                      rho::AbstractArray{Float64,1}, 
+                      r::AbstractArray{Float64,2}, 
+                      s::AbstractArray{Float64,2}, 
+                      tau_incr::Float64, tau_decr::Float64, mu::Float64)
     
+    # Save a copy of the old values of B
+    s .= copy(B) 
+
     # L2 updates
     B0 .= B .- B2
-    B0 = prox2(B0, rho, U, L)
+    # Transform B0
+    mul!(B0, transpose(Qx), B0*Qz) 
+    # Perform L2 updates and transform B0 back
+    mul!(B0, Qx * prox2.(B0, rho[1], U, L), transpose(Qz))
     
     # L1 updates
     B .= B0 .+ B2
-    B[regXidx,regZidx] = prox1(B, rho*lambda, Qx, Qz)[regXidx,regZidx]
-    
+    B[regXidx,regZidx] .= prox1.(B[regXidx,regZidx], lambda/rho[1])
+
+    # Primal residuals 
+    r .= B0 .- B
+    # Dual residuals 
+    s .-= B
+
     # Dual updates
-    B2 .+= rho.*(B0 .- B)
-    
-    # Transform coefficients back to original space
-    mul!(QxBQz, Qx*B, transpose(Qz)) 
+    B2 .+= r
+  
     # Update residuals
-    calc_resid!(resid, X, Y, Z, QxBQz) 
+    calc_resid!(resid, X, Y, Z, B) 
+
+    # Update rho according to the relative size of the primal and dual residuals
+    # Then re-scale B2 accordingly
+    if sqrt(sum(r.^2)) > mu * rho[1] * sqrt(sum(s.^2))
+        rho[:] .*= tau_incr
+        B2 ./= tau_incr
+    elseif rho[1] * sqrt(sum(s.^2)) > mu * sqrt(sum(r.^2))
+        rho[:] ./= tau_decr
+        B2 .*= tau_decr
+    end
 end
 
 
@@ -166,7 +172,7 @@ Performs ADMM.
 - norms = 2d array of floats consisting of the norms corresponding to each 
   coefficient or `nothing`
 - Qx = 2d array of floats consisting of the eigenvectors of X
-- Qz = 2d array of floats consisting of the eeigenvectors of Z
+- Qz = 2d array of floats consisting of the eigenvectors of Z
 - U = 2d array of floats consisting of the transformed Y matrix
 - L = 2d array of floats consisting of the kronecker product of the 
   eigenvalues of X and Z
@@ -177,12 +183,18 @@ Performs ADMM.
   Defaults to `true`. 
 - stepsize = float; step size for updates (irrelevant for ADMM). 
   Defaults to `0.01`. 
-- rho = float; parameter thata controls ADMM tuning. Defaults to `1.0`. 
+- rho = float; parameter that controls ADMM tuning. Defaults to `1.0`. 
 - setRho = boolean flag indicating whether the ADMM tuning parameter `rho` 
   should be calculated. Defaults to `true`.
 - thresh = threshold at which the coefficients are considered to have 
   converged, a floating scalar. Defaults to `10^(-7)`. 
 - maxiter = maximum number of update iterations. Defaults to `10^10`. 
+- tau_incr = float; parameter that controls the factor at which rho increases. 
+  Defaults to 2.0. 
+- tau_decr = float; parameter that controls the factor at which rho decreases. 
+  Defaults to 2.0. 
+- mu = float; parameter that controls the factor at which the primal and dual 
+  residuals should be within each other. Defaults to 10.0. 
 
 # Value
 
@@ -205,7 +217,8 @@ function admm!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
                U::AbstractArray{Float64,2}, L::AbstractArray{Float64,2}; 
                isVerbose::Bool=true, stepsize::Float64=0.01, 
                rho::Float64=1.0, setRho::Bool=true, 
-               thresh::Float64=10.0^(-7), maxiter::Int=10^10)
+               thresh::Float64=10.0^(-7), maxiter::Int=10^10, 
+               tau_incr::Float64=2.0, tau_decr::Float64=2.0, mu::Float64=10.0)
     
     # Set the ADMM tuning parameter, rho
     if setRho == true 
@@ -214,31 +227,34 @@ function admm!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
         maxeig = maximum(L)
         
         # Set the value of rho
-        if lambda < mineig 
-            rho = mineig # sqrt(lambda * mineig)
+        if lambda < mineig
+            rho = mineig
         elseif lambda > maxeig
-            rho = maxeig # sqrt(lambda * maxeig)
-        else 
             rho = lambda
+        else
+            rho = maxeig
         end
     end
+    rho = [rho]
 
     # Calculate residuals 
     resid = calc_resid(X, Y, Z, B)
-    # Store coefficients from previous iteration ??
-    B0 = prox2(B, rho, U, L) # copy(B) 
-    # Store extrapolated coefficients ??
-    B2 = B0 .- B # copy(B) 
-    
-    # Transform coefficients back to original space
-    QxBQz = Qx * B* transpose(Qz)
-    
+    # Initialize values for L2 updates
+    B0 = copy(B)
+    # Initialize values for dual updates
+    B2 = copy(B) 
+  
+    # Initial primal residuals
+    r = copy(B)
+    # Initialize dual residuals
+    s = copy(B)
+  
     # Denominators of criterion
     crit_denom = [size(X,1)*size(Z,1), size(X,2)*size(Z,2)] 
     # Placeholder to store the old criterion 
     oldcrit = 1.0 
     # Calculate the current criterion
-    crit = criterion(QxBQz[regXidx, regZidx], resid, lambda, crit_denom) 
+    crit = criterion(B[regXidx, regZidx], resid, lambda, crit_denom) 
     
     iter = 0
     # Iterate until coefficients converge or maximum iterations have been 
@@ -248,11 +264,11 @@ function admm!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
         oldcrit = crit 
 
         # Update the coefficient estimates
-        update_admm!(B, B0, B2, QxBQz, resid, X, Y, Z, Qx, Qz, U, L, lambda, 
-                     regXidx, regZidx, rho)
+        update_admm!(B, B0, B2, resid, X, Y, Z, Qx, Qz, U, L, lambda, 
+                     regXidx, regZidx, rho, r, s, tau_incr, tau_incr, mu)
 
         # Calculate the criterion after updating
-        crit = criterion(QxBQz[regXidx, regZidx], resid, lambda, crit_denom) 
+        crit = criterion(B[regXidx, regZidx], resid, lambda, crit_denom) 
 
         iter += 1 # Increment the number of iterations
         # Print warning message if coefficient estimates do not converge.
@@ -260,9 +276,6 @@ function admm!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
             println("Estimates did not converge.")
         end
     end
-
-    # Transform coefficients back to original space
-    B .= QxBQz
 
     println_verbose(string("Criterion: ", crit), isVerbose)
     println_verbose(string("Number of iterations: ", iter), isVerbose)
