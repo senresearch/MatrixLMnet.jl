@@ -94,8 +94,8 @@ function mlmnet_pathwise(fun::Function, X::AbstractArray{Float64,2},
         # Eigenfactorization of Z
         ZTZ = transpose(Z)*Z
         eigZ = eigen(ZTZ)
-        Qz = eigZ.vectors
-        Lz = eigZ.values
+		Qz = eigZ.vectors
+		Lz = eigZ.values
     
         # Transformed Y
         X1 = X*Qx
