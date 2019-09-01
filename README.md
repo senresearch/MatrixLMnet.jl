@@ -92,7 +92,7 @@ The functions for the algorithms used to fit the L1-penalized estimates have key
 
 `admm!` (ADMM)
 - `rho = 1.0`: Float64; parameter that controls ADMM tuning
-- `setRho = true`: Float64; whether the ADMM tuning parameter should be calculated. overriding `rho`
+- `setRho = true`: Float64; whether the ADMM tuning parameter should be calculated, overriding `rho`
 - `tau_incr = 2.0`: Float64; parameter that controls the factor at which the ADMM tuning parameter increases
 - `tau_decr = 2.0`: Float64; parameter that controls the factor at which the ADMM tuning parameter decreases
 - `mu = 10.0`: Float64; parameter that controls the factor at which the primal and dual residuals should be within each other
