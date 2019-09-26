@@ -1,6 +1,6 @@
 # matrixLMnet
 
-Core functions to obtain L1-penalized estimates for matrix linear models. 
+Core functions to obtain L$_1$-penalized estimates for matrix linear models. 
 
 `matrixLMnet` is an extension of the [`matrixLM`](https://github.com/janewliang/matrixLM.jl) package, which provides core functions for closed-form least squares estimates for matrix linear models. 
 
@@ -62,7 +62,7 @@ Create a 1d array of lambda penalty values to fit the estimates. If the lambdas 
 lambdas = reverse(1.8.^(1:10))
 ```
 
-L1-penalized estimates for matrix linear models can be obtained by running `mlmnet`. In addition to the `RawData` object and `lambdas`, `mlmnet` requires as an argument the function name for an algorithm used to fit L1-penalized estimates. Options are currently:`cd!` (coordinate descent), `cd_active!` (active coordinate descent), `ista!` (ISTA with fixed step size), `fista!` (FISTA with fixed step size), `fista_bt!` (FISTA with backtracking), and `admm!` (ADMM). 
+L$_1$-penalized estimates for matrix linear models can be obtained by running `mlmnet`. In addition to the `RawData` object and `lambdas`, `mlmnet` requires as an argument the function name for an algorithm used to fit L$_1$-penalized estimates. Options are currently:`cd!` (coordinate descent), `cd_active!` (active coordinate descent), `ista!` (ISTA with fixed step size), `fista!` (FISTA with fixed step size), `fista_bt!` (FISTA with backtracking), and `admm!` (ADMM). 
 
 An object of type `Mlmnet` will be returned, with variables for the penalized coefficient estimates (`B`) and the lambda penalty values used (`lambdas`). By default, `mlmnet` estimates both row and column main effects (X and Z intercepts), but this behavior can be suppressed by setting `isXIntercept=false` and/or `isZntercept=false`; the intercepts will be regularized unless `isXInterceptReg=false` and/or `isZInterceptReg=false`. Individual `X` (row) and `Z` (column) effects can be left unregularized by manually passing in 1d boolean arrays of length `p` and `q` to indicate which effects should be regularized (`true`) or not (`false`) into `isXReg` and `isZreg`. By default, `mlmnet` standardizes the columns of `X` and `Z` to have mean 0 and standard deviation 1 (`isStandardize=true`). Additional keyword arguments include `isVerbose`, which controls message printing; `thresh`, the threshold at which the coefficients are considered to have converged; and `maxiter`, the maximum number of iterations. 
 
@@ -70,7 +70,7 @@ An object of type `Mlmnet` will be returned, with variables for the penalized co
 est = mlmnet(fista_bt!, dat, lambdas)
 ```
 
-The functions for the algorithms used to fit the L1-penalized estimates have keyword arguments that can be passed into `mlmnet` when non-default behavior is desired. Irrelevant keyword arguments will be ignored. 
+The functions for the algorithms used to fit the L$_1$-penalized estimates have keyword arguments that can be passed into `mlmnet` when non-default behavior is desired. Irrelevant keyword arguments will be ignored. 
 
 `cd!` (coordinate descent)
 - `isRandom= true`: Bool; whether to use random or cyclic updates
