@@ -70,7 +70,7 @@ function make_folds_conds(conds::AbstractArray{String,1},
         # Iterate through all the folds
         for j in 1:k
             # For each fold, randomly keep a sample of each condition
-            boolFolds[rand(idx[cond .== conds], numSamp) ,j] = true
+            boolFolds[rand(idx[cond .== conds], numSamp) ,j] .= true
         end
     end
     
@@ -78,7 +78,7 @@ function make_folds_conds(conds::AbstractArray{String,1},
     folds = fill(convert(Array{Int64}, []), k)
     # Convert each column of booleans from boolFolds into indices
     for j in 1:k 
-        folds[j] = find(boolFolds[:,j])
+        folds[j] = findall(boolFolds[:,j])
     end
     
     return folds
