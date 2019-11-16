@@ -42,7 +42,7 @@ condition is represented in each fold.
 - conds = DataFrame of conditions
 - k = Number of folds to create. Defaults to 10. 
 - prop = Proportion of each condition level's replicates to include in each 
-  fold. Defaults to 0.5.
+  fold. Defaults to 1/k.
 
 # Value
 
@@ -50,7 +50,7 @@ condition is represented in each fold.
 
 """
 function make_folds_conds(conds::DataFrames.DataFrame, 
-                          k::Int64=10, prop::Float64=0.5)
+                          k::Int64=10, prop::Float64=1/k)
 						  
     if k == 1
         print("k is set to 1; may result in unexpected behavior")
@@ -59,12 +59,12 @@ function make_folds_conds(conds::DataFrames.DataFrame,
     end
     
     # All indices to split into folds
-    idx = 1:length(conds)
+    idx = 1:size(conds,2)
     # 2d boolean array to store which observations to keep in each fold
-    boolFolds = falses(length(conds), k)
+    boolFolds = falses(size(conds,2), k)
     
     # Iterate through all the conditions
-    for cond in levels(conds)
+    for cond in unique(conds)
         # For each condition, calculate the number of replicates to sample
         numSamp = convert(Int64, ceil(sum(cond .== conds) * prop))
         # Iterate through all the folds
