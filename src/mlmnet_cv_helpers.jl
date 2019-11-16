@@ -39,7 +39,7 @@ condition is represented in each fold.
 
 # Arguments
 
-- conds = DataFrame of conditions
+- conds = 1d array of conditions (strings)
 - k = Number of folds to create. Defaults to 10. 
 - prop = Proportion of each condition level's replicates to include in each 
   fold. Defaults to 1/k.
@@ -49,7 +49,7 @@ condition is represented in each fold.
 1d array of length `k` of arrays of indices 
 
 """
-function make_folds_conds(conds::DataFrames.DataFrame, 
+function make_folds_conds(conds::AbstractArray{String,1}, 
                           k::Int64=10, prop::Float64=1/k)
 						  
     if k == 1
@@ -59,9 +59,9 @@ function make_folds_conds(conds::DataFrames.DataFrame,
     end
     
     # All indices to split into folds
-    idx = 1:size(conds,2)
+    idx = 1:length(conds)
     # 2d boolean array to store which observations to keep in each fold
-    boolFolds = falses(size(conds,2), k)
+    boolFolds = falses(length(conds), k)
     
     # Iterate through all the conditions
     for cond in unique(conds)
