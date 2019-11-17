@@ -42,7 +42,8 @@ condition is represented in each fold.
 - conds = 1d array of conditions (strings)
 - k = Number of folds to create. Defaults to 10. 
 - prop = Proportion of each condition level's replicates to include in each 
-  fold. Defaults to 1/k.
+  fold. Defaults to 1/k. Each fold will contain at least one replicate of 
+  each condition level. 
 
 # Value
 
