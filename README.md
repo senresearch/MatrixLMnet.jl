@@ -10,7 +10,8 @@ The `matrixLMnet` package can be installed by running:
 
 ```
 using Pkg
-Pkg.add(PackageSpec(url="https://github.com/janewliang/matrixLM.jl", rev="master")) # Install matrixLM dependency first
+# Install matrixLM dependency first
+Pkg.add(PackageSpec(url="https://github.com/janewliang/matrixLM.jl", rev="master")) 
 Pkg.add(PackageSpec(url="https://github.com/janewliang/matrixLMnet.jl", rev="master"))
 ```
 
