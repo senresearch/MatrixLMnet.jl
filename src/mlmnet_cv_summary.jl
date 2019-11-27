@@ -117,22 +117,25 @@ error greater.
     
 """
 function lambda_min(MLMNet_cv::Mlmnet_cv)
-
+    
     # Calculate average test MSE across folds.
     mseMean = calc_avg_mse(MLMNet_cv)
     mseStd = valid_reduce2(MLMNet_cv.mse, std)
-
+    
     # Find index of minimum average test MSE
     minIdx = argmin(mseMean)
-
+    
     # Compute standard error across folds for the minimum MSE
     mse1StdErr = mseMean[minIdx] + mseStd[minIdx]
     # Find the index of the lambda that is closest to being 1 SE greater than 
     # the lowest lambda, in the direction of the bigger lambdas
     min1StdErrIdx = argmin(abs.(mseMean[1:minIdx[1]].-mse1StdErr))
-
+    
     # Pull out summary information for these two lambdas
     out = mlmnet_cv_summary(MLMNet_cv)[[minIdx,min1StdErrIdx],:]
-    insertcols!(out, 1, :Type => ["lambda_min", "lambda_min1se"])
+    # Add names
+    insertcols!(out, 1, :Name => ["lambda_min", "lambda_min1se"])
+    # Add indices
+    insertcols!(out, 1, :Index => [minIdx, min1StdErrIdx])
     return out
 end
