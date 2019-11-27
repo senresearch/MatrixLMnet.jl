@@ -133,9 +133,9 @@ function lambda_min(MLMNet_cv::Mlmnet_cv)
     
     # Pull out summary information for these two lambdas
     out = mlmnet_cv_summary(MLMNet_cv)[[minIdx,min1StdErrIdx],:]
-    # Add names
+    # Add names first column
     insertcols!(out, 1, :Name => ["lambda_min", "lambda_min1se"])
-    # Add indices
-    insertcols!(out, 1, :Index => [minIdx, min1StdErrIdx])
+    # Add indices as second column
+    insertcols!(out, 2, :Index => [minIdx, min1StdErrIdx])
     return out
 end
