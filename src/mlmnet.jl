@@ -84,7 +84,7 @@ function mlmnet_pathwise(fun::Function, X::AbstractArray{Float64,2},
     startB = zeros(size(X,2), size(Z,2))
 
     # Pre-compute eigenvalues and eigenvectors for ADMM
-    if string(fun)[(end-4):end] == "admm!" 
+    if length(string(fun)) > 4 && (string(fun)[(end-4):end] == "admm!") 
         # Eigenfactorization of X
         XTX = transpose(X)*X
         eigX = eigen(XTX)
@@ -110,7 +110,7 @@ function mlmnet_pathwise(fun::Function, X::AbstractArray{Float64,2},
     for i=1:length(lambdas) 
         # Get L1-penalty estimates by updating the coefficients from previous 
         # iteration in place
-        if string(fun)[(end-4):end] != "admm!" 
+        if length(string(fun)) <= 4 || (string(fun)[(end-4):end] != "admm!")
             fun(X, Y, Z, lambdas[i], startB, regXidx, regZidx, reg, norms; 
                 isVerbose=isVerbose, stepsize=stepsize, funArgs...)
         else
