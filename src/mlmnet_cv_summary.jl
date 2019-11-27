@@ -103,7 +103,7 @@ end
     lambda_min(MLMNet_cv)
     
 Returns summary information for lambdas corresponding to the minimum average 
-test MSE across folds and the MSE one standard error greater.  
+test MSE across folds and the MSE one that is standard error greater. 
 
 # Arguments 
 
@@ -112,8 +112,8 @@ test MSE across folds and the MSE one standard error greater.
 # Value
 
 DataFrame from mlmnet_cv_summary restricted to the lambdas that correspond to 
-the minimum average test MSE across folds and the MSE one standard error 
-greater. 
+the minimum average test MSE across folds and the MSE that is one standard 
+error greater. 
     
 """
 function lambda_min(MLMNet_cv::Mlmnet_cv)

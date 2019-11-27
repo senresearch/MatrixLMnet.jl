@@ -10,10 +10,11 @@ The `matrixLMnet` package can be installed by running:
 
 ```
 using Pkg
+Pkg.add(PackageSpec(url="https://github.com/janewliang/matrixLM.jl", rev="master")) # Install matrixLM dependency first
 Pkg.add(PackageSpec(url="https://github.com/janewliang/matrixLMnet.jl", rev="master"))
 ```
 
-`matrixLMnet` was developed in [Julia v1.1](https://julialang.org/downloads/). 
+`matrixLMnet` was developed in [Julia v1.3](https://julialang.org/downloads/). 
 
 ## Usage 
 
@@ -121,10 +122,16 @@ Random.seed!(120)
 estCVObjs = mlmnet_cv(fista_bt!, dat, lambdas, 10, 1)
 ```
 
-`mlmnet_cv_summary` displays a table of the average mean-squared error and proportion of zero coefficients across the folds for each value of lambda. The optimal lambda might be the one that minimizes the mean-squared error, or can be chosen based on a pre-determined proportion of zeros that is desired in the coefficient estimates. 
+`mlmnet_cv_summary` displays a table of the average mean-squared error and proportion of zero coefficients across the folds for each value of lambda. The optimal lambda might be the one that minimizes the mean-squared error (MSE), or can be chosen based on a pre-determined proportion of zeros that is desired in the coefficient estimates. 
 
 ```
 println(mlmnet_cv_summary(estCVObjs))
+```
+
+The `lambda_min` function returns the summary information for the lambdas that correspond to the minimum average test MSE across folds and the MSE that is one standard error greater. 
+
+```
+lambda_min(estCVObjs)
 ```
 
 Additional details can be found in the documentation for specific functions. 
