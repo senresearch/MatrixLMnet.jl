@@ -120,7 +120,7 @@ function lambda_min(MLMNet_cv::Mlmnet_cv)
 
     # Calculate average test MSE across folds.
     mseMean = calc_avg_mse(MLMNet_cv)
-    mseStd = valid_reduce2(mlmnetCVObjs.mse, std)
+    mseStd = valid_reduce2(MLMNet_cv.mse, std)
 
     # Find index of minimum average test MSE
     minIdx = argmin(mseMean)
@@ -132,7 +132,7 @@ function lambda_min(MLMNet_cv::Mlmnet_cv)
     min1StdErrIdx = argmin(abs.(mseMean)[1:minIdx[1]].-mse1StdErr)
 
     # Pull out summary information for these two lambdas
-    out = mlmnet_cv_summary(mlmnetCVObjs)[[minIdx,min1StdErrIdx],:]
+    out = mlmnet_cv_summary(MLMNet_cv)[[minIdx,min1StdErrIdx],:]
     insertcols!(out, 1, :Type => ["lambda_min", "lambda_min1se"])
     return out
 end
