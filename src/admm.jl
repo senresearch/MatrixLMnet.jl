@@ -1,5 +1,5 @@
 """
-    prox1(V, lambda)
+    prox1(v, lambda)
 
 Proximal operator for the L1 norm updates in ADMM. 
 
@@ -21,7 +21,7 @@ end
 
 
 """
-    prox2(V, rho, U, L)
+    prox2(v, rho, u, l)
 
 Proximal operator for the L2 norm updates in ADMM. 
 
@@ -46,8 +46,8 @@ end
 
 
 """
-    update_admm!(B, B0, B2, QxBQz, resid, X, Y, Z, Qx, Qz, U, L, 
-                 lambda, regXidx, regZidx, rho)
+    update_admm!(B, B0, B2, resid, X, Y, Z, Qx, Qz, U, L, lambda, 
+                 regXidx, regZidx, rho, r, s, tau_incr, tau_decr, mu)
 
 Updates coefficient estimates in place for each ADMM iteration. 
 
@@ -56,8 +56,6 @@ Updates coefficient estimates in place for each ADMM iteration.
 - B = 2d array of floats consisting of coefficient estimates for L1 updates
 - B0 = 2d array of floats consisting of coefficient estimates for L2 updates
 - B2 = 2d array of floats consisting of coefficient estimates for dual updates
-- QxBQz = 2d array of floats consisting of coefficient estimates transformed 
-  to original space
 - resid = 2d array of floats consisting of the residuals
 - X = 2d array of floats consisting of the row covariates, with all 
   categorical variables coded in appropriate contrasts
@@ -152,9 +150,10 @@ end
 
 """
     admm!(X, Y, Z, lambda, B, regXidx, regZidx, reg, norms, Qx, Qz, U, L; 
-          isVerbose, stepsize, rho, thresh, maxiter)
+          isVerbose, stepsize, rho, setRho, thresh, maxiter, 
+          tau_incr, tau_decr, mu)
 
-Performs ADMM.  
+Performs ADMM. 
 
 # Arguments
 
