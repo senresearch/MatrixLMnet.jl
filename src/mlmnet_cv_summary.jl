@@ -21,7 +21,7 @@ function valid_reduce2(A::Array{Float64,2}, fun::Function=mean)
     # Iterate through rows of A and reduce across columns
     for i in 1:size(A, 1)
         # Note that the following line also drops NaNs, which are not numbers
-        out[i] = fun(A[i, (A[i, :] .< Inf ) & (A[i, :] .> -Inf )])
+        out[i] = fun(A[i, (A[i, :] .< Inf) .& (A[i, :] .> -Inf)])
     end
     return out
 end
