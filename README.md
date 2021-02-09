@@ -43,7 +43,7 @@ X_df = hcat(DataFrame(catvar1=rand(1:5, n), catvar2=rand(["A", "B", "C"], n)),
 # Use the contr function to get contrasts for the two categorical variables 
 # (treatment contrasts for catvar1 and sum contrasts for catvar2).
 # contr returns a DataFrame, so X needs to be converted into a 2d array.
-X = convert(Array{Float64,2}, contr(X_df, ["catvar1", "catvar2"], 
+X = convert(Array{Float64,2}, contr(X_df, [:catvar1, :catvar2], 
                                     ["treat", "sum"]))
 # Number of row covariates
 p = size(X)[2]
