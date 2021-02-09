@@ -2,7 +2,7 @@
 
 Core functions to obtain L<sub>1</sub>-penalized estimates for matrix linear models. 
 
-`matrixLMnet` is an extension of the [`matrixLM`](https://github.com/janewliang/matrixLM.jl) package, which provides core functions for closed-form least squares estimates for matrix linear models. 
+`matrixLMnet` is an extension of the [`matrixLM`](https://github.com/senresearch/matrixLM.jl) package, which provides core functions for closed-form least squares estimates for matrix linear models. 
 
 ## Installation 
 
@@ -11,11 +11,11 @@ The `matrixLMnet` package can be installed by running:
 ```
 using Pkg
 # Install matrixLM dependency first
-Pkg.add(PackageSpec(url="https://github.com/janewliang/matrixLM.jl", rev="master")) 
-Pkg.add(PackageSpec(url="https://github.com/janewliang/matrixLMnet.jl", rev="master"))
+Pkg.add(PackageSpec(url="https://github.com/senresearch/matrixLM.jl", rev="master")) 
+Pkg.add(PackageSpec(url="https://github.com/senresearch/matrixLMnet.jl", rev="master"))
 ```
 
-`matrixLMnet` was developed in [Julia v1.3](https://julialang.org/downloads/). 
+`matrixLMnet` was developed in [Julia v1.5.3](https://julialang.org/downloads/). 
 
 ## Usage 
 
@@ -43,7 +43,7 @@ X_df = hcat(DataFrame(catvar1=rand(1:5, n), catvar2=rand(["A", "B", "C"], n)),
 # Use the contr function to get contrasts for the two categorical variables 
 # (treatment contrasts for catvar1 and sum contrasts for catvar2).
 # contr returns a DataFrame, so X needs to be converted into a 2d array.
-X = convert(Array{Float64,2}, contr(X_df, [:catvar1, :catvar2], 
+X = convert(Array{Float64,2}, contr(X_df, ["catvar1", "catvar2"], 
                                     ["treat", "sum"]))
 # Number of row covariates
 p = size(X)[2]

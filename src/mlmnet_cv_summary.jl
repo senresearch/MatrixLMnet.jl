@@ -93,7 +93,7 @@ function mlmnet_cv_summary(MLMNet_cv::Mlmnet_cv)
     out_df = DataFrame(hcat(MLMNet_cv.lambdas, calc_avg_mse(MLMNet_cv), 
                             calc_avg_prop_zero(MLMNet_cv)))
     # Useful names
-    names!(out_df, map(Meta.parse, ["Lambda", "AvgMSE", "AvgPercentZero"]))
+    rename!(out_df, map(Meta.parse, ["Lambda", "AvgMSE", "AvgPercentZero"]))
     
     return out_df
 end
