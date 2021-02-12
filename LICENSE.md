@@ -1,6 +1,6 @@
-The matrixLMnet.jl package is licensed under the MIT "Expat" License:
+The MatrixLMnet package is licensed under the MIT "Expat" License:
 
-> Copyright (c) 2019: Jane Liang, Saunak Sen.
+> Copyright (c) 2021: Jane Liang, Saunak Sen.
 >
 > Permission is hereby granted, free of charge, to any person obtaining
 > a copy of this software and associated documentation files (the

@@ -1,26 +1,26 @@
-# matrixLMnet
+# MatrixLMnet
 
-Core functions to obtain L<sub>1</sub>-penalized estimates for matrix linear models. 
+Core functions to obtain L<sub>1</sub>-penalized estimates for matrix linear models. See the associated paper, ["Sparse matrix linear models for structured high-throughput data"](https://arxiv.org/abs/1712.05767) and [reproducible code](https://github.com/senresearch/mlm_l1_supplement), for more details. 
 
-`matrixLMnet` is an extension of the [`matrixLM`](https://github.com/senresearch/matrixLM.jl) package, which provides core functions for closed-form least squares estimates for matrix linear models. 
+`MatrixLMnet` is related to the [`MatrixLM`](https://github.com/senresearch/MatrixLM.jl) package, which provides core functions for closed-form least squares estimates for matrix linear models. 
 
 ## Installation 
 
-The `matrixLMnet` package can be installed by running: 
+The `MatrixLMnet` package can be installed by running: 
 
 ```
 using Pkg
-# Install matrixLM dependency first
-Pkg.add(PackageSpec(url="https://github.com/senresearch/matrixLM.jl", rev="master")) 
-Pkg.add(PackageSpec(url="https://github.com/senresearch/matrixLMnet.jl", rev="master"))
+# Install MatrixLM dependency first
+Pkg.add(PackageSpec(url="https://github.com/senresearch/MatrixLM.jl", rev="master")) 
+Pkg.add(PackageSpec(url="https://github.com/senresearch/MatrixLMnet.jl", rev="master"))
 ```
 
-`matrixLMnet` was developed in [Julia v1.5.3](https://julialang.org/downloads/). 
+`MatrixLMnet` was developed in [Julia v1.5.3](https://julialang.org/downloads/). 
 
 ## Usage 
 
 ```
-using matrixLMnet
+using MatrixLMnet
 ```
 
 First, construct a `RawData` object consisting of the response variable `Y` and row/column covariates `X` and `Z`. All three matrices must be passed in as 2-dimensional arrays. Note that the `contr` function can be used to set up treatment and/or sum contrasts for categorical variables stored in a DataFrame. By default, `contr` generates treatment contrasts for all specified categorical variables (`"treat"`). Other options include `"sum"` for sum contrasts, `"noint"` for treatment contrasts with no intercept, and `"sumnoint"` for sum contrasts with no intercept. 
