@@ -1,6 +1,6 @@
 # MatrixLMnet
 
-Core functions to obtain L<sub>1</sub>-penalized estimates for matrix linear models. See the associated paper, ["Sparse matrix linear models for structured high-throughput data"](https://arxiv.org/abs/1712.05767) and [reproducible code](https://github.com/senresearch/mlm_l1_supplement), for more details. 
+Core functions to obtain L<sub>1</sub>-penalized estimates for matrix linear models. See the associated paper, ["Sparse matrix linear models for structured high-throughput data"](https://arxiv.org/abs/1712.05767), and its [reproducible code](https://github.com/senresearch/mlm_l1_supplement) for more details. 
 
 `MatrixLMnet` is related to the [`MatrixLM`](https://github.com/senresearch/MatrixLM.jl) package, which provides core functions for closed-form least squares estimates for matrix linear models. 
 
