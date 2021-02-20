@@ -1,5 +1,7 @@
 # MatrixLMnet
 
+[![Build Status](https://travis-ci.com/senresearch/MatrixLMnet.jl.svg?branch=master)](https://travis-ci.com/senresearch/MatrixLMnet.jl)
+
 Core functions to obtain L<sub>1</sub>-penalized estimates for matrix linear models. See the associated paper, ["Sparse matrix linear models for structured high-throughput data"](https://arxiv.org/abs/1712.05767), and its [reproducible code](https://github.com/senresearch/mlm_l1_supplement) for more details. 
 
 `MatrixLMnet` is related to the [`MatrixLM`](https://github.com/senresearch/MatrixLM.jl) package, which provides core functions for closed-form least squares estimates for matrix linear models. 
@@ -14,8 +16,6 @@ using Pkg
 Pkg.add(PackageSpec(url="https://github.com/senresearch/MatrixLM.jl", rev="master")) 
 Pkg.add(PackageSpec(url="https://github.com/senresearch/MatrixLMnet.jl", rev="master"))
 ```
-
-`MatrixLMnet` was developed in [Julia v1.5.3](https://julialang.org/downloads/). 
 
 ## Usage 
 
