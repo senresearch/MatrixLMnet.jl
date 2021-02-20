@@ -12,9 +12,13 @@ The `MatrixLMnet` package can be installed by running:
 
 ```
 using Pkg
-# Install MatrixLM dependency first
-Pkg.add(PackageSpec(url="https://github.com/senresearch/MatrixLM.jl", rev="master")) 
-Pkg.add(PackageSpec(url="https://github.com/senresearch/MatrixLMnet.jl", rev="master"))
+Pkg.add("MatrixLMnet")
+```
+
+For the most recent version, use:
+```
+using Pkg
+Pkg.add(url = "https://github.com/senresearch/MatrixLMnet.jl", rev="master")
 ```
 
 ## Usage 
@@ -58,7 +62,7 @@ Y = X*B*transpose(Z)+E
 dat = RawData(Response(Y), Predictors(X, Z))
 ```
 
-Create a 1d array of lambda penalty values to fit the estimates. If the lambdas are not in descending order, they will be sorted by `mlmnet`. 
+Create a 1d array of lambda penalty values to fit the estimates. If the lambdas are not in descending order, they will be automatically sorted by `mlmnet`. 
 
 ```
 lambdas = reverse(1.8.^(1:10))
@@ -77,7 +81,7 @@ The functions for the algorithms used to fit the L<sub>1</sub>-penalized estimat
 `cd!` (coordinate descent)
 - `isRandom= true`: Bool; whether to use random or cyclic updates
 
-`cd_active` (active coordinate descent)
+`cd_active!` (active coordinate descent)
 - `isRandom = true`: Bool; whether to use random or cyclic updates
 
 `ista!` (ISTA with fixed step size)
@@ -114,7 +118,7 @@ All four of these functions take an optional `lambda` argument, in which case on
 estPerms = mlmnet_perms(fista_bt!, dat, lambdas)
 ```
 
-Cross-validation for `mlmnet` can be run using `mlmnet_cv`. The user can either manually specify the row/column folds of `Y` as a 1d array of 1d arrays of row indices, or specify the number of folds that should be used. If the number of folds is specified, disjoint folds of approximately equal size will be generated from a call to `make_folds`. Passing in `1` for the number of row (or column) folds indicates that all of the rows (or columns) of `Y` should be used in each fold. The advantage of manually passing in the row and/or column folds is that it allows the user to stratify or otherwise control the nature of the folds. For example, `make_folds_conds` will generate folds for a set of categorical conditions and ensure that each condition is represented in each fold. Cross validation is computed in parallel when possible. Non-default behavior for `mlmnet` can be specified by passing its keyword arguments into `mlmnet_cv`. 
+Cross-validation for `mlmnet` is implemented by `mlmnet_cv`. The user can either manually specify the row/column folds of `Y` as a 1d array of 1d arrays of row/column indices, or specify the number of folds that should be used. If the number of folds is specified, disjoint folds of approximately equal size will be generated from a call to `make_folds`. Passing in `1` for the number of row (or column) folds indicates that all of the rows (or columns) of `Y` should be used in each fold. The advantage of manually passing in the row and/or column folds is that it allows the user to stratify or otherwise control the nature of the folds. For example, `make_folds_conds` will generate folds for a set of categorical conditions and ensure that each condition is represented in each fold. Cross validation is computed in parallel when possible. Non-default behavior for `mlmnet` can be specified by passing its keyword arguments into `mlmnet_cv`. 
 
 In the call below, `mlmnet_cv` generates 10 disjoint row folds but uses all columns of `Y` in each fold (indicated by the `1`). The function returns an `Mlmnet_cv` object, which contains an array of the Mlmnet objects for each fold (`MLMNets`); the lambda penalty values used (`lambdas`); the row and column folds (`rowFolds` and `colFolds`); an array of the mean-squared error for each fold (`mse`); and an array of the proportion of zero interaction effects for each fold (`propZero`). The keyword argument `dig` in `mlmnet_cv` adjusts the level of precision when calculating the percent of zero coefficients. It defaults to `12`. 
 
