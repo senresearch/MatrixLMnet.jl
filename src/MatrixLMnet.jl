@@ -1,9 +1,9 @@
-module matrixLMnet
+module MatrixLMnet
 
 
-using matrixLM
-import matrixLM.calc_preds, matrixLM.calc_preds!, 
-    matrixLM.calc_resid, matrixLM.calc_resid!
+using MatrixLM
+import MatrixLM.calc_preds, MatrixLM.calc_preds!, 
+    MatrixLM.calc_resid, MatrixLM.calc_resid!
 
 using DataFrames
 using Distributed
