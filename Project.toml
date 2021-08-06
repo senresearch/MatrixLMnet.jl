@@ -1,6 +1,6 @@
 name = "MatrixLMnet2"
 uuid = "1741ad21-9c37-460f-90b7-a3d76335463f"
-authors = ["Gregory Farage <gfarage@uthsc.edu>"]
+authors = ["Jane Liang", "Zifan Yu", "Gregory Farage"]
 version = "0.1.0"
 
 [deps]

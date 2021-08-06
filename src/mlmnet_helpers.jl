@@ -76,7 +76,7 @@ end
 
 
 """
-    prox(b, gradient, b2sign, lambda, norm, stepsize)
+    prox(b, gradient, b2sign, lambda, norm)
 
 Proximal (soft-thresholding) operator when not incorporating the norms 
 (norms=1) and step size is 1
@@ -129,7 +129,7 @@ end
 
 
 """
-    prox(b, gradient, b2sign, lambda, norm, stepsize)
+    prox(b, gradient, b2sign, lambda, norm)
 
 Proximal (soft-thresholding) operator when step size is 1
 
