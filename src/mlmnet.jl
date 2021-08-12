@@ -274,7 +274,6 @@ function mlmnet(fun::Function, data::RawData, lambdas::AbstractArray{Float64,1};
         # Calculate the norm matrix
         # 2d array of norms corresponding to each coefficient
         norms = transpose(sum(X.^2, dims=1)).*sum(Z.^2, dims=1) 
-        norms = nothing
     end
 
     # If chosen method is ista!/fista! with fixed step size and setStepsize is 
