@@ -112,27 +112,27 @@ end
 
 
 """
-    calc_mse(MLMNets, data, lambdas, rowFolds, colFolds)
+    calc_mse(MLMNets, data, s, rowFolds, colFolds)
 
-Calculates test MSE for each of the CV folds for each lambda. 
+Calculates test MSE for each of the CV folds for each . 
 
 # Arguments 
 
 - MLMNets = 1d array of Mlmnet objects resulting from running cross validation
 - data = RawData object used to generate MLMNets
-- lambdas = 1d array of floats consisting of lambda penalties used to 
+- s = 1d array of floats consisting of  penalties used to 
   generate MLMNets
 - rowFolds = 1d array of arrays containing booleans for the row folds
 - colFolds = 1d array of arrays containing booleans for the column folds
 
 # Value
 
-2d array of floats with dimensions equal to the number of lambdas by the 
+2d array of floats with dimensions equal to the number of s by the 
 number of folds. 
 
 """
 function calc_mse(MLMNets::AbstractArray{Mlmnet,1}, data::RawData, 
-                  lambdas::AbstractArray{Float64,1}, 
+                  s::AbstractArray{Float64,1}, 
                   rowFolds::Array{Array{Int64,1},1}, 
                   colFolds::Array{Array{Int64,1},1})
 
@@ -156,14 +156,14 @@ function calc_mse(MLMNets::AbstractArray{Mlmnet,1}, data::RawData,
     end
   
     # Initialize array to store test MSEs 
-    mse = Array{Float64}(undef, length(lambdas), nFolds)
+    mse = Array{Float64}(undef, length(s), nFolds)
     
-    # Iterate through all folds and lambdas to calculate test MSE
+    # Iterate through all folds and s to calculate test MSE
     for j in 1:nFolds
-        # Residuals for all lambdas at fold j
+        # Residuals for all s at fold j
         resids = resid(MLMNets[j], holdoutFolds[j]) 
-        for i in 1:length(lambdas)
-            # MSE for lambda i and fold j   
+        for i in 1:length(s)
+            # MSE for  i and fold j   
             mse[i,j] = mean(resids[i,:,:].^2) 
         end
     end
@@ -173,15 +173,15 @@ end
 
 
 """
-    calc_prop_zero(MLMNets, lambdas, dig)
+    calc_prop_zero(MLMNets, s, dig)
 
 Calculates proportion of zero interaction coefficients for each of the CV 
-folds for each lambda. 
+folds for each . 
 
 # Arguments 
 
 - MLMNets = 1d array of Mlmnet objects resulting from running cross validation
-- lambdas = 1d array of floats consisting of lambda penalties used to 
+- s = 1d array of floats consisting of  penalties used to 
   generate MLMNets
 
 # Keyword arguments 
@@ -190,19 +190,19 @@ folds for each lambda.
 
 # Value
 
-2d array of floats with dimensions equal to the number of lambdas by the 
+2d array of floats with dimensions equal to the number of s by the 
 number of folds. 
 
 """
 function calc_prop_zero(MLMNets::AbstractArray{Mlmnet,1}, 
-                        lambdas::AbstractArray{Float64,1}; 
+                        s::AbstractArray{Float64,1}; 
                         dig::Int64=12)
     
     # Number of folds
     nFolds = length(MLMNets)
   
     # Initialize array to store proportions of zero interactions 
-    propZero = Array{Float64}(undef, length(lambdas), nFolds)
+    propZero = Array{Float64}(undef, length(s), nFolds)
 
     # Boolean arrays used to subset coefficients for interactions only
     xIdx = trues(MLMNets[1].data.p)
@@ -210,11 +210,11 @@ function calc_prop_zero(MLMNets::AbstractArray{Mlmnet,1},
     zIdx = trues(MLMNets[1].data.q)
     zIdx[1] = MLMNets[1].data.predictors.isZIntercept==false 
   
-    # Iterate through all folds and lambdas to calculate proportion of zero 
+    # Iterate through all folds and s to calculate proportion of zero 
     # interaction coefficients 
     for j in 1:nFolds
-        for i in 1:length(lambdas)
-            # Proportion of zero interaction coefficients for lambda i and 
+        for i in 1:length(s)
+            # Proportion of zero interaction coefficients for  i and 
             # fold j  
             propZero[i,j] = mean(round.(coef(MLMNets[j])[i,xIdx,zIdx], 
                                         digits=dig) .== 0) 
