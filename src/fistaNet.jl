@@ -35,7 +35,7 @@ silution, when `X` and `Z` are both standardized.
 None; updates coefficients in place
 
 """
-function update_fista!(B::AbstractArray{Float64,2}, 
+function update_fistaNet!(B::AbstractArray{Float64,2}, 
                        B_prev::AbstractArray{Float64,2}, 
                        A::AbstractArray{Float64,2}, 
                        resid::AbstractArray{Float64,2}, 
@@ -64,8 +64,8 @@ function update_fista!(B::AbstractArray{Float64,2},
         B[i,j] = A[i,j] - stepsize[1] * grad[i,j] # L2 updates
         # Apply shrinkage to regularized coefficients
         if reg[i,j] 
-            B[i,j] = prox(A[i,j], grad[i,j], sign(B[i,j]), lambdaL1*stepsize, norms, 
-                          stepsize[1])/(1+lambdaL2*stepsize)
+            B[i,j] = prox(A[i,j], grad[i,j], sign(B[i,j]), lambdaL1, norms, 
+                          stepsize[1])/(1+lambdaL2*stepsize[1])
         end
         
         # Update extrapolated coefficient
@@ -115,7 +115,7 @@ Updates coefficient estimates in place for each FISTA iteration when `X` and
 None; updates coefficients in place
 
 """
-function update_fista!(B::AbstractArray{Float64,2}, 
+function update_fistaNet!(B::AbstractArray{Float64,2}, 
                        B_prev::AbstractArray{Float64,2}, 
                        A::AbstractArray{Float64,2}, 
                        resid::AbstractArray{Float64,2}, 
@@ -145,8 +145,8 @@ function update_fista!(B::AbstractArray{Float64,2},
         B[i,j] = A[i,j] - stepsize[1] * grad[i,j]./norms[i,j] # L2 updates
         # Apply shrinkage to regularized coefficients
         if reg[i,j] 
-            B[i,j] = prox(A[i,j], grad[i,j], sign(B[i,j]), lambdaL1*stepsize, norms[i,j], 
-                          stepsize[1])/(1+lambdaL2*stepsize)
+            B[i,j] = prox(A[i,j], grad[i,j], sign(B[i,j]), lambdaL1, norms[i,j], 
+                          stepsize[1])/(1+lambdaL2*stepsize[1])
         end
         
         # Update extrapolated coefficient
@@ -236,7 +236,7 @@ function fistaNet!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
     # Placeholder to store the old criterion 
     oldcrit = 1.0 
     # Calculate the current criterion
-    crit = criterion(B[regXidx, regZidx], resid_B, lambdaL1, lambdaL2, crit_denom) 
+    crit = criterionNet(B[regXidx, regZidx], resid_B, lambdaL1, lambdaL2, crit_denom) 
     
     stepsize = [stepsize]
     iter = [0]
@@ -249,7 +249,7 @@ function fistaNet!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
         update_fistaNet!(B, B_prev, A, resid, resid_B, grad, X, Y, Z, norms, 
                       lambdaL1, lambdaL2, reg, iter, stepsize) 
         # Calculate the criterion after updating
-        crit = criterion(B[regXidx, regZidx], resid_B, lambdaL1, lambdaL2, crit_denom) 
+        crit = criterionNet(B[regXidx, regZidx], resid_B, lambdaL1, lambdaL2, crit_denom) 
         
         iter[:] = iter .+ 1 # Increment the number of iterations
         # Warning message if coefficient estimates do not converge.

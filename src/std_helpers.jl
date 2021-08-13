@@ -271,3 +271,73 @@ function backtransform!(B::AbstractArray{Float64,3},
         end
     end
 end
+
+"""
+    backtransformNet!(B, isXIntercept, isZIntercept, 
+                   meansX, meansZ, normsX, normsZ)
+
+Back-transform coefficient estimates B in place if X and Z were standardized 
+prior to the estimation-- when not including intercept columns for either X 
+or Z. 
+
+# Arguments 
+
+- B = 3d array of coefficient estimates
+- isXIntercept = boolean flag indicating whether or not to X has an 
+  intercept column
+- isZIntercept = boolean flag indicating whether or not to Z has an 
+  intercept column
+- meansX = 2d array of column means of X, obtained prior to standardizing X
+- meansZ = 2d array of column means of Z, obtained prior to standardizing Z
+- normsX = 2d array of column norms of X, obtained prior to standardizing X
+- normsZ = 2d array of column norms of Z, obtained prior to standardizing Z
+
+# Value 
+
+None; back-transforms B in place. 
+
+# Some notes
+
+B is a 3d array in which each coefficient matrix is stored along the first 
+dimension. 
+
+"""
+function backtransformNet!(B::AbstractArray{Float64,4}, 
+                        isXIntercept::Bool, isZIntercept::Bool, 
+                        meansX::AbstractArray{Float64,2}, 
+                        meansZ::AbstractArray{Float64,2}, 
+                        normsX::AbstractArray{Float64,2}, 
+                        normsZ::AbstractArray{Float64,2})
+
+    # Iterate through the first dimension of B to back-transform each 
+	# coefficient matrix. 
+    for i in 1:size(B,1)  
+        for j in 1:size(B,2) 
+            # Back transform the X intercepts (row main effects), if necessary 
+            if isXIntercept == true 
+                prodX = (meansX[:,2:end]./normsX[:,2:end])*B[i,2:end,2:end]
+                B[i,1,2:end] = (B[i,1,2:end]-vec(prodX))./vec(normsZ[:,2:end])/
+                                                        normsX[1,1]
+            end
+        
+            # Back transform the Z intercepts (column main effects), if necessary
+            if isZIntercept == true 
+                prodZ = B[i,2:end,2:end]*transpose(meansZ[:,2:end]./
+                    normsZ[:,2:end])
+                B[i,2:end,1] = (B[i,2:end,1]-prodZ)./transpose(normsX[:,2:end])/
+                                                    normsZ[1,1]
+            end
+        
+            # Back transform the interactions, if necessary
+            if (isXIntercept == true) || (isZIntercept == true) 
+                B[i,2:end,2:end] = B[i,2:end,2:end]./transpose(normsX[:,2:end])./
+                                                    normsZ[:,2:end]
+            end
+        
+            # Back transform the interactions if not including any main effects
+            if (isXIntercept == false) && (isZIntercept == false) 
+                B[i,j,:,:] = B[i,j,:,:]./transpose(normsX)./normsZ
+            end
+        end
+    end
+end
