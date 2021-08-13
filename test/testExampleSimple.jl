@@ -4,6 +4,7 @@ using Random
 using LinearAlgebra
 include("../src/mlmnetNet.jl")
 include("../src/istaNet.jl")
+include("../src/fistaNet.jl")
 include("../src/mlmnet_helpers.jl")
 include("../src/std_helpers.jl")
 

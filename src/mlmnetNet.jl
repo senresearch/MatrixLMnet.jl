@@ -339,7 +339,7 @@ function mlmnetNet(fun::Function, data::RawData,
         backtransform!(coeffs, meansX, meansZ, normsX, normsZ, get_Y(data), 
                        data.predictors.X, data.predictors.Z)
     elseif isStandardize == true # Otherwise
-        backtransform!(coeffs[1, 1, :, :], isXIntercept, isZIntercept, meansX, meansZ, 
+        backtransformNet!(coeffs, isXIntercept, isZIntercept, meansX, meansZ, 
                        normsX, normsZ)
     end
 
