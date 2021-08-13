@@ -1,27 +1,28 @@
 """
-    Mlmnet(B, lambdas, data)
+    MlmnetNet(B, lambdas, data)
 
-Type for storing the results of an mlmnet model fit
+Type for storing the results of an mlmnet (Elastic net) model fit
 
 """
-mutable struct Mlmnet 
-    
+
+mutable struct MlmnetNet
+
     # Coefficient estimates
-    B::Array{Float64,3} 
+    B::Array{Float64, 4}
     # Lambda penalties
-    lambdas::Array{Float64,1} 
+    lambdasL1::Array{Float64, 1} # L1 penalty
+    lambdasL2::Array{Float64, 1} # L1 penalty
     
     # Response and predictor matrices
-    data::RawData 
+    data::RawData
 end
 
-
 """
-    mlmnet_pathwise(fun, X, Y, Z, lambdas, regXidx, regZidx, reg, norms; 
-                    isVerbose, stepsize, funArgs...)
+    mlmnet_pathwiseNet(fun, X, Y, Z, lambdasL1, lambdasL2, regXidx, regZidx, 
+                    reg, norms; isVerbose, stepsize, funArgs...)
 
-Performs the supplied method on a descending list of lambdas using ``warm 
-starts''. 
+Performs the supplied method on two descending lists of lambdas (for l1 and l2) 
+using ``warm starts''. 
 
 # Arguments
 
@@ -31,7 +32,9 @@ starts''.
 - Y = 2d array of floats consisting of the multivariate response
 - Z = 2d array of floats consisting of the column covariates, with all 
   categorical variables coded in appropriate contrasts
-- lambdas = 1d array of floats consisting of lambda penalties in descending 
+- lambdasL1 = 1d array of floats consisting of l1 penalties in descending 
+  order. If they are not in descending order, they will be sorted.
+- lambdasL2 = 1d array of floats consisting of l2 penalties in descending 
   order. If they are not in descending order, they will be sorted. 
 - regXidx = 1d array of indices corresponding to regularized X covariates
 - regZidx = 1d array of indices corresponding to regularized Z covariates
@@ -59,32 +62,44 @@ Z, including adding on intercepts. To be called by `mlmnet`, which performs
 standardization and backtransforming. 
 
 """
-function mlmnet_pathwise(fun::Function, X::AbstractArray{Float64,2}, 
+function mlmnet_pathwiseNet(fun::Function, X::AbstractArray{Float64,2}, 
                          Y::AbstractArray{Float64,2}, 
                          Z::AbstractArray{Float64,2}, 
-                         lambdas::AbstractArray{Float64,1},  
+                         lambdasL1::AbstractArray{Float64,1},
+                         lambdasL2::AbstractArray{Float64,1},  
                          regXidx::AbstractArray{Int64,1}, 
                          regZidx::AbstractArray{Int64,1}, 
                          reg::BitArray{2}, norms; isVerbose::Bool=true, 
                          stepsize::Float64=0.01, funArgs...)
 
     # Check that the lambdas are unique and in descending order. 
-    if length(lambdas) != length(unique(lambdas))
-        println_verbose("Dropping non-unique lambdas", isVerbose)
+    if length(lambdasL1) != length(unique(lambdasL1))
+        println_verbose("Dropping non-unique lambdasL1", isVerbose)
     end
-    if any(lambdas .!= sort(lambdas, rev=true))
-        println_verbose("Sorting lambdas into descending order.", isVerbose)
-        lambdas = sort(lambdas, rev=true)
+
+    if length(lambdasL2) != length(unique(lambdasL2))
+      println_verbose("Dropping non-unique lambdasL2", isVerbose)
+    end
+
+    if any(lambdasL1 .!= sort(lambdasL1, rev=true))
+        println_verbose("Sorting l1 lambdas into descending order.", isVerbose)
+        lambdasL1 = sort(lambdasL1, rev=true)
     end 
 
+    if any(lambdasL2 .!= sort(lambdasL2, rev=true))
+        println_verbose("Sorting l2 lambdas into descending order.", isVerbose)
+        lambdasL2 = sort(lambdasL2, rev=true)
+    end
+
+
     # Pre-allocate array for coefficients
-    coeffs = Array{Float64}(undef, length(lambdas), size(X,2), size(Z,2)) 
+    coeffs = Array{Float64}(undef, length(lambdasL1), length(lambdasL2), size(X,2), size(Z,2)) 
 
     # Start with coefficients initalized at zero for the largest lambda value
     startB = zeros(size(X,2), size(Z,2))
 
     # Pre-compute eigenvalues and eigenvectors for ADMM
-    if length(string(fun)) > 4 && (string(fun)[(end-4):end] == "admm!") 
+    if length(string(fun)) > 7 && (string(fun)[(end-7):end] == "admmNet!") 
         # Eigenfactorization of X
         XTX = transpose(X)*X
         eigX = eigen(XTX)
@@ -94,8 +109,8 @@ function mlmnet_pathwise(fun::Function, X::AbstractArray{Float64,2},
         # Eigenfactorization of Z
         ZTZ = transpose(Z)*Z
         eigZ = eigen(ZTZ)
-		Qz = eigZ.vectors
-		Lz = eigZ.values
+		    Qz = eigZ.vectors
+		    Lz = eigZ.values
     
         # Transformed Y
         X1 = X*Qx
@@ -107,45 +122,48 @@ function mlmnet_pathwise(fun::Function, X::AbstractArray{Float64,2},
     end
 
     # Iterate through the path of lambdas
-    for i=1:length(lambdas) 
+    for i = 1:length(lambdasL1) 
         # Get L1-penalty estimates by updating the coefficients from previous 
         # iteration in place
-        if length(string(fun)) <= 4 || (string(fun)[(end-4):end] != "admm!")
-            fun(X, Y, Z, lambdas[i], startB, regXidx, regZidx, reg, norms; 
+      for j = 1:length(lambdasL2)
+        # Coordinate Descent
+        if length(string(fun)) <= 7 || (string(fun)[(end-7):end] != "admmNet!") # Methods other than ADMM
+            fun(X, Y, Z, lambdasL1[i], lambdasl2[j], startB, regXidx, regZidx, reg, norms; 
                 isVerbose=isVerbose, stepsize=stepsize, funArgs...)
+        # ADMM       
         else
-            fun(X, Y, Z, lambdas[i], startB, regXidx, regZidx, reg, norms, 
+            fun(X, Y, Z, lambdasL1[i], lambdasL2[j], startB, regXidx, regZidx, reg, norms, 
                 Qx, Qz, U, L; 
                 isVerbose=isVerbose, stepsize=stepsize, funArgs...)
         end
 
         # Assign a slice of coeffs to the current coefficient estimates
-        coeffs[i,:,:] = startB 
+        coeffs[i, j, :, :] = startB 
+      end
     end
 
     return coeffs
 end
 
-
-
-
 """
-    mlmnet(fun, data, lambdas; 
+    mlmnetNet(fun, data, lambdas; 
            isXIntercept, isZIntercept, isXReg, isZReg, 
            isXInterceptReg, isZInterceptReg, isStandardize, isVerbose, 
            stepsize, setStepsize, funArgs...)
 
 Standardizes X and Z predictor matrices, calculates fixed step size, performs 
-the supplied method on a descending list of lambdas using ``warm starts'', 
+the supplied method on a descending list of lambdas (each for L1 and L2) using ``warm starts'', 
 and backtransforms resulting coefficients, as is deemed necessary by the user 
 inputs.
 
 # Arguments
 
-- fun = function that applies an L1-penalty estimate method
+- fun = function that applies an Elastic-net penalty estimate method
 - data = RawData object
-- lambdas = 1d array of floats consisting of lambda penalties in descending 
+- lambdasL1 = 1d array of floats consisting of l1 penalties in descending 
 order. If they are not in descending order, they will be sorted. 
+- lambdasL2 = 1d array of floats consisting of l2 penalties in descending 
+order. If they are not in descending order, they will be sorted.
 
 # Keyword arguments
 
@@ -176,7 +194,7 @@ order. If they are not in descending order, they will be sorted.
 
 # Value
 
-An Mlmnet object
+An MlmnetNet object
 
 # Some notes
 
@@ -196,7 +214,8 @@ too quickly can cause the criterion to diverge. We have found that setting
 be less consequential. 
 
 """
-function mlmnet(fun::Function, data::RawData, lambdas::AbstractArray{Float64,1}; 
+function mlmnetNet(fun::Function, data::RawData, 
+                lambdasL1::AbstractArray{Float64,1}, lambdasL2::AbstractArray{Float64, 1};
                 isXIntercept::Bool=true, isZIntercept::Bool=true, 
                 isXReg::BitArray{1}=trues(data.p), 
                 isZReg::BitArray{1}=trues(data.q),     
@@ -280,7 +299,7 @@ function mlmnet(fun::Function, data::RawData, lambdas::AbstractArray{Float64,1};
 
     # If chosen method is ista!/fista! with fixed step size and setStepsize is 
     # true, compute the step size. 
-    if length(string(fun)) > 4 && (string(fun)[(end-4):end] == "ista!") && 
+    if length(string(fun)) > 7 && (string(fun)[(end-7):end] == "istaNet!") && 
        setStepsize == true
         # Calculate and store transpose(X)*X
         XTX = transpose(X)*X
@@ -310,7 +329,7 @@ function mlmnet(fun::Function, data::RawData, lambdas::AbstractArray{Float64,1};
     end
 
     # Run the specified L1-penalty method on the supplied inputs. 
-    coeffs = mlmnet_pathwise(fun, X, get_Y(data), Z, lambdas, regXidx, 
+    coeffs = mlmnet_pathwiseNet(fun, X, get_Y(data), Z, lambdasL1, lambdasL2, regXidx, 
                              regZidx, reg, norms; isVerbose=isVerbose, 
                              stepsize=stepsize, funArgs...)
   
@@ -324,5 +343,5 @@ function mlmnet(fun::Function, data::RawData, lambdas::AbstractArray{Float64,1};
                        normsX, normsZ)
     end
 
-    return Mlmnet(coeffs, lambdas, data)
+    return MlmnetNet(coeffs, lambdasL1, lambdasL2, data)
 end
