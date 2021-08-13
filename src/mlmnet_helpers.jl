@@ -47,6 +47,33 @@ function criterion(B::AbstractArray{Float64,2},
              lambda * sum(abs2, B)/crit_denom[2]
 end
 
+"""
+    criterionNet(B, resid, lambdaL1, lambdaL2, crit_denom)
+
+Calculate the criterion for the Elastic-net penalty
+
+# Arguments 
+
+- B = 2d array of floats consisting of regularized coefficient estimates
+- resid = 2d array of floats consisting of the residuals
+- lambdaL1 = l1 penalty, a floating scalar
+- lambdaL2 = l2 penalty, a floating scalar
+- crit_denom = 1d array of 2 integers, the denominators of the criterion
+
+# Value 
+
+A floating scalar
+
+"""
+function criterionNet(B::AbstractArray{Float64,2}, 
+                   resid::AbstractArray{Float64,2}, 
+                   lambdaL1::Float64, lambdaL2::Float64, crit_denom::AbstractArray{Int64,1})
+    
+    return 0.5 * sum(abs2, resid)/crit_denom[1] + 
+             lambdaL1 * sum(abs2, B)/crit_denom[2] + 
+             0.5 * lambdaL2 * sum(abs2, B)/crit_denom[2]
+end
+
 
 """
     prox(b, gradient, b2sign, lambda, norm, stepsize)
