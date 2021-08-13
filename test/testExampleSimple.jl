@@ -1,6 +1,21 @@
-using MatrixLMnet2
+using MatrixLMnet
 using DataFrames
 using Random
+using LinearAlgebra
+include("../src/mlmnetNet.jl")
+include("../src/istaNet.jl")
+include("../src/mlmnet_helpers.jl")
+include("../src/std_helpers.jl")
+
+
+function calc_resid!(resid::AbstractArray{Float64, 2}, 
+                    X::AbstractArray{Float64, 2}, 
+                    Y::AbstractArray{Float64, 2}, 
+                    Z::AbstractArray{Float64, 2}, 
+                    B::AbstractArray{Float64, 2})
+
+    resid .= Y .- (X*B*transpose(Z))
+end
 
 # Dimensions of matrices 
 n = 100
@@ -33,6 +48,6 @@ dat = RawData(Response(Y), Predictors(X, Z));
 lambdasL1 = [10.0]
 lambdasL2 = [0.0]
 est1 = mlmnetNet(istaNet!, dat, lambdasL1, lambdasL2, isZIntercept = false, isXIntercept = false)
-
+est1.B[1, 1, :, :]
 
 

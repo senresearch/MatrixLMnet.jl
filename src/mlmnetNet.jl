@@ -128,7 +128,7 @@ function mlmnet_pathwiseNet(fun::Function, X::AbstractArray{Float64,2},
       for j = 1:length(lambdasL2)
         # Coordinate Descent
         if length(string(fun)) <= 7 || (string(fun)[(end-7):end] != "admmNet!") # Methods other than ADMM
-            fun(X, Y, Z, lambdasL1[i], lambdasl2[j], startB, regXidx, regZidx, reg, norms; 
+            fun(X, Y, Z, lambdasL1[i], lambdasL2[j], startB, regXidx, regZidx, reg, norms; 
                 isVerbose=isVerbose, stepsize=stepsize, funArgs...)
         # ADMM       
         else
@@ -339,7 +339,7 @@ function mlmnetNet(fun::Function, data::RawData,
         backtransform!(coeffs, meansX, meansZ, normsX, normsZ, get_Y(data), 
                        data.predictors.X, data.predictors.Z)
     elseif isStandardize == true # Otherwise
-        backtransform!(coeffs, isXIntercept, isZIntercept, meansX, meansZ, 
+        backtransform!(coeffs[1, 1, :, :], isXIntercept, isZIntercept, meansX, meansZ, 
                        normsX, normsZ)
     end
 

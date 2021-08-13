@@ -45,8 +45,8 @@ function update_istaNet!(B::AbstractArray{Float64,2},
         b2sign = sign(b2update) # L2 update sign
         
         # Update the current coefficient 
-        b = reg[i,j] ? prox(B[i,j], grad[i,j], b2sign, lambdaL1*stepsize, norms, 
-                            stepsize[1])/(1+lambdaL2*stepsize) : b2update
+        b = reg[i,j] ? prox(B[i,j], grad[i,j], b2sign, lambdaL1*stepsize[1], norms, 
+                            stepsize[1])/(1+lambdaL2*stepsize[1]) : b2update
         
         # Update coefficient estimate in the current copy
         if b != B[i,j] 
@@ -107,8 +107,8 @@ function update_istaNet!(B::AbstractArray{Float64,2},
         b2sign = sign(b2update) # L2 update signs
         
         # Update the current coefficient 
-        b = reg[i,j] ? prox(B[i,j], grad[i,j], b2sign, lambdaL1*stepsize, norms[i,j], 
-                            stepsize[1])/(1+lambdaL2*rho) : b2update
+        b = reg[i,j] ? prox(B[i,j], grad[i,j], b2sign, lambdaL1*stepsize[1], norms[i,j], 
+                            stepsize[1])/(1+lambdaL2*stepsize[1]) : b2update
         
         # Update coefficient estimate in the current copy    
         if b != B[i,j] 
@@ -202,7 +202,7 @@ function istaNet!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
         # Update the coefficient estimates
         update_istaNet!(B, resid, grad, X, Y, Z, norms, lambdaL1, lambdaL2, reg, stepsize) 
         # Calculate the criterion after updating
-        crit = criterion(B[regXidx, regZidx], resid, lambdaL1, lambdaL2, crit_denom) 
+        crit = criterionNet(B[regXidx, regZidx], resid, lambdaL1, lambdaL2, crit_denom) 
         
         iter += 1 # Increment the number of iterations
         # Warning message if coefficient estimates do not converge.
