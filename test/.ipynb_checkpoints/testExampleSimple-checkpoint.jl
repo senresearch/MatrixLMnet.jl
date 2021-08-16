@@ -1,4 +1,3 @@
-# using MatrixLM
 using MatrixLMnet
 using DataFrames
 using Random

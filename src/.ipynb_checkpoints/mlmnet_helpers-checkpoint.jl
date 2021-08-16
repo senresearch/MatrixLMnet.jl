@@ -70,7 +70,7 @@ function criterionNet(B::AbstractArray{Float64,2},
                    lambdaL1::Float64, lambdaL2::Float64, crit_denom::AbstractArray{Int64,1})
     
     return 0.5 * sum(abs2, resid)/crit_denom[1] + 
-             lambdaL1 * sum(abs, B)/crit_denom[2] + 
+             lambdaL1 * sum(abs2, B)/crit_denom[2] + 
              0.5 * lambdaL2 * sum(abs2, B)/crit_denom[2]
 end
 
