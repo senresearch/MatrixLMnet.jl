@@ -37,8 +37,13 @@ include("fista.jl")
 include("fista_bt.jl")
 include("admm.jl")
 
+# Elastic-net algorithms
+include("istaNet.jl")
+include("fistaNet.jl")
+
 # Top level functions that call L1 algorithms using warm starts
 include("mlmnet.jl")
+include("mlmnetNet.jl")
 # Predictions and residuals
 include("predict.jl")
 

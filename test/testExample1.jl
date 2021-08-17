@@ -1,8 +1,9 @@
 ###########
 # Library #
 ###########
+using MatrixLM
 using Distributions, Random, Statistics, LinearAlgebra, StatsBase
-using MatrixLMnet
+using MatrixLMnet2
 using DataFrames
 using Random
 using LinearAlgebra
@@ -11,21 +12,6 @@ using LinearAlgebra
 # External sources #
 ####################
 include("../src/sim_helpers.jl")
-include("../src/mlmnetNet.jl")
-include("../src/istaNet.jl")
-include("../src/fistaNet.jl")
-include("../src/mlmnet_helpers.jl")
-include("../src/std_helpers.jl")
-
-
-function calc_resid!(resid::AbstractArray{Float64, 2}, 
-    X::AbstractArray{Float64, 2}, 
-    Y::AbstractArray{Float64, 2}, 
-    Z::AbstractArray{Float64, 2}, 
-    B::AbstractArray{Float64, 2})
-
-resid .= Y .- (X*B*transpose(Z))
-end
 
 p = 8; # Number of predictors
 β1 = [3.5, 1.5, 0, 0, 2, 0, 0 ,0];
@@ -54,26 +40,28 @@ Z = 1.0*Matrix(I, 2, 2);
 dat = RawData(Response(Y), Predictors(X, Z));
 
 lambdasL1 = [10.0]
-lambdasL2 = [10.0]
-est1 = mlmnetNet(istaNet!, dat, lambdasL1, lambdasL2, isZIntercept = false, isXIntercept = false)
+lambdasL2 = [0.0]
+est1 = mlmnetNet(fistaNet!, dat, lambdasL1, lambdasL2, isZIntercept = false, isXIntercept = false)
 est_B_Net = est1.B[1, 1, :, :]
 
 ################################################################################
 
-# # Generate predictors
-# X = simulateCorrelatedData(matCor, n);
+# Generate predictors
+X = simulateCorrelatedData(matCor, n);
 
-# # Generate response
-# Random.seed!(705)
-# Y1 = X*β1 + σ*rand(Normal(0, 1), n);
-# Y2 = X*β2 + σ*rand(Normal(0, 1), n);
+# Generate response
+Random.seed!(705)
+Y1 = X*β1 + σ*rand(Normal(0, 1), n);
+Y2 = X*β2 + σ*rand(Normal(0, 1), n);
 
-# Y = hcat(Y1, Y2);
+Y = hcat(Y1, Y2);
 
-# Z = 1.0*Matrix(I, 2, 2);
+Z = 1.0*Matrix(I, 2, 2);
 
-# dat = RawData(Response(Y), Predictors(X, Z));
+dat = RawData(Response(Y), Predictors(X, Z));
 
-# est1 = mlmnet(ista!, dat, lambdasL1, isZIntercept = false, isXIntercept = false)
-# est_B_Lasso = est1.B[1, :, :]
+est2 = mlmnet(fista!, dat, lambdasL1, isZIntercept = false, isXIntercept = false)
+est_B_Lasso = est2.B[1, :, :]
+
+@test est_B_Net == est_B_Lasso
 
