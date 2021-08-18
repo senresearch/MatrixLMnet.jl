@@ -1,5 +1,5 @@
 """
-    prox1Net(v, lambda)
+    proxNet1(v, lambda)
 
 Proximal operator for the L1 norm updates in ADMM. 
 
@@ -15,13 +15,13 @@ Proximal operator for the L1 norm updates in ADMM.
 
 """
 
-function prox1Net(v::Float64, lambda::Float64)
+function proxNet1(v::Float64, lambda::Float64)
 
     return max(0.0, abs(v)-lambda) * sign(v)
 end
 
 """
-    prox2Net(v, rho, u, l)
+    proxNet2(v, rho, u, l)
 
 Proximal operator for the L2 norm updates in ADMM. 
 
@@ -38,7 +38,7 @@ Proximal operator for the L2 norm updates in ADMM.
 
 """
 
-function prox2Net(v::Float64, rho::Float64, 
+function proxNet2(v::Float64, rho::Float64, 
                u::Float64, l::Float64)
     
     return (u + rho*v) / (l + rho)
@@ -120,11 +120,11 @@ function update_admmNet!(B::AbstractArray{Float64,2},
     # Transform B0
     mul!(B0, transpose(Qx), B0*Qz) 
     # Perform L2 updates and transform B0 back
-    mul!(B0, Qx * prox2Net.(B0, rho[1], U, L), transpose(Qz))
+    mul!(B0, Qx * proxNet2.(B0, rho[1], U, L), transpose(Qz))
     
     # L1 updates
     B .= B0 .+ B2
-    B[regXidx,regZidx] .= prox1Net.(B[regXidx,regZidx], lambdaL1/rho[1])/(1+lambdaL2/rho[1])
+    B[regXidx,regZidx] .= proxNet1.(B[regXidx,regZidx], lambdaL1/rho[1])/(1+lambdaL2/rho[1])
 
     # Primal residuals 
     r .= B0 .- B
