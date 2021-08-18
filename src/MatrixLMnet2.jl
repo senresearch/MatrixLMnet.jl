@@ -19,8 +19,8 @@ using MLBase
 export Response, Predictors, RawData, get_X, get_Z, get_Y, contr, 
     add_intercept, remove_intercept, shuffle_rows, shuffle_cols,
     cd!, cd_active!, ista!, fista!, fista_bt!, admm!, 
-    istaNet!, fistaNet!,
-    Mlmnet, mlmnet, mlmnetNet, coef, coef_2d, predict, fitted, resid, 
+    istaNet!, fistaNet!, fistaNet_bt!, admmNet!,
+    Mlmnet, mlmnet, MlmnetNet, mlmnetNet, coef, coef_2d, predict, fitted, resid, 
     mlmnet_perms, 
     make_folds, make_folds_conds, Mlmnet_cv, mlmnet_cv, 
     avg_mse, lambda_min, avg_prop_zero, mlmnet_cv_summary
@@ -40,6 +40,8 @@ include("admm.jl")
 # Elastic-net algorithms
 include("istaNet.jl")
 include("fistaNet.jl")
+include("fistaNet_bt.jl")
+include("admmNet.jl")
 
 # Top level functions that call L1 algorithms using warm starts
 include("mlmnet.jl")

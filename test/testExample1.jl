@@ -7,6 +7,7 @@ using MatrixLMnet2
 using DataFrames
 using Random
 using LinearAlgebra
+using Test
 
 ####################
 # External sources #
@@ -39,10 +40,11 @@ Z = 1.0*Matrix(I, 2, 2);
 
 dat = RawData(Response(Y), Predictors(X, Z));
 
-lambdasL1 = [10.0]
+lambdasL1 = [10.0, 5.0, 3.0]
 lambdasL2 = [0.0]
+
 est1 = mlmnetNet(fistaNet!, dat, lambdasL1, lambdasL2, isZIntercept = false, isXIntercept = false)
-est_B_Net = est1.B[1, 1, :, :]
+est_B_Net = est1.B[3, 1, :, :]
 
 ################################################################################
 
@@ -61,7 +63,7 @@ Z = 1.0*Matrix(I, 2, 2);
 dat = RawData(Response(Y), Predictors(X, Z));
 
 est2 = mlmnet(fista!, dat, lambdasL1, isZIntercept = false, isXIntercept = false)
-est_B_Lasso = est2.B[1, :, :]
+est_B_Lasso = est2.B[3, :, :]
 
 @test est_B_Net == est_B_Lasso
 

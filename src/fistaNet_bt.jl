@@ -1,5 +1,5 @@
 """
-    update_fista2!(B, A, resid_B, grad, X, Y, Z, norms, lambdaL1, lambdaL2, reg, stepsize)
+    update_fistaNet2!(B, A, resid_B, grad, X, Y, Z, norms, lambdaL1, lambdaL2, reg, stepsize)
 
 Updates coefficient estimates in place for each FISTA iteration when `X` and 
 `Z` are both standardized, but without updating the extrapolated coefficients. 
@@ -28,7 +28,7 @@ Updates coefficient estimates in place for each FISTA iteration when `X` and
 None; updates coefficients in place
 
 """
-function update_fista2!(B::AbstractArray{Float64,2}, 
+function update_fistaNet2!(B::AbstractArray{Float64,2}, 
                         A::AbstractArray{Float64,2}, 
                         resid_B::AbstractArray{Float64,2}, 
                         grad::AbstractArray{Float64,2}, 
@@ -55,7 +55,7 @@ end
 
 
 """
-    update_fista2!(B, A, resid_B, grad, X, Y, Z, norms, lambda, reg, stepsize)
+    update_fistaNet2!(B, A, resid_B, grad, X, Y, Z, norms, lambda, reg, stepsize)
 
 Updates coefficient estimates in place for each FISTA iteration when `X` and 
 `Z` are not standardized, but without updating the extrapolated coefficients. 
@@ -84,7 +84,7 @@ Updates coefficient estimates in place for each FISTA iteration when `X` and
 None; updates coefficients in place
 
 """					
-function update_fista2!(B::AbstractArray{Float64,2}, 
+function update_fistaNet2!(B::AbstractArray{Float64,2}, 
                         A::AbstractArray{Float64,2}, 
                         resid_B::AbstractArray{Float64,2}, 
                         grad::AbstractArray{Float64,2}, 
@@ -192,7 +192,7 @@ function outer_update_fista_bt!(B::AbstractArray{Float64,2},
         # Update step size
         stepsize[:] .*= gamma 
         # Try to update coefficient estimates using current step size
-		    update_fista2!(B, A, resid_B, grad, X, Y, Z, norms, 
+		    update_fistaNet2!(B, A, resid_B, grad, X, Y, Z, norms, 
                        lambdaL1, lambdaL2, reg, stepsize)
     end 
 
@@ -200,7 +200,7 @@ function outer_update_fista_bt!(B::AbstractArray{Float64,2},
     # usual FISTA update
     if looped == false
         # Update coefficents
-        update_fista!(B, B_prev, A, resid, resid_B, grad, X, Y, Z, norms, 
+        update_fistaNet!(B, B_prev, A, resid, resid_B, grad, X, Y, Z, norms, 
                       lambdaL1, lambdaL2, reg, iter, stepsize)
     else 
         # Otherwise, update the extrapolated coefficients after exiting the 

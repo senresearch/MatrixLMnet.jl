@@ -146,7 +146,7 @@ function mlmnet_pathwiseNet(fun::Function, X::AbstractArray{Float64,2},
 end
 
 """
-    mlmnetNet(fun, data, lambdas; 
+    mlmnetNet(fun, data, lambdasL1, lambdasL2; 
            isXIntercept, isZIntercept, isXReg, isZReg, 
            isXInterceptReg, isZInterceptReg, isStandardize, isVerbose, 
            stepsize, setStepsize, funArgs...)

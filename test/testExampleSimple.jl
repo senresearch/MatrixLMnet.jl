@@ -33,11 +33,11 @@ Y = X*B*transpose(Z)+E
 # Construct a RawData object
 dat = RawData(Response(Y), Predictors(X, Z));
 
-lambdasL1 = [10.0]
+lambdasL1 = [10.0, 5.0]
 lambdasL2 = [0.0]
 
-est = mlmnetNet(fistaNet!, dat, lambdasL1, lambdasL2, isZIntercept = false, isXIntercept = false);
-est_Net = est.B[1, 1, :, :]
+est = mlmnetNet(admmNet!, dat, lambdasL1, lambdasL2, isZIntercept = false, isXIntercept = false);
+est_Net = est.B[2, 1, :, :]
 
 # Dimensions of matrices 
 n = 100
@@ -67,10 +67,10 @@ Y = X*B*transpose(Z)+E
 # Construct a RawData object
 dat = RawData(Response(Y), Predictors(X, Z));
 
-lambdasL1 = [10.0]
+lambdasL1 = [10.0, 5.0]
 lambdasL2 = [0.0]
 
-est_2 = mlmnet(fista!, dat, lambdasL1, isZIntercept = false, isXIntercept = false);
-est_Lasso = est_2.B[1, :, :]
+est_2 = mlmnet(admm!, dat, lambdasL1, isZIntercept = false, isXIntercept = false);
+est_Lasso = est_2.B[2, :, :]
 
 @test est_Lasso == est_Net
