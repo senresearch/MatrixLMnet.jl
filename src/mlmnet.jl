@@ -292,6 +292,7 @@ function mlmnet(fun::Function, data::RawData, lambdas::AbstractArray{Float64,1};
             # Standardizing X and Z results in complex eigenvalues
             # Hack is to add diagonal matrix where the diagonal is random 
             # normal noise
+            Random.seed!(705) # Fix random seed for stable results
             stepsize = 1/max(eigmax(XTX + diagm(0 => 
                                  1.0 .+ randn(data.p)/1000)) * 
                              eigmax(ZTZ + diagm(0 => 
