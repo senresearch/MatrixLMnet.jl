@@ -221,7 +221,8 @@ function mlmnetNet(fun::Function, data::RawData,
                 isZReg::BitArray{1}=trues(data.q),     
                 isXInterceptReg::Bool=false, isZInterceptReg::Bool=false, 
                 isStandardize::Bool=true, isVerbose::Bool=true, 
-                stepsize::Float64=0.01, setStepsize::Bool=true, funArgs...)
+                stepsize::Float64=0.01, setStepsize::Bool=true, 
+                alpha_lambda::Bool=false, funArgs...)
     
     # Ensure that isXReg and isZReg have same length as columns of X and Z
     if length(isXReg) != data.p
@@ -313,13 +314,13 @@ function mlmnetNet(fun::Function, data::RawData,
             # normal noise
             Random.seed!(705) # Fix random seed for stable results
             stepsize = 1/max(eigmax(XTX + diagm(0 => 
-                                 1.0 .+ randn(data.p)/1000)) * 
+                                 1.0 .+ ones(data.p)/1000)) * 
                              eigmax(ZTZ + diagm(0 => 
-                                 1.0 .+ randn(data.q)/1000)), 
+                                 1.0 .+ ones(data.q)/1000)), 
                              eigmin(XTX + diagm(0 => 
-                                 1.0 .+ randn(data.p)/1000)) * 
+                                 1.0 .+ ones(data.p)/1000)) * 
                              eigmin(ZTZ + diagm(0 => 
-                                 1.0 .+ randn(data.q)/1000)))
+                                 1.0 .+ ones(data.q)/1000)))
   	    else 
             stepsize = 1/max(eigmax(XTX) * eigmax(ZTZ),
                              eigmin(XTX) * eigmin(ZTZ))
