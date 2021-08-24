@@ -17,7 +17,7 @@ NaN, Inf, and -Inf.
 function valid_reduce2(A::Array{Float64,3}, fun::Function=mean)
     
     # Initialize array for storing output 
-    out = Array{Float64}(undef, size(A, 1))
+    out = Array{Float64, 2}(undef, size(A, 1), size(A, 2))
     # Iterate through rows of A and reduce across columns
     for i in 1:size(A, 1), j in 1:size(A, 2)
         # Note that the following line also drops NaNs, which are not numbers
