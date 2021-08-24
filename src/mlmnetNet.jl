@@ -216,6 +216,7 @@ be less consequential.
 """
 function mlmnetNet(fun::Function, data::RawData, 
                 lambdasL1::AbstractArray{Float64,1}, lambdasL2::AbstractArray{Float64, 1};
+                isNaive::Bool = false,
                 isXIntercept::Bool=true, isZIntercept::Bool=true, 
                 isXReg::BitArray{1}=trues(data.p), 
                 isZReg::BitArray{1}=trues(data.q),     
@@ -311,8 +312,10 @@ function mlmnetNet(fun::Function, data::RawData,
         if isStandardize==true
             # Standardizing X and Z results in complex eigenvalues
             # Hack is to add diagonal matrix where the diagonal is random 
-            # normal noise
-            Random.seed!(705) # Fix random seed for stable results
+            # normal noise (JWL)
+
+            # Hack is to use 
+
             stepsize = 1/max(eigmax(XTX + diagm(0 => 
                                  1.0 .+ ones(data.p)/1000)) * 
                              eigmax(ZTZ + diagm(0 => 
@@ -330,11 +333,18 @@ function mlmnetNet(fun::Function, data::RawData,
                         isVerbose) 
     end
 
-    # Run the specified L1-penalty method on the supplied inputs. 
+    # Run the specified Elastic-net penalty method on the supplied inputs. 
     coeffs = mlmnet_pathwiseNet(fun, X, get_Y(data), Z, lambdasL1, lambdasL2, regXidx, 
                              regZidx, reg, norms; isVerbose=isVerbose, 
                              stepsize=stepsize, funArgs...)
-  
+
+    # Perform the direct scaling transformation to undo shrinkage for Elastic-net solutions
+    if !isNaive
+      for i in 1:length(lambdasL1), j in 1:length(lambdasL2)
+        coeffs[i, j, :, :] *= (1+lambdasL2[j])
+      end
+    end
+
     # Back-transform coefficient estimates, if necessary. 
     # Case if including both X and Z intercepts. 
     if isStandardize == true && (isXIntercept==true) && (isZIntercept==true)
