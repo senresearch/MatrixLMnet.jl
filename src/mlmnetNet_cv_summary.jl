@@ -87,7 +87,7 @@ DataFrame summarizing average MSE and proportion of zero interactions across
 folds for each lambda. 
 	
 """
-function mlmnet_cv_summary(MLMNet_cv::MlmnetNet_cv)
+function mlmnetNet_cv_summary(MLMNet_cv::MlmnetNet_cv)
     
     # Calculate summary information across folds
     out_df = DataFrame(hcat(MLMNet_cv.lambdasL1, MLMNet_cv.lambdasL2, calc_avg_mse(MLMNet_cv), 
