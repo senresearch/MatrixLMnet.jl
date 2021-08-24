@@ -292,7 +292,7 @@ function mlmnet(fun::Function, data::RawData, lambdas::AbstractArray{Float64,1};
             # Standardizing X and Z results in complex eigenvalues
             
             # Hack is to add diagonal matrix where the diagonal is random 
-            # normal noise
+            # normal noise (JWL)
             # stepsize = 1/max(eigmax(XTX + diagm(0 => 
             #                      1.0 .+ rand(data.p)/1000)) * 
             #                  eigmax(ZTZ + diagm(0 => 
@@ -302,7 +302,7 @@ function mlmnet(fun::Function, data::RawData, lambdas::AbstractArray{Float64,1};
             #                  eigmin(ZTZ + diagm(0 => 
             #                      1.0 .+ rand(data.q)/1000)))
 
-            # Hack is to square the singular values to get the eigenvalues
+            # Hack is to square the singular values to get the eigenvalues (ZFY)
             eig_X = (svd(XTX).S).^2
             eig_Z = (svd(ZTZ).S).^2
 

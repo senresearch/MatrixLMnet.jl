@@ -345,8 +345,8 @@ function mlmnetNet(fun::Function, data::RawData,
       lambdas = copy(lambdasL1)
       alphas = copy(lambdasL2)
 
-      if any(alphas .> 1.0)
-        error("Alpha should not exceed 1.0!")
+      if any(alphas .> 1.0) | any(alphas .< 0)
+        error("Alpha should be between 0.0 and 1.0!")
       end
 
       lambdasL1 = Array{Float64, 1}(undef, length(lambdas)*length(alphas))

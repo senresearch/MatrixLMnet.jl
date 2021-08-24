@@ -44,7 +44,7 @@ function criterion(B::AbstractArray{Float64,2},
                    lambda::Float64, crit_denom::AbstractArray{Int64,1})
     
     return 0.5 * sum(abs2, resid)/crit_denom[1] + 
-             lambda * sum(abs, B)/crit_denom[2]
+             lambda * sum(abs2, B)/crit_denom[2]
 end
 
 """
