@@ -311,7 +311,7 @@ function mlmnetNet(fun::Function, data::RawData,
         # Step size is the reciprocal of the maximum eigenvalue of kron(Z, X)
         if isStandardize==true
             # Standardizing X and Z results in complex eigenvalues
-            
+
             # Hack is to add diagonal matrix where the diagonal is random 
             # normal noise (JWL)
             # stepsize = 1/max(eigmax(XTX + diagm(0 => 
@@ -338,6 +338,30 @@ function mlmnetNet(fun::Function, data::RawData,
                         isVerbose) 
     end
 
+    # If the user choose to use the penalty version of (lambdas, alphas), 
+    # reparametrize them to be in the form of lambdaL1 and lambdaL2
+    if alpha_lambda
+      # Store the inputs before to reparametrize
+      lambdas = copy(lambdasL1)
+      alphas = copy(lambdasL2)
+
+      if any(alphas .> 1.0)
+        error("Alpha should not exceed 1.0!")
+      end
+
+      lambdasL1 = Array{Float64, 1}(undef, length(lambdas)*length(alphas))
+      lambdasL2 = Array{Float64, 1}(undef, length(lambdas)*length(alphas))
+
+      index = 1
+
+      for lambda in lambdas, alpha in alphas
+        lambdasL1[index] = lambda*alpha
+        lambdasL2[index] = lambda*(1-alpha)
+        index += 1
+      end
+
+    end
+
     # Run the specified Elastic-net penalty method on the supplied inputs. 
     coeffs = mlmnet_pathwiseNet(fun, X, get_Y(data), Z, lambdasL1, lambdasL2, regXidx, 
                              regZidx, reg, norms; isVerbose=isVerbose, 
@@ -361,4 +385,4 @@ function mlmnetNet(fun::Function, data::RawData,
     end
 
     return MlmnetNet(coeffs, lambdasL1, lambdasL2, data)
-end
+  end
