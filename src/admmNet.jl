@@ -226,11 +226,12 @@ function admmNet!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
         mineig = minimum(L)
         maxeig = maximum(L)
         
+        gamma = lambdaL1/sqrt(1+lambdaL2)
         # Set the value of rho
-        if lambdaL1 < mineig
+        if gamma < mineig
             rho = mineig
-        elseif lambdaL1 > maxeig
-            rho = lambdaL1
+        elseif gamma > maxeig
+            rho = gamma
         else
             rho = maxeig
         end

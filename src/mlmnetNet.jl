@@ -1,5 +1,5 @@
 """
-    MlmnetNet(B, lambdas, data)
+    MlmnetNet(B, lambdasL1, lambdasL2, data)
 
 Type for storing the results of an mlmnet (Elastic net) model fit
 
@@ -11,7 +11,7 @@ mutable struct MlmnetNet
     B::Array{Float64, 4}
     # Lambda penalties
     lambdasL1::Array{Float64, 1} # L1 penalty
-    lambdasL2::Array{Float64, 1} # L1 penalty
+    lambdasL2::Array{Float64, 1} # L2 penalty
     
     # Response and predictor matrices
     data::RawData
@@ -216,12 +216,14 @@ be less consequential.
 """
 function mlmnetNet(fun::Function, data::RawData, 
                 lambdasL1::AbstractArray{Float64,1}, lambdasL2::AbstractArray{Float64, 1};
+                isNaive::Bool = false,
                 isXIntercept::Bool=true, isZIntercept::Bool=true, 
                 isXReg::BitArray{1}=trues(data.p), 
                 isZReg::BitArray{1}=trues(data.q),     
                 isXInterceptReg::Bool=false, isZInterceptReg::Bool=false, 
                 isStandardize::Bool=true, isVerbose::Bool=true, 
-                stepsize::Float64=0.01, setStepsize::Bool=true, funArgs...)
+                stepsize::Float64=0.01, setStepsize::Bool=true, 
+                alpha_lambda::Bool=false, funArgs...)
     
     # Ensure that isXReg and isZReg have same length as columns of X and Z
     if length(isXReg) != data.p
@@ -309,16 +311,24 @@ function mlmnetNet(fun::Function, data::RawData,
         # Step size is the reciprocal of the maximum eigenvalue of kron(Z, X)
         if isStandardize==true
             # Standardizing X and Z results in complex eigenvalues
+
             # Hack is to add diagonal matrix where the diagonal is random 
-            # normal noise
-            stepsize = 1/max(eigmax(XTX + diagm(0 => 
-                                 1.0 .+ randn(data.p)/1000)) * 
-                             eigmax(ZTZ + diagm(0 => 
-                                 1.0 .+ randn(data.q)/1000)), 
-                             eigmin(XTX + diagm(0 => 
-                                 1.0 .+ randn(data.p)/1000)) * 
-                             eigmin(ZTZ + diagm(0 => 
-                                 1.0 .+ randn(data.q)/1000)))
+            # normal noise (JWL)
+            # stepsize = 1/max(eigmax(XTX + diagm(0 => 
+            #                      1.0 .+ rand(data.p)/1000)) * 
+            #                  eigmax(ZTZ + diagm(0 => 
+            #                      1.0 .+ rand(data.q)/1000)), 
+            #                  eigmin(XTX + diagm(0 => 
+            #                      1.0 .+ rand(data.p)/1000)) * 
+            #                  eigmin(ZTZ + diagm(0 => 
+            #                      1.0 .+ rand(data.q)/1000)))
+
+            # Hack is to square the singular values to get the eigenvalues
+            eig_X = (svd(XTX).S).^2
+            eig_Z = (svd(ZTZ).S).^2
+
+            stepsize = 1/max(maximum(eig_X) * maximum(eig_Z), 
+                             minimum(eig_X) * minimum(eig_Z))
   	    else 
             stepsize = 1/max(eigmax(XTX) * eigmax(ZTZ),
                              eigmin(XTX) * eigmin(ZTZ))
@@ -328,11 +338,42 @@ function mlmnetNet(fun::Function, data::RawData,
                         isVerbose) 
     end
 
-    # Run the specified L1-penalty method on the supplied inputs. 
+    # If the user choose to use the penalty version of (lambdas, alphas), 
+    # reparametrize them to be in the form of lambdaL1 and lambdaL2
+    if alpha_lambda
+      # Store the inputs before to reparametrize
+      lambdas = copy(lambdasL1)
+      alphas = copy(lambdasL2)
+
+      if any(alphas .> 1.0)
+        error("Alpha should not exceed 1.0!")
+      end
+
+      lambdasL1 = Array{Float64, 1}(undef, length(lambdas)*length(alphas))
+      lambdasL2 = Array{Float64, 1}(undef, length(lambdas)*length(alphas))
+
+      index = 1
+
+      for lambda in lambdas, alpha in alphas
+        lambdasL1[index] = lambda*alpha
+        lambdasL2[index] = lambda*(1-alpha)
+        index += 1
+      end
+
+    end
+
+    # Run the specified Elastic-net penalty method on the supplied inputs. 
     coeffs = mlmnet_pathwiseNet(fun, X, get_Y(data), Z, lambdasL1, lambdasL2, regXidx, 
                              regZidx, reg, norms; isVerbose=isVerbose, 
                              stepsize=stepsize, funArgs...)
-  
+
+    # Perform the direct scaling transformation to undo shrinkage for Elastic-net solutions
+    if !isNaive
+      for i in 1:length(lambdasL1), j in 1:length(lambdasL2)
+        coeffs[i, j, :, :] *= (1+lambdasL2[j])
+      end
+    end
+
     # Back-transform coefficient estimates, if necessary. 
     # Case if including both X and Z intercepts. 
     if isStandardize == true && (isXIntercept==true) && (isZIntercept==true)
@@ -344,4 +385,4 @@ function mlmnetNet(fun::Function, data::RawData,
     end
 
     return MlmnetNet(coeffs, lambdasL1, lambdasL2, data)
-end
+  end

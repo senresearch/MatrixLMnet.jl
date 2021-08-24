@@ -106,6 +106,11 @@ function mlmnet_cv(fun::Function, data::RawData,
                    isStandardize::Bool=true, isVerbose::Bool=true, 
                    stepsize::Float64=0.01, setStepsize::Bool=true, 
                    dig::Int64=12, funArgs...)
+                   # tuningMode::String = "l1, l2"
+
+                   # if(tuningMode == "alpha, lambda")
+                   # lambdasL1 = lambdas.*alpha
+                   # lambdasL2 = lambdas.*(1.-alpha)
     
     # Number of folds
     nFolds = length(rowFolds)
@@ -129,7 +134,9 @@ function mlmnet_cv(fun::Function, data::RawData,
                                           data.predictors.isZIntercept))
     end
     
+
     # Run mlmnet on each RawData object, in parallel when possible
+
     MLMNets = Distributed.pmap(data -> mlmnet(fun, data, lambdas; 
                                               isXIntercept=isXIntercept, 
                                               isZIntercept=isZIntercept, 
