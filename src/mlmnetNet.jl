@@ -311,19 +311,24 @@ function mlmnetNet(fun::Function, data::RawData,
         # Step size is the reciprocal of the maximum eigenvalue of kron(Z, X)
         if isStandardize==true
             # Standardizing X and Z results in complex eigenvalues
+            
             # Hack is to add diagonal matrix where the diagonal is random 
             # normal noise (JWL)
+            # stepsize = 1/max(eigmax(XTX + diagm(0 => 
+            #                      1.0 .+ rand(data.p)/1000)) * 
+            #                  eigmax(ZTZ + diagm(0 => 
+            #                      1.0 .+ rand(data.q)/1000)), 
+            #                  eigmin(XTX + diagm(0 => 
+            #                      1.0 .+ rand(data.p)/1000)) * 
+            #                  eigmin(ZTZ + diagm(0 => 
+            #                      1.0 .+ rand(data.q)/1000)))
 
-            # Hack is to use 
+            # Hack is to square the singular values to get the eigenvalues
+            eig_X = (svd(XTX).S).^2
+            eig_Z = (svd(ZTZ).S).^2
 
-            stepsize = 1/max(eigmax(XTX + diagm(0 => 
-                                 1.0 .+ ones(data.p)/1000)) * 
-                             eigmax(ZTZ + diagm(0 => 
-                                 1.0 .+ ones(data.q)/1000)), 
-                             eigmin(XTX + diagm(0 => 
-                                 1.0 .+ ones(data.p)/1000)) * 
-                             eigmin(ZTZ + diagm(0 => 
-                                 1.0 .+ ones(data.q)/1000)))
+            stepsize = 1/max(max(eig_X) * max(eig_Z), 
+                             min(eig_X) * min(eig_Z))
   	    else 
             stepsize = 1/max(eigmax(XTX) * eigmax(ZTZ),
                              eigmin(XTX) * eigmin(ZTZ))
