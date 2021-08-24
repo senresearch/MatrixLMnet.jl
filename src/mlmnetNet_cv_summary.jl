@@ -134,7 +134,7 @@ function lambdaNet_min(MLMNet_cv::MlmnetNet_cv)
     min1StdErrIdy = argmin(abs.(mseMean[1:minIdx[1], 1:minIdy[1]].-mse1StdErr))[2]
     
     # Pull out summary information for these two lambdas
-    out = mlmnetNet_cv_summary(MLMNet_cv)[[minIdx,minIdy,min1StdErrIdx],:]
+    out = mlmnetNet_cv_summary(MLMNet_cv)[[minIdx,minIdy,min1StdErrIdx,min1StdErrIdy],:]
     # Add names first column
     insertcols!(out, 1, :Name => ["lambdaL1_min", "lambdaL2_min", "lambdaL1_min1se", "lambdaL2_min1se"])
     # Add indices as second column
