@@ -91,7 +91,7 @@ function mlmnetNet_cv_summary(MLMNet_cv::MlmnetNet_cv)
     
     # Calculate summary information across folds
     out_df = DataFrame(hcat(MLMNet_cv.lambdasL1, MLMNet_cv.lambdasL2, calc_avg_mse(MLMNet_cv), 
-                            calc_avg_prop_zeroNet(MLMNet_cv)))
+                            calc_avg_prop_zero(MLMNet_cv)))
     # Useful names
     rename!(out_df, map(Meta.parse, ["LambdaL1", "LambdaL2", "AvgMSE", "AvgPercentZero"]))
     
