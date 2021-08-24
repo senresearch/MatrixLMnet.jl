@@ -1,5 +1,5 @@
 """
-    MlmnetNet(B, lambdas, data)
+    MlmnetNet(B, lambdasL1, lambdasL2, data)
 
 Type for storing the results of an mlmnet (Elastic net) model fit
 
@@ -11,7 +11,7 @@ mutable struct MlmnetNet
     B::Array{Float64, 4}
     # Lambda penalties
     lambdasL1::Array{Float64, 1} # L1 penalty
-    lambdasL2::Array{Float64, 1} # L1 penalty
+    lambdasL2::Array{Float64, 1} # L2 penalty
     
     # Response and predictor matrices
     data::RawData
