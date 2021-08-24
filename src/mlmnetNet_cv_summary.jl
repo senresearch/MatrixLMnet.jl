@@ -123,7 +123,8 @@ function lambdaNet_min(MLMNet_cv::MlmnetNet_cv)
     mseStd = valid_reduce2(MLMNet_cv.mse, std)
     
     # Find index of minimum average test MSE
-    (minIdx, minIdy) = argmin(mseMean)
+    minIdx = argmin(mseMean)[1]
+    minIdy = argmin(mseMean)[2]
     
     # Compute standard error across folds for the minimum MSE
     mse1StdErr = mseMean[minIdx, minIdy] + mseStd[minIdx, minIdy]
