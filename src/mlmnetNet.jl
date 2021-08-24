@@ -327,8 +327,8 @@ function mlmnetNet(fun::Function, data::RawData,
             eig_X = (svd(XTX).S).^2
             eig_Z = (svd(ZTZ).S).^2
 
-            stepsize = 1/max(max(eig_X) * max(eig_Z), 
-                             min(eig_X) * min(eig_Z))
+            stepsize = 1/max(maximum(eig_X) * maximum(eig_Z), 
+                             minimum(eig_X) * minimum(eig_Z))
   	    else 
             stepsize = 1/max(eigmax(XTX) * eigmax(ZTZ),
                              eigmin(XTX) * eigmin(ZTZ))
