@@ -223,3 +223,120 @@ function calc_prop_zero(MLMNets::AbstractArray{Mlmnet,1},
 
     return propZero
 end
+############################# Elastic-net #############################
+"""
+    calc_mseNet(MLMNets, data, lambdas, rowFolds, colFolds)
+
+Calculates test MSE for each of the CV folds for each lambda. 
+
+# Arguments 
+
+- MLMNets = 1d array of MlmnetNet objects resulting from running cross validation
+- data = RawData object used to generate MLMNets
+- lambdasL1 = 1d array of floats consisting of lambda penalties used to 
+  generate MLMNets
+- lambdasL2 = 1d array of floats consisting of lambda penalties used to 
+  generate MLMNets
+- rowFolds = 1d array of arrays containing booleans for the row folds
+- colFolds = 1d array of arrays containing booleans for the column folds
+
+# Value
+
+2d array of floats with dimensions equal to the number of lambdas by the 
+number of folds. 
+
+"""
+function calc_mseNet(MLMNets::AbstractArray{MlmnetNet,1}, data::RawData, 
+                  lambdasL1::AbstractArray{Float64,1}, 
+                  lambdasL2::AbstractArray{Float64,1},
+                  rowFolds::Array{Array{Int64,1},1}, 
+                  colFolds::Array{Array{Int64,1},1})
+
+    # Number of folds
+    nFolds = length(MLMNets)
+
+    # For each fold, generate a RawData object corresponding to the holdout set
+    holdoutFolds = Array{RawData}(undef, nFolds)
+    for i in 1:nFolds
+        holdoutFolds[i] = 
+          RawData(Response(get_Y(data)[findnotin(rowFolds[i], 
+                                                 collect(1:data.n)), 
+                                       findnotin(colFolds[i], 
+                                                 collect(1:data.m))]), 
+                  Predictors(get_X(data)[findnotin(rowFolds[i], 
+                                                   collect(1:data.n)),:], 
+                             get_Z(data)[findnotin(colFolds[i], 
+                                                   collect(1:data.m)),:], 
+                             data.predictors.isXIntercept, 
+                             data.predictors.isZIntercept))
+    end
+  
+    # Initialize array to store test MSEs 
+    mse = Array{Float64}(undef, length(lambdasL1), length(lambdasL2), nFolds)
+    
+    # Iterate through all folds and lambdas to calculate test MSE
+    for j in 1:nFolds
+        # Residuals for all lambdasL1 and lambdasL2 at fold j
+        resids = resid(MLMNets[j], holdoutFolds[j]) 
+        for i in 1:length(lambdasL1), k in 1:length(lambdasL2)
+            # MSE for (lambdaL1 i, lambdaL2 k) and fold j   
+            mse[i,k,j] = mean(resids[i,k,:,:].^2) 
+        end
+    end
+
+    return mse
+end
+
+
+"""
+    calc_prop_zeroNet(MLMNets, lambdasL1, lambdasL2, dig)
+
+Calculates proportion of zero interaction coefficients for each of the CV 
+folds for each lambda. 
+
+# Arguments 
+
+- MLMNets = 1d array of Mlmnet objects resulting from running cross validation
+- lambdas = 1d array of floats consisting of lambda penalties used to 
+  generate MLMNets
+
+# Keyword arguments 
+
+- dig = integer; digits of precision for zero coefficients. Defaults to 12. 
+
+# Value
+
+2d array of floats with dimensions equal to the number of lambdas by the 
+number of folds. 
+
+"""
+function calc_prop_zeroNet(MLMNets::AbstractArray{MlmnetNet,1}, 
+                        lambdasL1::AbstractArray{Float64,1},
+                        lambdasL2::Abstractarray{Float64,1}; 
+                        dig::Int64=12)
+    
+    # Number of folds
+    nFolds = length(MLMNets)
+  
+    # Initialize array to store proportions of zero interactions 
+    propZero = Array{Float64}(undef, length(lambdasL1), length(lambdasL2), nFolds)
+
+    # Boolean arrays used to subset coefficients for interactions only
+    xIdx = trues(MLMNets[1].data.p)
+    xIdx[1] = MLMNets[1].data.predictors.isXIntercept==false
+    zIdx = trues(MLMNets[1].data.q)
+    zIdx[1] = MLMNets[1].data.predictors.isZIntercept==false 
+  
+    # Iterate through all folds and lambdas to calculate proportion of zero 
+    # interaction coefficients 
+    for j in 1:nFolds
+        for i in 1:length(lambdasL1), k in 1:length(lambdasL2)
+            # Proportion of zero interaction coefficients for lambda i and 
+            # fold j  
+            propZero[i,k,j] = mean(round.(coef(MLMNets[j])[i,k,xIdx,zIdx], 
+                                        digits=dig) .== 0) 
+        end
+    end
+
+    return propZero
+end
