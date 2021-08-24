@@ -312,7 +312,7 @@ number of folds.
 """
 function calc_prop_zeroNet(MLMNets::AbstractArray{MlmnetNet,1}, 
                         lambdasL1::AbstractArray{Float64,1},
-                        lambdasL2::Abstractarray{Float64,1}; 
+                        lambdasL2::AbstractArray{Float64,1}; 
                         dig::Int64=12)
     
     # Number of folds
