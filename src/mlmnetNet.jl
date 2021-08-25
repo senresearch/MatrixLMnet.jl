@@ -340,7 +340,7 @@ function mlmnetNet(fun::Function, data::RawData,
 
     # If the user choose to use the penalty version of (lambdas, alphas), 
     # reparametrize them to be in the form of lambdaL1 and lambdaL2
-    if alpha_lambda
+    if alpha_lambda == true
       # Store the inputs before to reparametrize
       lambdas = copy(lambdasL1)
       alphas = copy(lambdasL2)
@@ -382,6 +382,17 @@ function mlmnetNet(fun::Function, data::RawData,
     elseif isStandardize == true # Otherwise
         backtransformNet!(coeffs, isXIntercept, isZIntercept, meansX, meansZ, 
                        normsX, normsZ)
+    end
+
+    if alpha_lambda == true
+      lambdas = Array{Float64, 1}(undef, length(lambdasL1))
+      alphas = Array{Float64, 1}(undef, length(lambdasL2))
+
+      lambdas = lambdasL1 .+ lambdasL2
+      alphas = lambdasL1 ./ lambdas
+
+      lambdasL1 = lambdas
+      lambdasL2 = alphas
     end
 
     return MlmnetNet(coeffs, lambdasL1, lambdasL2, data)
