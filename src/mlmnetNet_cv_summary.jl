@@ -11,7 +11,7 @@ NaN, Inf, and -Inf.
 
 # Value
 
-1d array of floats
+2d array of floats
     
 """
 function valid_reduce2(A::Array{Float64,3}, fun::Function=mean)
@@ -38,12 +38,13 @@ Calculates average test MSE across folds.
 
 # Value
 
-1d array of floats
+2d array of floats
 	
 """
 function calc_avg_mse(MLMNet_cv::MlmnetNet_cv) 
     
-    return valid_reduce2(MLMNet_cv.mse, mean)[:,:,1]
+    # return valid_reduce2(MLMNet_cv.mse, mean)[:, :, 1]
+    return valid_reduce2(MLMNet_cv.mse, mean)
 end
 
 
@@ -63,7 +64,8 @@ Calculates average proportion of zero interaction coefficients across folds.
 """
 function calc_avg_prop_zero(MLMNet_cv::MlmnetNet_cv)
     
-    return valid_reduce2(MLMNet_cv.propZero, mean)[:,:,1]
+    # return valid_reduce2(MLMNet_cv.propZero, mean)[:,:,1]
+    return valid_reduce2(MLMNet_cv.propZero, mean)
 end
 
 
@@ -90,10 +92,35 @@ folds for each lambda.
 function mlmnetNet_cv_summary(MLMNet_cv::MlmnetNet_cv)
     
     # Calculate summary information across folds
-    out_df = DataFrame(hcat(MLMNet_cv.lambdasL1, MLMNet_cv.lambdasL2, calc_avg_mse(MLMNet_cv), 
-                            calc_avg_prop_zero(MLMNet_cv)))
+
+    # First column
+    l1s = MLMNet_cv.lambdasL1
+    l2s = MLMNet_cv.lambdasL2
+
+    ls = Array{Tuple, 1}(undef, length(l1s)*length(l2s))
+    id = 1
+    for l1 in l1s
+        for l2 in l2s
+            ls[id] = Tuple([l1, l2])
+            id += 1
+        end
+    end
+
+    # Second column
+    # a 2-d matrix of average MSEs w.r.p.t each (l1, l2)
+    avg_mse = calc_avg_mse(MLMNet_cv) 
+    avg_mse = collect(avg_mse'[:]) # vectorize...
+
+    # Third column
+    # a 2-d matrix of average zero proportions w.r.p.t each (l1, l2)
+    avg_prop_zero = calc_avg_prop_zero(MLMNet_cv)
+    avg_prop_zero = collect(avg_prop_zero'[:]) # vectorize...
+
+
+
+    out_df = DataFrame(hcat(ls, avg_mse, avg_prop_zero))
     # Useful names
-    # rename!(out_df, map(Meta.parse, ["LambdaL1", "LambdaL2", "AvgMSE", "AvgPercentZero"]))
+    # rename!(out_df, map(Meta.parse, ["(LambdaL1, LambdaL2)", "AvgMSE", "AvgPercentZero"]))
     
     return out_df
 end
@@ -117,6 +144,8 @@ error greater.
     
 """
 function lambdaNet_min(MLMNet_cv::MlmnetNet_cv)
+    # Calculate average proportion of zeros
+    prop_zeroMean = calc_avg_prop_zero(MLMNet_cv)
     
     # Calculate average test MSE across folds.
     mseMean = calc_avg_mse(MLMNet_cv)
@@ -134,10 +163,20 @@ function lambdaNet_min(MLMNet_cv::MlmnetNet_cv)
     min1StdErrIdy = argmin(abs.(mseMean[1:minIdx[1], 1:minIdy[1]].-mse1StdErr))[2]
     
     # Pull out summary information for these two lambdas
-    out = mlmnetNet_cv_summary(MLMNet_cv)[[minIdx,minIdy,min1StdErrIdx,min1StdErrIdy],:]
+    out = hcat(MLMNet_cv.lambdasL1[minIdx], MLMNet_cv.lambdasL2[minIdy], 
+               mseMean[minIdx, minIdy], prop_zeroMean[minIdx, minIdy])
+    out2 = hcat(MLMNet_cv.lambdasL1[min1StdErrIdx], MLMNet_cv.lambdasL2[min1StdErrIdy], 
+                mseMean[min1StdErrIdx, min1StdErrIdy], 
+                prop_zeroMean[min1StdErrIdx, min1StdErrIdy])
+    out = DataFrame(vcat(out, out2))
+
+    colnames = ["lambda1", "lambda2", "AvgMSE", "AvgPercentZero"];
+    rename!(out, Symbol.(colnames))
+
     # Add names first column
-    insertcols!(out, 1, :Name => ["lambdaL1_min", "lambdaL2_min", "lambdaL1_min1se", "lambdaL2_min1se"])
+    insertcols!(out, 1, :Name => ["(L1, L2)_min", "(L1, L2)_min1se"])
     # Add indices as second column
-    insertcols!(out, 2, :Index => [minIdx, minIdy, min1StdErrIdx, min1StdErrIdy])
+    insertcols!(out, 2, :Index => [Tuple([minIdx, minIdy]), Tuple([min1StdErrIdx, min1StdErrIdy])])
+    
     return out
 end
