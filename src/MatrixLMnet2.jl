@@ -22,8 +22,8 @@ export Response, Predictors, RawData, get_X, get_Z, get_Y, contr,
     istaNet!, fistaNet!, fistaNet_bt!, admmNet!,
     Mlmnet, mlmnet, MlmnetNet, mlmnetNet, coef, coef_2d, predict, fitted, resid, 
     mlmnet_perms, 
-    make_folds, make_folds_conds, Mlmnet_cv, mlmnet_cv, 
-    avg_mse, lambda_min, avg_prop_zero, mlmnet_cv_summary
+    make_folds, make_folds_conds, Mlmnet_cv, mlmnet_cv, MlmnetNet_cv, mlmnetNet_cv,
+    avg_mse, lambda_min, lambdaNet_min, avg_prop_zero, mlmnet_cv_summary, mlmnetNet_cv_summary
 
 
 # Helper functions
@@ -56,6 +56,10 @@ include("mlmnet_perms.jl")
 include("mlmnet_cv_helpers.jl")
 include("mlmnet_cv.jl")
 include("mlmnet_cv_summary.jl")
+
+# Cross-validation for Elastic-net
+include("mlmnetNet_cv.jl")
+include("mlmnetNet_cv_summary.jl")
 
 
 end
