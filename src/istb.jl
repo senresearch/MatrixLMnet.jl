@@ -44,7 +44,7 @@ function update_ista_mat!(B::AbstractArray{Float64,2},
     b = prox_mat(b2update, b2sign, lambda, norms, stepsize[1])
 
     # Regularized only slected coefficient
-    B = b.*reg
+    B = b.*reg + .!reg.*B
 
     # Update residuals
     calc_resid!(resid, X, Y, Z, B) 
@@ -99,7 +99,7 @@ function update_ista_mat!(B::AbstractArray{Float64,2},
      b = prox_mat(b2update, b2sign, lambda, norms, stepsize[1])
  
      # Regularized only slected coefficient
-     B = b.*reg
+     B = b.*reg + .!reg.*B
  
      # Update residuals
      calc_resid!(resid, X, Y, Z, B) 
