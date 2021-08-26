@@ -101,6 +101,13 @@ function prox(b::Float64, gradient::Float64, b2sign::Float64,
     return max(0.0, b2sign*b - stepsize * (b2sign*gradient + lambda)) * b2sign
 end
 
+# New
+function prox_mat(b::AbstractArray{Float64,2}, b2sign::AbstractArray{Float64,2}, lambda::Float64, 
+                  norm::Nothing, stepsize::Float64)
+    
+    return max.(0.0, abs.(b) .- stepsize*lambda) .* b2sign
+end
+
 
 """
     prox(b, gradient, b2sign, lambda, norm)
@@ -125,6 +132,13 @@ function prox(b::Float64, gradient::Float64, b2sign::Float64,
               lambda::Float64, norm::Nothing)
     
     return max(0.0, b2sign*b - (b2sign*gradient + lambda)) * b2sign
+end
+
+# New
+function prox_mat(b::AbstractArray{Float64,2}, b2sign::AbstractArray{Float64,2}, lambda::Float64, 
+    norm::Nothing)
+
+return max.(0.0, abs.(b) .- lambda) .* b2sign
 end
 
 
@@ -154,6 +168,13 @@ function prox(b::Float64, gradient::Float64, b2sign::Float64,
              b2sign
 end
 
+# New
+function prox_mat(b::AbstractArray{Float64,2}, b2sign::AbstractArray{Float64,2}, 
+                  lambda::Float64, norm::AbstractArray{Float64,2}, stepsize::Float64)
+
+return max.(0.0, abs.(b) .- stepsize*lambda./norm) .* b2sign
+end
+
 
 """
     prox(b, gradient, b2sign, lambda, norm)
@@ -177,6 +198,13 @@ function prox(b::Float64, gradient::Float64, b2sign::Float64,
               lambda::Float64, norm::Float64)
     
     return max(0.0, b2sign*b - (b2sign*gradient + lambda)/norm) * b2sign
+end
+
+# New
+function prox_mat(b::AbstractArray{Float64,2}, b2sign::AbstractArray{Float64,2}, lambda::Float64, 
+    norm::AbstractArray{Float64,2})
+
+return max.(0.0, abs.(b) .- lambda./norm) .* b2sign
 end
 
 

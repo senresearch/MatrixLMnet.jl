@@ -19,7 +19,7 @@ using MLBase
 export Response, Predictors, RawData, get_X, get_Z, get_Y, contr, 
     add_intercept, remove_intercept, shuffle_rows, shuffle_cols,
     cd!, cd_active!, ista!, fista!, fista_bt!, admm!, 
-    istaNet!, fistaNet!, fistaNet_bt!, admmNet!,
+    istaNet!, fistaNet!, fistaNet_bt!, admmNet!, istb!,
     Mlmnet, mlmnet, MlmnetNet, mlmnetNet, coef, coef_2d, predict, fitted, resid, 
     mlmnet_perms, 
     make_folds, make_folds_conds, Mlmnet_cv, mlmnet_cv, MlmnetNet_cv, mlmnetNet_cv,
@@ -33,6 +33,7 @@ include("mlmnet_helpers.jl")
 # L1 algorithms
 include("cd.jl")
 include("ista.jl")
+include("istb.jl")
 include("fista.jl")
 include("fista_bt.jl")
 include("admm.jl")
