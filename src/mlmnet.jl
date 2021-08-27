@@ -72,10 +72,10 @@ function mlmnet_pathwise(fun::Function, X::AbstractArray{Float64,2},
     if length(lambdas) != length(unique(lambdas))
         println_verbose("Dropping non-unique lambdas", isVerbose)
     end
-    if any(lambdas .!= sort(lambdas, rev=true))
-        println_verbose("Sorting lambdas into descending order.", isVerbose)
-        lambdas = sort(lambdas, rev=true)
-    end 
+    # if any(lambdas .!= sort(lambdas, rev=true))
+    #     println_verbose("Sorting lambdas into descending order.", isVerbose)
+    #     lambdas = sort(lambdas, rev=true)
+    # end 
 
     # Pre-allocate array for coefficients
     coeffs = Array{Float64}(undef, length(lambdas), size(X,2), size(Z,2)) 
@@ -94,8 +94,8 @@ function mlmnet_pathwise(fun::Function, X::AbstractArray{Float64,2},
         # Eigenfactorization of Z
         ZTZ = transpose(Z)*Z
         eigZ = eigen(ZTZ)
-		Qz = eigZ.vectors
-		Lz = eigZ.values
+		    Qz = eigZ.vectors
+		    Lz = eigZ.values
     
         # Transformed Y
         X1 = X*Qx
@@ -332,7 +332,7 @@ function mlmnet(fun::Function, data::RawData, lambdas::AbstractArray{Float64,1};
                        normsX, normsZ)
     end
 
-    lambdas = sort(lambdas, rev=true)
+    # lambdas = sort(lambdas, rev=true)
     
     return Mlmnet(coeffs, lambdas, data)
 end
