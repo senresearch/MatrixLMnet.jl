@@ -280,7 +280,7 @@ function mlmnet(fun::Function, data::RawData, lambdas::AbstractArray{Float64,1};
 
     # If chosen method is ista!/fista! with fixed step size and setStepsize is 
     # true, compute the step size. 
-    if length(string(fun)) > 4 && (string(fun)[(end-4):end] == "ista!") && 
+    if length(string(fun)) > 4 && ((string(fun)[(end-4):end] == "ista!")||(string(fun)[(end-4):end] == "istb!")) && 
        setStepsize == true
         # Calculate and store transpose(X)*X
         XTX = transpose(X)*X
