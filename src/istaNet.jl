@@ -46,7 +46,7 @@ function update_istaNet!(B::AbstractArray{Float64,2},
         
         # Update the current coefficient 
         b = reg[i,j] ? prox(B[i,j], grad[i,j], b2sign, lambdaL1, norms, 
-                            stepsize[1])/(1+lambdaL2*stepsize[1]) : b2update
+                            stepsize[1])/(1+2*lambdaL2*stepsize[1]) : b2update
         
         # Update coefficient estimate in the current copy
         if b != B[i,j] 
@@ -108,7 +108,7 @@ function update_istaNet!(B::AbstractArray{Float64,2},
         
         # Update the current coefficient 
         b = reg[i,j] ? prox(B[i,j], grad[i,j], b2sign, lambdaL1, norms[i,j], 
-                            stepsize[1])/(1+lambdaL2*stepsize[1]) : b2update
+                            stepsize[1])/(1+2*lambdaL2*stepsize[1]) : b2update
         
         # Update coefficient estimate in the current copy    
         if b != B[i,j] 
