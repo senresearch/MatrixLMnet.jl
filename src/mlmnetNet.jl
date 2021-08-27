@@ -81,15 +81,16 @@ function mlmnet_pathwiseNet(fun::Function, X::AbstractArray{Float64,2},
       println_verbose("Dropping non-unique lambdasL2", isVerbose)
     end
 
-    if any(lambdasL1 .!= sort(lambdasL1, rev=true))
-        println_verbose("Sorting l1 lambdas into descending order.", isVerbose)
-        lambdasL1 = sort(lambdasL1, rev=true)
-    end 
+    #### Important!!! Need to be tested if the solutions returned are in the order as the lambdas
+    # if any(lambdasL1 .!= sort(lambdasL1, rev=true))
+    #     println_verbose("Sorting l1 lambdas into descending order.", isVerbose)
+    #     lambdasL1 = sort(lambdasL1, rev=true)
+    # end 
 
-    if any(lambdasL2 .!= sort(lambdasL2, rev=true))
-        println_verbose("Sorting l2 lambdas into descending order.", isVerbose)
-        lambdasL2 = sort(lambdasL2, rev=true)
-    end
+    # if any(lambdasL2 .!= sort(lambdasL2, rev=true))
+    #     println_verbose("Sorting l2 lambdas into descending order.", isVerbose)
+    #     lambdasL2 = sort(lambdasL2, rev=true)
+    # end
 
 
     # Pre-allocate array for coefficients
@@ -223,7 +224,7 @@ function mlmnetNet(fun::Function, data::RawData,
                 isXInterceptReg::Bool=false, isZInterceptReg::Bool=false, 
                 isStandardize::Bool=true, isVerbose::Bool=true, 
                 stepsize::Float64=0.01, setStepsize::Bool=true, 
-                alpha_lambda::Bool=false, funArgs...)
+                isAlphaVer::Bool=false, funArgs...)
     
     # Ensure that isXReg and isZReg have same length as columns of X and Z
     if length(isXReg) != data.p
@@ -340,7 +341,7 @@ function mlmnetNet(fun::Function, data::RawData,
 
     # If the user choose to use the penalty version of (lambdas, alphas), 
     # reparametrize them to be in the form of lambdaL1 and lambdaL2
-    if alpha_lambda == true
+    if isAlphaVer == true
       # Store the inputs before to reparametrize
       lambdas = copy(lambdasL1)
       alphas = copy(lambdasL2)
@@ -354,10 +355,12 @@ function mlmnetNet(fun::Function, data::RawData,
 
       index = 1
 
-      for lambda in lambdas, alpha in alphas
-        lambdasL1[index] = lambda*alpha
-        lambdasL2[index] = lambda*(1-alpha)
-        index += 1
+      for lambda in lambdas
+        for alpha in alphas
+          lambdasL1[index] = lambda*alpha
+          lambdasL2[index] = lambda*(1-alpha)
+          index += 1
+        end
       end
 
     end
@@ -384,7 +387,10 @@ function mlmnetNet(fun::Function, data::RawData,
                        normsX, normsZ)
     end
 
-    if alpha_lambda == true
+    # lambdasL1 = sort(lambdasL1, rev=true)
+    # lambdasL2 = sort(lambdasL2, rev=true)
+
+    if isAlphaVer == true
       lambdas = Array{Float64, 1}(undef, length(lambdasL1))
       alphas = Array{Float64, 1}(undef, length(lambdasL2))
 
@@ -394,6 +400,7 @@ function mlmnetNet(fun::Function, data::RawData,
       lambdasL1 = lambdas
       lambdasL2 = alphas
     end
+
 
     return MlmnetNet(coeffs, lambdasL1, lambdasL2, data)
   end

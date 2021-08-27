@@ -65,7 +65,7 @@ function update_fistaNet!(B::AbstractArray{Float64,2},
         # Apply shrinkage to regularized coefficients
         if reg[i,j] 
             B[i,j] = prox(A[i,j], grad[i,j], sign(B[i,j]), lambdaL1, norms, 
-                          stepsize[1])/(1+lambdaL2*stepsize[1])
+                          stepsize[1])/(1+2*lambdaL2*stepsize[1])
         end
         
         # Update extrapolated coefficient
@@ -146,7 +146,7 @@ function update_fistaNet!(B::AbstractArray{Float64,2},
         # Apply shrinkage to regularized coefficients
         if reg[i,j] 
             B[i,j] = prox(A[i,j], grad[i,j], sign(B[i,j]), lambdaL1, norms[i,j], 
-                          stepsize[1])/(1+lambdaL2*stepsize[1])
+                          stepsize[1])/(1+2*lambdaL2*stepsize[1])
         end
         
         # Update extrapolated coefficient
