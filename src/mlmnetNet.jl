@@ -384,6 +384,9 @@ function mlmnetNet(fun::Function, data::RawData,
                        normsX, normsZ)
     end
 
+    lambdasL1 = sort(lambdasL1, rev=true)
+    lambdasL2 = sort(lambdasL2, rev=true)
+
     if alpha_lambda == true
       lambdas = Array{Float64, 1}(undef, length(lambdasL1))
       alphas = Array{Float64, 1}(undef, length(lambdasL2))
@@ -394,6 +397,7 @@ function mlmnetNet(fun::Function, data::RawData,
       lambdasL1 = lambdas
       lambdasL2 = alphas
     end
+
 
     return MlmnetNet(coeffs, lambdasL1, lambdasL2, data)
   end

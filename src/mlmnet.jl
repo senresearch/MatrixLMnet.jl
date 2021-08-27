@@ -332,5 +332,7 @@ function mlmnet(fun::Function, data::RawData, lambdas::AbstractArray{Float64,1};
                        normsX, normsZ)
     end
 
+    lambdas = sort(lambdas, rev=true)
+    
     return Mlmnet(coeffs, lambdas, data)
 end
