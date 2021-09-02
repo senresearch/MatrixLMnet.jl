@@ -9,6 +9,8 @@ mutable struct MlmnetNet_cv
     # Mlmnet objects
     MLMNets::Array{MlmnetNet, 1} 
     # Lambda penalties
+    lambdas::Array{Float64, 1}
+    alpha::Float64
     lambdasL1::Array{Float64,1}
     lambdasL2::Array{Float64,1}  
     

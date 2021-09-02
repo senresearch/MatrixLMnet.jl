@@ -9,7 +9,10 @@ mutable struct MlmnetNet
 
     # Coefficient estimates
     B::Array{Float64, 4}
+
     # Lambda penalties
+    lambdas # Total penalty
+    alpha::Float64 # A fixed penalty ratio
     lambdasL1::Array{Float64, 1} # L1 penalty
     lambdasL2::Array{Float64, 1} # L2 penalty
     
@@ -26,16 +29,15 @@ using ``warm starts''.
 
 # Arguments
 
-- fun = function that applies an L1-penalty estimate method
+- fun = function that applies the Elastic-net pentalty estimate method
 - X = 2d array of floats consisting of the row covariates, with all 
   categorical variables coded in appropriate contrasts
 - Y = 2d array of floats consisting of the multivariate response
 - Z = 2d array of floats consisting of the column covariates, with all 
   categorical variables coded in appropriate contrasts
-- lambdasL1 = 1d array of floats consisting of l1 penalties in descending 
+- lambdas = 1d array of floats consisting of the total penalties in descending 
   order. If they are not in descending order, they will be sorted.
-- lambdasL2 = 1d array of floats consisting of l2 penalties in descending 
-  order. If they are not in descending order, they will be sorted. 
+- alpha = a float variable, the penalty ratio
 - regXidx = 1d array of indices corresponding to regularized X covariates
 - regZidx = 1d array of indices corresponding to regularized Z covariates
 - reg = 2d array of bits, indicating whether or not to regularize each of the 
@@ -52,46 +54,41 @@ using ``warm starts''.
 
 # Value
 
-A 3d array consisting of the coefficient estimates, with the different 
-lambdas along the first dimension
+A 4d array consisting of the coefficient estimates, with the different 
+lambdasL1 and lambdasL2 along the first and second dimensions respectively
 
 # Some notes
 
 Assumes that all necessary standardizations have been performed on X, Y, and 
-Z, including adding on intercepts. To be called by `mlmnet`, which performs 
+Z, including adding on intercepts. To be called by `mlmnetNet`, which performs 
 standardization and backtransforming. 
 
 """
 function mlmnet_pathwiseNet(fun::Function, X::AbstractArray{Float64,2}, 
                          Y::AbstractArray{Float64,2}, 
                          Z::AbstractArray{Float64,2}, 
-                         lambdasL1::AbstractArray{Float64,1},
-                         lambdasL2::AbstractArray{Float64,1},  
+                         lambdas::AbstractArray{Float64,1},
+                         alpha::Float64,  
                          regXidx::AbstractArray{Int64,1}, 
                          regZidx::AbstractArray{Int64,1}, 
                          reg::BitArray{2}, norms; isVerbose::Bool=true, 
                          stepsize::Float64=0.01, funArgs...)
 
     # Check that the lambdas are unique and in descending order. 
-    if length(lambdasL1) != length(unique(lambdasL1))
-        println_verbose("Dropping non-unique lambdasL1", isVerbose)
+    if length(lambdas) != length(unique(lambdas))
+        println_verbose("Dropping non-unique lambdas", isVerbose)
     end
 
-    if length(lambdasL2) != length(unique(lambdasL2))
-      println_verbose("Dropping non-unique lambdasL2", isVerbose)
-    end
+    # Pre-sort the lambdas in descending order in order to apply warm-starts
+    if any(lambdas .!= sort(lambdas, rev=true))
+        println_verbose("Sorting total penalty lambdas into descending order.", isVerbose)
+        lambdas = sort(lambdas, rev=true)
+    end 
 
-    #### Important!!! Need to be tested if the solutions returned are in the order as the lambdas
-    # if any(lambdasL1 .!= sort(lambdasL1, rev=true))
-    #     println_verbose("Sorting l1 lambdas into descending order.", isVerbose)
-    #     lambdasL1 = sort(lambdasL1, rev=true)
-    # end 
-
-    # if any(lambdasL2 .!= sort(lambdasL2, rev=true))
-    #     println_verbose("Sorting l2 lambdas into descending order.", isVerbose)
-    #     lambdasL2 = sort(lambdasL2, rev=true)
-    # end
-
+    # Pre-allocate arrays for L1 and L2 penalties converted from the 
+    # corresponding (lambda, alpha)
+    lambdasL1 = lambdas .* alpha
+    lambdasL2 = lambdas .* (1-alpha)
 
     # Pre-allocate array for coefficients
     coeffs = Array{Float64}(undef, length(lambdasL1), length(lambdasL2), size(X,2), size(Z,2)) 
@@ -122,15 +119,18 @@ function mlmnet_pathwiseNet(fun::Function, X::AbstractArray{Float64,2},
         L = kron(Lx, transpose(Lz))
     end
 
-    # Iterate through the path of lambdas
+    # Iterate through the paths of lambdasL1, lambdasL2
     for i = 1:length(lambdasL1) 
-        # Get L1-penalty estimates by updating the coefficients from previous 
-        # iteration in place
       for j = 1:length(lambdasL2)
-        # Coordinate Descent
-        if length(string(fun)) <= 7 || (string(fun)[(end-7):end] != "admmNet!") # Methods other than ADMM
+
+        # Get Elastic-net penalty estimates by updating the coefficients from previous 
+        # iteration in place
+
+        # ISTA, FISTA and FISTA with Backtracking (CD not supported for Elastic-net yet)
+        if length(string(fun)) <= 7 || (string(fun)[(end-7):end] != "admmNet!") 
             fun(X, Y, Z, lambdasL1[i], lambdasL2[j], startB, regXidx, regZidx, reg, norms; 
                 isVerbose=isVerbose, stepsize=stepsize, funArgs...)
+
         # ADMM       
         else
             fun(X, Y, Z, lambdasL1[i], lambdasL2[j], startB, regXidx, regZidx, reg, norms, 
@@ -147,27 +147,28 @@ function mlmnet_pathwiseNet(fun::Function, X::AbstractArray{Float64,2},
 end
 
 """
-    mlmnetNet(fun, data, lambdasL1, lambdasL2; 
+    mlmnetNet(fun, data, lambdas, alpha; 
            isXIntercept, isZIntercept, isXReg, isZReg, 
            isXInterceptReg, isZInterceptReg, isStandardize, isVerbose, 
            stepsize, setStepsize, funArgs...)
 
 Standardizes X and Z predictor matrices, calculates fixed step size, performs 
-the supplied method on a descending list of lambdas (each for L1 and L2) using ``warm starts'', 
+the supplied method on two descending lists of lambdas (each for L1 and L2) using ``warm starts'', 
 and backtransforms resulting coefficients, as is deemed necessary by the user 
 inputs.
 
 # Arguments
 
-- fun = function that applies an Elastic-net penalty estimate method
+- fun = function that applies the Elastic-net penalty estimate method
 - data = RawData object
-- lambdasL1 = 1d array of floats consisting of l1 penalties in descending 
-order. If they are not in descending order, they will be sorted. 
-- lambdasL2 = 1d array of floats consisting of l2 penalties in descending 
-order. If they are not in descending order, they will be sorted.
+- lambdas = 1d array of floats consisting of the total penalties in descending 
+  order. If they are not in descending order, they will be sorted. 
+- alpha = a float, the penalty ratio
 
 # Keyword arguments
 
+- isNaive = boolean flag indicating whether to solve the Naive or non-Naive 
+  Elastic-net problem
 - isXIntercept = boolean flag indicating whether or not to include an `X` 
   intercept (row main effects). Defaults to `true`. 
 - isZIntercept = boolean flag indicating whether or not to include a `Z` 
@@ -199,7 +200,7 @@ An MlmnetNet object
 
 # Some notes
 
-The default method for choosing the fixed step size for `fista!` or `ista!` 
+The default method for choosing the fixed step size for `fistaNet!` or `istaNet!` 
 is to use the reciprocal of the product of the maximum eigenvalues of 
 `X*transpose(X)` and `Z*transpose(Z)`. This is computed when `fista!` or 
 `ista!` is passed into the `fun` argument and `setStepsize` is set to `true`. 
@@ -216,15 +217,15 @@ be less consequential.
 
 """
 function mlmnetNet(fun::Function, data::RawData, 
-                lambdasL1::AbstractArray{Float64,1}, lambdasL2::AbstractArray{Float64, 1};
-                isNaive::Bool = false,
+                lambdas::AbstractArray{Float64,1}, alpha::Float64;
+                isNaive::Bool=false,
                 isXIntercept::Bool=true, isZIntercept::Bool=true, 
                 isXReg::BitArray{1}=trues(data.p), 
                 isZReg::BitArray{1}=trues(data.q),     
                 isXInterceptReg::Bool=false, isZInterceptReg::Bool=false, 
                 isStandardize::Bool=true, isVerbose::Bool=true, 
                 stepsize::Float64=0.01, setStepsize::Bool=true, 
-                isAlphaVer::Bool=false, funArgs...)
+                funArgs...)
     
     # Ensure that isXReg and isZReg have same length as columns of X and Z
     if length(isXReg) != data.p
@@ -257,6 +258,7 @@ function mlmnetNet(fun::Function, data::RawData,
         data.p = data.p - 1
         isXReg = isXReg[2:end]
     end
+
     if isZIntercept==false && data.predictors.isZIntercept==true
         data.predictors.Z = remove_intercept(data.predictors.Z)
         data.predictors.isZIntercept = false
@@ -301,7 +303,7 @@ function mlmnetNet(fun::Function, data::RawData,
     end
 
     # If chosen method is ista!/fista! with fixed step size and setStepsize is 
-    # true, compute the step size. 
+    # true, compute the step size:
     if length(string(fun)) > 7 && (string(fun)[(end-7):end] == "istaNet!") && 
        setStepsize == true
         # Calculate and store transpose(X)*X
@@ -312,17 +314,6 @@ function mlmnetNet(fun::Function, data::RawData,
         # Step size is the reciprocal of the maximum eigenvalue of kron(Z, X)
         if isStandardize==true
             # Standardizing X and Z results in complex eigenvalues
-
-            # Hack is to add diagonal matrix where the diagonal is random 
-            # normal noise (JWL)
-            # stepsize = 1/max(eigmax(XTX + diagm(0 => 
-            #                      1.0 .+ rand(data.p)/1000)) * 
-            #                  eigmax(ZTZ + diagm(0 => 
-            #                      1.0 .+ rand(data.q)/1000)), 
-            #                  eigmin(XTX + diagm(0 => 
-            #                      1.0 .+ rand(data.p)/1000)) * 
-            #                  eigmin(ZTZ + diagm(0 => 
-            #                      1.0 .+ rand(data.q)/1000)))
 
             # Hack is to square the singular values to get the eigenvalues
             eig_X = (svd(XTX).S).^2
@@ -339,38 +330,17 @@ function mlmnetNet(fun::Function, data::RawData,
                         isVerbose) 
     end
 
-    # If the user choose to use the penalty version of (lambdas, alphas), 
-    # reparametrize them to be in the form of lambdaL1 and lambdaL2
-    if isAlphaVer == true
-      # Store the inputs before to reparametrize
-      lambdas = copy(lambdasL1)
-      alphas = copy(lambdasL2)
-
-      if any(alphas .> 1.0) | any(alphas .< 0)
-        error("Alpha should be between 0.0 and 1.0!")
-      end
-
-      lambdasL1 = Array{Float64, 1}(undef, length(lambdas)*length(alphas))
-      lambdasL2 = Array{Float64, 1}(undef, length(lambdas)*length(alphas))
-
-      index = 1
-
-      for lambda in lambdas
-        for alpha in alphas
-          lambdasL1[index] = lambda*alpha
-          lambdasL2[index] = lambda*(1-alpha)
-          index += 1
-        end
-      end
-
-    end
-
     # Run the specified Elastic-net penalty method on the supplied inputs. 
-    coeffs = mlmnet_pathwiseNet(fun, X, get_Y(data), Z, lambdasL1, lambdasL2, regXidx, 
+    coeffs = mlmnet_pathwiseNet(fun, X, get_Y(data), Z, lambdas, alpha, regXidx, 
                              regZidx, reg, norms; isVerbose=isVerbose, 
                              stepsize=stepsize, funArgs...)
 
-    # Perform the direct scaling transformation to undo shrinkage for Elastic-net solutions
+    # To be put in to the struct, and for the Non-naive elastic-net direct scaling...
+    lambdasL1 = lambdas .* alpha
+    lambdasL2 = lambdas .* (1-alpha)
+
+    # Perform the direct scaling transformation to undo double-shrinkage 
+    # in the Naive Elastic-net solutions:
     if !isNaive
       for i in 1:length(lambdasL1), j in 1:length(lambdasL2)
         coeffs[i, j, :, :] *= (1+lambdasL2[j])
@@ -378,7 +348,7 @@ function mlmnetNet(fun::Function, data::RawData,
     end
 
     # Back-transform coefficient estimates, if necessary. 
-    # Case if including both X and Z intercepts. 
+    # Case if including both X and Z intercepts:
     if isStandardize == true && (isXIntercept==true) && (isZIntercept==true)
         backtransform!(coeffs, meansX, meansZ, normsX, normsZ, get_Y(data), 
                        data.predictors.X, data.predictors.Z)
@@ -387,20 +357,5 @@ function mlmnetNet(fun::Function, data::RawData,
                        normsX, normsZ)
     end
 
-    # lambdasL1 = sort(lambdasL1, rev=true)
-    # lambdasL2 = sort(lambdasL2, rev=true)
-
-    if isAlphaVer == true
-      lambdas = Array{Float64, 1}(undef, length(lambdasL1))
-      alphas = Array{Float64, 1}(undef, length(lambdasL2))
-
-      lambdas = lambdasL1 .+ lambdasL2
-      alphas = lambdasL1 ./ lambdas
-
-      lambdasL1 = lambdas
-      lambdasL2 = alphas
-    end
-
-
-    return MlmnetNet(coeffs, lambdasL1, lambdasL2, data)
+    return MlmnetNet(coeffs, lambdas, alpha, lambdasL1, lambdasL2, data)
   end

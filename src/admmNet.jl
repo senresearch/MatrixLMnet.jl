@@ -1,7 +1,7 @@
 """
     proxNet1(v, lambda)
 
-Proximal operator for the L1 norm updates in ADMM. 
+Proximal operator for the Elastic-net penalisation component updates in ADMM. 
 
 # Arguments 
 
@@ -23,7 +23,7 @@ end
 """
     proxNet2(v, rho, u, l)
 
-Proximal operator for the L2 norm updates in ADMM. 
+Proximal operator for the residual sum of squares component updates in ADMM. 
 
 # Arguments 
 

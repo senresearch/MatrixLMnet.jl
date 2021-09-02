@@ -61,7 +61,7 @@ function update_fistaNet!(B::AbstractArray{Float64,2},
             B_prev[i,j] = B[i,j] 
         end
         
-        B[i,j] = A[i,j] - stepsize[1] * grad[i,j] # L2 updates
+        B[i,j] = A[i,j] - stepsize[1] * grad[i,j] # RSS updates
         # Apply shrinkage to regularized coefficients
         if reg[i,j] 
             B[i,j] = prox(A[i,j], grad[i,j], sign(B[i,j]), lambdaL1, norms, 

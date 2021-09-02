@@ -7,7 +7,7 @@ where columns are correlated according to the `ρMat` correlation matrix.
 
 # Arguments
 - `ρMat::Matrix{Real}`: coefficients of the correlation matrix
-- `n::Int64`: number of samples, default `n` is `100`.
+- `n::Int64`: number of samples, default `n` is `100`
 - `σₙ::Real`: noise standard deviation, default `σₙ` is `0` 
 - `σ::Real`: simulated data standard deviation, default `σ` is `1` 
 - `μ::Real`: simulated data mean, default `μ` is `0` 

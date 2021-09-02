@@ -310,7 +310,7 @@ function backtransformNet!(B::AbstractArray{Float64,4},
                         normsZ::AbstractArray{Float64,2})
 
     # Iterate through the first dimension of B to back-transform each 
-	# coefficient matrix. 
+	# coefficient matrix: 
     for i in 1:size(B,1)  
         for j in 1:size(B,2) 
             # Back transform the X intercepts (row main effects), if necessary 
