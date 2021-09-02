@@ -37,12 +37,12 @@ function update_istaNet!(B::AbstractArray{Float64,2},
                       stepsize::AbstractArray{Float64,1})
     
     # Update gradient
-    calc_grad!(grad, X, Z, resid) 
+    calc_grad!(grad, X, Z, resid)
     
     # Cycle through all the coefficients to perform assignments
     for j = 1:size(B,2), i = 1:size(B,1)
-        b2update = B[i,j] - stepsize[1] * grad[i,j] # L2 update
-        b2sign = sign(b2update) # L2 update sign
+        b2update = B[i,j] - stepsize[1] * grad[i,j] # RSS update
+        b2sign = sign(b2update) # RSS update sign
         
         # Update the current coefficient 
         b = reg[i,j] ? prox(B[i,j], grad[i,j], b2sign, lambdaL1, norms, 
