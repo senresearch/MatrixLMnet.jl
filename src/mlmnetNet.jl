@@ -11,10 +11,8 @@ mutable struct MlmnetNet
     B::Array{Float64, 4}
 
     # Lambda penalties
-    lambdas # Total penalty
-    alpha::Float64 # A fixed penalty ratio
-    lambdasL1::Array{Float64, 1} # L1 penalty
-    lambdasL2::Array{Float64, 1} # L2 penalty
+    lambdas::Array{Float64, 1} # Total penalty
+    alphas::Array{Float64, 1} # Penalty ratios
     
     # Response and predictor matrices
     data::RawData
@@ -68,7 +66,7 @@ function mlmnet_pathwiseNet(fun::Function, X::AbstractArray{Float64,2},
                          Y::AbstractArray{Float64,2}, 
                          Z::AbstractArray{Float64,2}, 
                          lambdas::AbstractArray{Float64,1},
-                         alpha::Float64,  
+                         alphas::AbstractArray{Float64, 1},  
                          regXidx::AbstractArray{Int64,1}, 
                          regZidx::AbstractArray{Int64,1}, 
                          reg::BitArray{2}, norms; isVerbose::Bool=true, 
@@ -85,13 +83,9 @@ function mlmnet_pathwiseNet(fun::Function, X::AbstractArray{Float64,2},
         lambdas = sort(lambdas, rev=true)
     end 
 
-    # Pre-allocate arrays for L1 and L2 penalties converted from the 
-    # corresponding (lambda, alpha)
-    lambdasL1 = lambdas .* alpha
-    lambdasL2 = lambdas .* (1-alpha)
-
     # Pre-allocate array for coefficients
-    coeffs = Array{Float64}(undef, length(lambdasL1), length(lambdasL2), size(X,2), size(Z,2)) 
+    coeffs = Array{Float64}(undef, length(lambdas)*length(alphas), length(lambdas)*length(alphas), 
+                            size(X,2), size(Z,2)) 
 
     # Start with coefficients initalized at zero for the largest lambda value
     startB = zeros(size(X,2), size(Z,2))
@@ -120,20 +114,22 @@ function mlmnet_pathwiseNet(fun::Function, X::AbstractArray{Float64,2},
     end
 
     # Iterate through the paths of lambdasL1, lambdasL2
-    for i = 1:length(lambdasL1) 
-      for j = 1:length(lambdasL2)
+    for i = 1:length(alphas)
+      startB = zeros(size(X,2), size(Z,2))
+      
+      for j = 1:length(lambdas)
 
         # Get Elastic-net penalty estimates by updating the coefficients from previous 
         # iteration in place
 
         # ISTA, FISTA and FISTA with Backtracking (CD not supported for Elastic-net yet)
         if length(string(fun)) <= 7 || (string(fun)[(end-7):end] != "admmNet!") 
-            fun(X, Y, Z, lambdasL1[i], lambdasL2[j], startB, regXidx, regZidx, reg, norms; 
+            fun(X, Y, Z, lambdas[j], alphas[i], startB, regXidx, regZidx, reg, norms; 
                 isVerbose=isVerbose, stepsize=stepsize, funArgs...)
 
         # ADMM       
         else
-            fun(X, Y, Z, lambdasL1[i], lambdasL2[j], startB, regXidx, regZidx, reg, norms, 
+            fun(X, Y, Z, lambdas[j], alphas[i], startB, regXidx, regZidx, reg, norms, 
                 Qx, Qz, U, L; 
                 isVerbose=isVerbose, stepsize=stepsize, funArgs...)
         end
