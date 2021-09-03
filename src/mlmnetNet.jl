@@ -11,8 +11,10 @@ mutable struct MlmnetNet
     B::Array{Float64, 4}
 
     # Lambda penalties
-    lambdas::Array{Float64, 1} # Total penalty
+    lambdas::Array{Float64, 1} # Total penalties
     alphas::Array{Float64, 1} # Penalty ratios
+    # lambdasL1::Array{Float64, 1} # L1 penalties
+    # lambdasL2::Array{Float64, 1} # L2 penalties
     
     # Response and predictor matrices
     data::RawData
@@ -80,12 +82,11 @@ function mlmnet_pathwiseNet(fun::Function, X::AbstractArray{Float64,2},
     # Pre-sort the lambdas in descending order in order to apply warm-starts
     if any(lambdas .!= sort(lambdas, rev=true))
         println_verbose("Sorting total penalty lambdas into descending order.", isVerbose)
-        lambdas = sort(lambdas, rev=true)
+        lambdas .= sort(lambdas, rev=true)
     end 
 
     # Pre-allocate array for coefficients
-    coeffs = Array{Float64}(undef, length(lambdas)*length(alphas), length(lambdas)*length(alphas), 
-                            size(X,2), size(Z,2)) 
+    coeffs = Array{Float64}(undef, length(alphas), length(lambdas), size(X,2), size(Z,2)) 
 
     # Start with coefficients initalized at zero for the largest lambda value
     startB = zeros(size(X,2), size(Z,2))
@@ -213,7 +214,7 @@ be less consequential.
 
 """
 function mlmnetNet(fun::Function, data::RawData, 
-                lambdas::AbstractArray{Float64,1}, alpha::Float64;
+                lambdas::AbstractArray{Float64,1}, alphas::AbstractArray{Float64,1};
                 isNaive::Bool=false,
                 isXIntercept::Bool=true, isZIntercept::Bool=true, 
                 isXReg::BitArray{1}=trues(data.p), 
@@ -327,19 +328,16 @@ function mlmnetNet(fun::Function, data::RawData,
     end
 
     # Run the specified Elastic-net penalty method on the supplied inputs. 
-    coeffs = mlmnet_pathwiseNet(fun, X, get_Y(data), Z, lambdas, alpha, regXidx, 
+    coeffs = mlmnet_pathwiseNet(fun, X, get_Y(data), Z, lambdas, alphas, regXidx, 
                              regZidx, reg, norms; isVerbose=isVerbose, 
                              stepsize=stepsize, funArgs...)
-
-    # To be put in to the struct, and for the Non-naive elastic-net direct scaling...
-    lambdasL1 = lambdas .* alpha
-    lambdasL2 = lambdas .* (1-alpha)
 
     # Perform the direct scaling transformation to undo double-shrinkage 
     # in the Naive Elastic-net solutions:
     if !isNaive
-      for i in 1:length(lambdasL1), j in 1:length(lambdasL2)
-        coeffs[i, j, :, :] *= (1+lambdasL2[j])
+      for i in 1:length(alphas), j in 1:length(lambdas)
+        lambdaL2 = lambdas[j]*(1-alphas[i])
+        coeffs[i, j, :, :] *= (1+lambdaL2)
       end
     end
 
@@ -353,5 +351,9 @@ function mlmnetNet(fun::Function, data::RawData,
                        normsX, normsZ)
     end
 
-    return MlmnetNet(coeffs, lambdas, alpha, lambdasL1, lambdasL2, data)
+    # lambdasL1 = lambdas.*alphas;
+    # lambdasL2 = lambdas.*(1 .- alphas);
+
+    # return MlmnetNet(coeffs, lambdas, alphas, lambdasL1, lambdasL2, data)
+    return MlmnetNet(coeffs, lambdas, alphas, data)
   end
