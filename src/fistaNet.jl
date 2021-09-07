@@ -210,12 +210,16 @@ and/or `Z` are very large may exceed computational limitations.
 """
 function fistaNet!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2}, 
                 Z::AbstractArray{Float64,2}, 
-                lambdaL1::Float64, lambdaL2::Float64,
+                lambda::Float64, alpha::Float64,
                 B::AbstractArray{Float64,2}, 
                 regXidx::AbstractArray{Int64,1}, 
                 regZidx::AbstractArray{Int64,1}, reg::BitArray{2}, norms; 
                 isVerbose::Bool=true, stepsize::Float64=0.01, 
                 thresh::Float64=10.0^(-7), maxiter::Int=10^10)
+
+    # Re-parametrize the Elastic-net tuning parameters
+    lambdaL1 = lambda*alpha
+    lambdaL2 = lambda*(1-alpha)
   
     # Pre-allocating arrays to store residuals for extrapolated coefficients 
     # and gradient. 

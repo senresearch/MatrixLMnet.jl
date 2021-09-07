@@ -72,10 +72,11 @@ function mlmnet_pathwise(fun::Function, X::AbstractArray{Float64,2},
     if length(lambdas) != length(unique(lambdas))
         println_verbose("Dropping non-unique lambdas", isVerbose)
     end
-    # if any(lambdas .!= sort(lambdas, rev=true))
-    #     println_verbose("Sorting lambdas into descending order.", isVerbose)
-    #     lambdas = sort(lambdas, rev=true)
-    # end 
+
+    if any(lambdas .!= sort(lambdas, rev=true))
+        println_verbose("Sorting lambdas into descending order.", isVerbose)
+        lambdas .= sort(lambdas, rev=true)
+    end 
 
     # Pre-allocate array for coefficients
     coeffs = Array{Float64}(undef, length(lambdas), size(X,2), size(Z,2)) 
@@ -290,18 +291,6 @@ function mlmnet(fun::Function, data::RawData, lambdas::AbstractArray{Float64,1};
         # Step size is the reciprocal of the maximum eigenvalue of kron(Z, X)
         if isStandardize==true
             # Standardizing X and Z results in complex eigenvalues
-            
-            # Hack is to add diagonal matrix where the diagonal is random 
-            # normal noise (JWL)
-            # stepsize = 1/max(eigmax(XTX + diagm(0 => 
-            #                      1.0 .+ rand(data.p)/1000)) * 
-            #                  eigmax(ZTZ + diagm(0 => 
-            #                      1.0 .+ rand(data.q)/1000)), 
-            #                  eigmin(XTX + diagm(0 => 
-            #                      1.0 .+ rand(data.p)/1000)) * 
-            #                  eigmin(ZTZ + diagm(0 => 
-            #                      1.0 .+ rand(data.q)/1000)))
-
             # Hack is to square the singular values to get the eigenvalues (ZFY)
             eig_X = (svd(XTX).S).^2
             eig_Z = (svd(ZTZ).S).^2
@@ -331,8 +320,6 @@ function mlmnet(fun::Function, data::RawData, lambdas::AbstractArray{Float64,1};
         backtransform!(coeffs, isXIntercept, isZIntercept, meansX, meansZ, 
                        normsX, normsZ)
     end
-
-    # lambdas = sort(lambdas, rev=true)
     
     return Mlmnet(coeffs, lambdas, data)
 end
