@@ -14,9 +14,27 @@ using Test
 ####################
 include("../src/sim_helpers.jl")
 
+###########################
+# Generate Simulated Data #
+###########################
+
+#=
+Description:
+-----------
+
+Model: 𝑌 = 𝐗𝛽𝐙 + 𝜎𝜖, with 𝜖∼𝑁(0,1)
+
+Simulate data set consisting  of 20/20/200 observations and 8 predictors.
+We let 𝛽₁ = (3, 1.5, 0, 0, 2, 0, 0, 0), 𝛽₂ = (0, 1.5, 0, 3.5, 2, 0, 0 , 2) where
+𝛽 = [𝛽₁, 𝛽₂] and 𝜎 = 3.
+The pairwise correlation between 𝑋ᵢ and 𝑋ⱼ was set to be 𝑐𝑜𝑟(𝑖,𝑗)=(0.5)^|𝑖−𝑗|.
+Here, the Z matrix is an identity matrix.
+=#
+
+# Simulation parameters
 p = 8; # Number of predictors
-β1 = [3.5, 1.5, 0, 0, 2, 0, 0 ,0];
-β2 = [0, 1.5, 0, 3.5, 2, 0, 0 , 2];
+β1 = [3.5, 1.5, 0,   0, 2, 0, 0 , 0];
+β2 = [  0, 1.5, 0, 3.5, 2, 0, 0 , 2];
 σ = 3;
 n = 240;
 
@@ -33,36 +51,25 @@ X = simulateCorrelatedData(matCor, n);
 Random.seed!(705)
 Y1 = X*β1 + σ*rand(Normal(0, 1), n);
 Y2 = X*β2 + σ*rand(Normal(0, 1), n);
-
 Y = hcat(Y1, Y2);
 
+# Generate Z matrix
 Z = 1.0*Matrix(I, 2, 2);
 
+# Build raw data object from MatrixLM.jl
 dat = RawData(Response(Y), Predictors(X, Z));
 
-lambdasL1 = [10.0, 5.0, 3.0]
-lambdasL2 = [0.0]
+# Hyper parameters
+λ = [10.0, 5.0, 3.0]
+α = [1.0]
 
-est1 = mlmnetNet(fistaNet!, dat, lambdasL1, lambdasL2, isZIntercept = false, isXIntercept = false)
-est_B_Net = est1.B[3, 1, :, :]
 
-################################################################################
+# Elastic net penalized regression
+est1 = mlmnetNet(fistaNet!, dat, λ, α, isZIntercept = false, isXIntercept = false)
+est_B_Net = est1.B[1, 3, :, :]
 
-# Generate predictors
-X = simulateCorrelatedData(matCor, n);
-
-# Generate response
-Random.seed!(705)
-Y1 = X*β1 + σ*rand(Normal(0, 1), n);
-Y2 = X*β2 + σ*rand(Normal(0, 1), n);
-
-Y = hcat(Y1, Y2);
-
-Z = 1.0*Matrix(I, 2, 2);
-
-dat = RawData(Response(Y), Predictors(X, Z));
-
-est2 = mlmnet(fista!, dat, lambdasL1, isZIntercept = false, isXIntercept = false)
+# Lasso penalized regression
+est2 = mlmnet(fista!, dat, λ, isZIntercept = false, isXIntercept = false)
 est_B_Lasso = est2.B[3, :, :]
 
 @test est_B_Net == est_B_Lasso
