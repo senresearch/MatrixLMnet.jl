@@ -79,7 +79,7 @@ function mlmnet_pathwise(fun::Function, X::AbstractArray{Float64,2},
     end 
 
     # Pre-allocate array for coefficients
-    coeffs = Array{Float64}(undef, length(lambdas), size(X,2), size(Z,2)) 
+    coeffs = Array{Float64}(undef, size(X,2), size(Z,2), length(lambdas)) # issue#10 ✓
 
     # Start with coefficients initalized at zero for the largest lambda value
     startB = zeros(size(X,2), size(Z,2))
@@ -121,7 +121,7 @@ function mlmnet_pathwise(fun::Function, X::AbstractArray{Float64,2},
         end
 
         # Assign a slice of coeffs to the current coefficient estimates
-        coeffs[i,:,:] = startB 
+        coeffs[:,:,i] = startB  # issue#10 ✓
     end
 
     return coeffs

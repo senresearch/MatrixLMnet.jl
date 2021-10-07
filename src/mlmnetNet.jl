@@ -86,13 +86,14 @@ function mlmnet_pathwiseNet(fun::Function, X::AbstractArray{Float64,2},
     end 
 
     # Pre-allocate array for coefficients
-    coeffs = Array{Float64}(undef, length(alphas), length(lambdas), size(X,2), size(Z,2)) 
+    # coeffs = Array{Float64}(undef, length(alphas), length(lambdas), size(X,2), size(Z,2)) # issue#10 original
+    coeffs = Array{Float64}(undef, size(X,2), size(Z,2), length(lambdas), length(alphas)) # issue#10 ✓
 
     # Start with coefficients initalized at zero for the largest lambda value
     startB = zeros(size(X,2), size(Z,2))
 
     # Pre-compute eigenvalues and eigenvectors for ADMM
-    if length(string(fun)) > 7 && (string(fun)[(end-7):end] == "admmNet!") 
+    if length(string(fun)) > 7 && (string(fun)[(end-7):end] == "admmNet!") # issue#15
         # Eigenfactorization of X
         XTX = transpose(X)*X
         eigX = eigen(XTX)
@@ -114,29 +115,29 @@ function mlmnet_pathwiseNet(fun::Function, X::AbstractArray{Float64,2},
         L = kron(Lx, transpose(Lz))
     end
 
-    # Iterate through the paths of lambdasL1, lambdasL2
+    # Iterate through the paths of alphas and lambdas
     for i = 1:length(alphas)
-      startB = zeros(size(X,2), size(Z,2))
+      startB = zeros(size(X,2), size(Z,2)) 
       
       for j = 1:length(lambdas)
 
         # Get Elastic-net penalty estimates by updating the coefficients from previous 
         # iteration in place
-
-        # ISTA, FISTA and FISTA with Backtracking (CD not supported for Elastic-net yet)
+        
         if length(string(fun)) <= 7 || (string(fun)[(end-7):end] != "admmNet!") 
+            # ISTA, FISTA and FISTA with Backtracking (CD not supported for Elastic-net yet)
             fun(X, Y, Z, lambdas[j], alphas[i], startB, regXidx, regZidx, reg, norms; 
                 isVerbose=isVerbose, stepsize=stepsize, funArgs...)
 
-        # ADMM       
         else
+            # ADMM 
             fun(X, Y, Z, lambdas[j], alphas[i], startB, regXidx, regZidx, reg, norms, 
                 Qx, Qz, U, L; 
                 isVerbose=isVerbose, stepsize=stepsize, funArgs...)
         end
 
         # Assign a slice of coeffs to the current coefficient estimates
-        coeffs[i, j, :, :] = startB 
+        coeffs[:, :, j, i] = startB  #issue#10 ✓
       end
     end
 
@@ -337,14 +338,14 @@ function mlmnetNet(fun::Function, data::RawData,
     if !isNaive
       for i in 1:length(alphas), j in 1:length(lambdas)
         lambdaL2 = lambdas[j]*(1-alphas[i])
-        coeffs[i, j, :, :] *= (1+lambdaL2)
+        coeffs[:, :, j, i] *= (1+lambdaL2) #issue#10 ✓    
       end
     end
 
     # Back-transform coefficient estimates, if necessary. 
     # Case if including both X and Z intercepts:
     if isStandardize == true && (isXIntercept==true) && (isZIntercept==true)
-        backtransform!(coeffs, meansX, meansZ, normsX, normsZ, get_Y(data), 
+        backtransform!(coeffs, meansX, meansZ, normsX, normsZ, get_Y(data),  # issue# should be backtransformNet!
                        data.predictors.X, data.predictors.Z)
     elseif isStandardize == true # Otherwise
         backtransformNet!(coeffs, isXIntercept, isZIntercept, meansX, meansZ, 
