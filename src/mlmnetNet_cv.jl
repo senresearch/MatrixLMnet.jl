@@ -7,9 +7,9 @@ Type for storing the results of running cross-validation for `mlmnet`
 mutable struct MlmnetNet_cv 
     
     # Mlmnet objects
-    MLMNets::Array{MlmnetNet, 1} 
+    MLMNets::Array{MlmnetNet,1} 
     # Lambda penalties
-    lambdas::Array{Float64, 1}
+    lambdas::Array{Float64,1}
     alpha::Float64
     lambdasL1::Array{Float64,1}
     lambdasL2::Array{Float64,1}  
@@ -24,10 +24,10 @@ mutable struct MlmnetNet_cv
     # These will be generated and should not be supplied as input to the 
     # constructor.
     # Test MSE for each of the CV folds for each lambdaL1 and lambdaL2
-    mse::Array{Float64, 3} 
+    mse::Array{Float64,3} 
     # Proportion of zero interaction coefficients for each of the CV folds 
     # for each lambdaL1 and lambdaL2
-    propZero::Array{Float64, 3} 
+    propZero::Array{Float64,3} 
     
     MlmnetNet_cv(MLMNets, lambdasL1, lambdasL2, data, rowFolds, colFolds, dig) = 
         new(MLMNets, lambdasL1, lambdasL2, data, rowFolds, colFolds, 
@@ -100,14 +100,15 @@ This is the base `mlmnet_cv` function that all other variants call. Folds
 are computed in parallel when possible. 
 
 """
-function mlmnetNet_cv(fun::Function, data::RawData, 
-                   lambdasL1::AbstractArray{Float64,1},
-                   lambdasL2::AbstractArray{Float64,1}, 
+function mlmnetNet_cv(data::RawData, 
+                   lambdas::AbstractArray{Float64,1},
+                   alphas::AbstractArray{Float64,1}, 
                    rowFolds::Array{Array{Int64,1},1}, 
                    colFolds::Array{Array{Int64,1},1}; 
+                   method::String="ista", isNaive::Bool=false,
                    isXIntercept::Bool=true, isZIntercept::Bool=true, 
-                   isXReg::BitArray{1}=trues(size(get_X(data),2)), 
-                   isZReg::BitArray{1}=trues(size(get_Z(data),2)), 
+                   isXReg::BitArray{1}=trues(size(get_X(data), 2)), 
+                   isZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
                    isXInterceptReg::Bool=false, isZInterceptReg::Bool=false, 
                    isStandardize::Bool=true, isVerbose::Bool=true, 
                    stepsize::Float64=0.01, setStepsize::Bool=true, 
@@ -143,7 +144,8 @@ function mlmnetNet_cv(fun::Function, data::RawData,
 
     # Run mlmnet on each RawData object, in parallel when possible
 
-    MLMNets = Distributed.pmap(data -> mlmnetNet(fun, data, lambdasL1, lambdasL2; 
+    MLMNets = Distributed.pmap(data -> mlmnetNet(data, lambdas, alphas;
+                                              method=method, isNaive=isNaive, 
                                               isXIntercept=isXIntercept, 
                                               isZIntercept=isZIntercept, 
                                               isXReg=isXReg, isZReg=isZReg, 
@@ -224,8 +226,8 @@ function mlmnetNet_cv(fun::Function, data::RawData,
                    lambdasL2::AbstractArray{Float64,1},
                    rowFolds::Array{Array{Int64,1},1}, nColFolds::Int64; 
                    isXIntercept::Bool=true, isZIntercept::Bool=true, 
-                   isXReg::BitArray{1}=trues(size(get_X(data),2)), 
-                   isZReg::BitArray{1}=trues(size(get_Z(data),2)), 
+                   isXReg::BitArray{1}=trues(size(get_X(data), 2)), 
+                   isZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
                    isXInterceptReg::Bool=false, isZInterceptReg::Bool=false, 
                    isStandardize::Bool=true, isVerbose::Bool=true, 
                    stepsize::Float64=0.01, setStepsize::Bool=true, 
@@ -313,8 +315,8 @@ function mlmnetNet_cv(fun::Function, data::RawData,
                    lambdasL2::AbstractArray{Float64,1}, 
                    nRowFolds::Int64, colFolds::Array{Array{Int64,1},1}; 
                    isXIntercept::Bool=true, isZIntercept::Bool=true, 
-                   isXReg::BitArray{1}=trues(size(get_X(data),2)), 
-                   isZReg::BitArray{1}=trues(size(get_Z(data),2)), 
+                   isXReg::BitArray{1}=trues(size(get_X(data), 2)), 
+                   isZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
                    isXInterceptReg::Bool=false, isZInterceptReg::Bool=false, 
                    isStandardize::Bool=true, isVerbose::Bool=true, 
                    stepsize::Float64=0.01, setStepsize::Bool=true, 
@@ -410,12 +412,14 @@ too quickly can cause the criterion to diverge. We have found that setting
 be less consequential. 
 
 """
-function mlmnetNet_cv(fun::Function, data::RawData, 
-                   lambdasL1::Array{Float64,1}, lambdasL2::Array{Float64,1},
-                   nRowFolds::Int64=10, nColFolds::Int64=10; 
+function mlmnetNet_cv(data::RawData, 
+                   lambdas::Array{Float64,1}, alphas::Array{Float64,1},
+                   nRowFolds::Int64=10, nColFolds::Int64=10;
+                   method::String="ista", 
+                   isNaive::Bool=false,
                    isXIntercept::Bool=true, isZIntercept::Bool=true, 
-                   isXReg::BitArray{1}=trues(size(get_X(data),2)), 
-                   isZReg::BitArray{1}=trues(size(get_Z(data),2)), 
+                   isXReg::BitArray{1}=trues(size(get_X(data), 2)), 
+                   isZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
                    isXInterceptReg::Bool=false, isZInterceptReg::Bool=false, 
                    isStandardize::Bool=true, isVerbose::Bool=true, 
                    stepsize::Float64=0.01, setStepsize::Bool=true, 
@@ -427,7 +431,8 @@ function mlmnetNet_cv(fun::Function, data::RawData,
     
     # Pass in randomly generated row and column folds to the base mlmnet_cv 
     # function
-    mlmnetNet_cv(fun, data, lambdasL1, lambdasL2, rowFolds, colFolds; 
+    mlmnetNet_cv(data, lambdas, alphas, rowFolds, colFolds; 
+              method=method, isNaive=isNaive, 
               isXIntercept=isXIntercept, isZIntercept=isZIntercept, 
               isXReg=isXReg, isZReg=isZReg, 
               isXInterceptReg=isXInterceptReg, 

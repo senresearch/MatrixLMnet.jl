@@ -93,7 +93,8 @@ function mlmnet_pathwiseNet(fun::Function, X::AbstractArray{Float64,2},
     startB = zeros(size(X,2), size(Z,2))
 
     # Pre-compute eigenvalues and eigenvectors for ADMM
-    if length(string(fun)) > 7 && (string(fun)[(end-7):end] == "admmNet!") # issue#15
+    # if length(string(fun)) > 7 && (string(fun)[(end-7):end] == "admmNet!") # issue#15 ✓
+    if string(fun) == "admmNet!"
         # Eigenfactorization of X
         XTX = transpose(X)*X
         eigX = eigen(XTX)
@@ -124,7 +125,8 @@ function mlmnet_pathwiseNet(fun::Function, X::AbstractArray{Float64,2},
         # Get Elastic-net penalty estimates by updating the coefficients from previous 
         # iteration in place
         
-        if length(string(fun)) <= 7 || (string(fun)[(end-7):end] != "admmNet!") 
+        # if length(string(fun)) <= 7 || (string(fun)[(end-7):end] != "admmNet!") # issue#15 ✓
+        if (string(fun) != "admmNet!" && string(fun) != "cd")
             # ISTA, FISTA and FISTA with Backtracking (CD not supported for Elastic-net yet)
             fun(X, Y, Z, lambdas[j], alphas[i], startB, regXidx, regZidx, reg, norms; 
                 isVerbose=isVerbose, stepsize=stepsize, funArgs...)
@@ -214,8 +216,19 @@ too quickly can cause the criterion to diverge. We have found that setting
 be less consequential. 
 
 """
-function mlmnetNet(fun::Function, data::RawData, 
+# function mlmnetNet(fun::Function, data::RawData, # To delete
+#                 lambdas::AbstractArray{Float64,1}, alphas::AbstractArray{Float64,1};
+#                 isNaive::Bool=false,
+#                 isXIntercept::Bool=true, isZIntercept::Bool=true, 
+#                 isXReg::BitArray{1}=trues(data.p), 
+#                 isZReg::BitArray{1}=trues(data.q),     
+#                 isXInterceptReg::Bool=false, isZInterceptReg::Bool=false, 
+#                 isStandardize::Bool=true, isVerbose::Bool=true, 
+#                 stepsize::Float64=0.01, setStepsize::Bool=true, 
+#                 funArgs...)
+function mlmnetNet(data::RawData, 
                 lambdas::AbstractArray{Float64,1}, alphas::AbstractArray{Float64,1};
+                method::String = "ista", 
                 isNaive::Bool=false,
                 isXIntercept::Bool=true, isZIntercept::Bool=true, 
                 isXReg::BitArray{1}=trues(data.p), 
@@ -225,6 +238,9 @@ function mlmnetNet(fun::Function, data::RawData,
                 stepsize::Float64=0.01, setStepsize::Bool=true, 
                 funArgs...)
     
+    # Get the function according to the selected method             
+    fun = getFunc(method);
+
     # Ensure that isXReg and isZReg have same length as columns of X and Z
     if length(isXReg) != data.p
         error("isXReg does not have same length as number of columns in X.")
@@ -302,8 +318,11 @@ function mlmnetNet(fun::Function, data::RawData,
 
     # If chosen method is ista!/fista! with fixed step size and setStepsize is 
     # true, compute the step size:
-    if length(string(fun)) > 7 && (string(fun)[(end-7):end] == "istaNet!") && 
+    # if length(string(fun)) > 7 && (string(fun)[(end-7):end] == "istaNet!") && #to delete
+    #    setStepsize == true
+    if (string(fun) == "istaNet!" || string(fun) == "fistaNet!") && 
        setStepsize == true
+
         # Calculate and store transpose(X)*X
         XTX = transpose(X)*X
         # Calculate and store transpose(Z)*Z
@@ -358,3 +377,42 @@ function mlmnetNet(fun::Function, data::RawData,
     # return MlmnetNet(coeffs, lambdas, alphas, lambdasL1, lambdasL2, data)
     return MlmnetNet(coeffs, lambdas, alphas, data)
   end
+
+
+
+
+
+  """
+  mlmnetNet(data, lambdas; 
+         method, isXIntercept, isZIntercept, isXReg, isZReg, 
+         isXInterceptReg, isZInterceptReg, isStandardize, isVerbose, 
+         stepsize, setStepsize, funArgs...)
+
+"""
+function mlmnetNet(data::RawData, 
+              lambdas::AbstractArray{Float64,1};
+              method::String = "ista", 
+              isNaive::Bool=false,
+              isXIntercept::Bool=true, isZIntercept::Bool=true, 
+              isXReg::BitArray{1}=trues(data.p), 
+              isZReg::BitArray{1}=trues(data.q),     
+              isXInterceptReg::Bool=false, isZInterceptReg::Bool=false, 
+              isStandardize::Bool=true, isVerbose::Bool=true, 
+              stepsize::Float64=0.01, setStepsize::Bool=true, 
+              funArgs...)
+  
+  
+  alphas = [1.0] # default LASSO, 𝛼 = 1
+
+  rslts = mlmnetNet(data, lambdas, alphas; method,
+                    isNaive, isXIntercept, isZIntercept, 
+                    isXReg, isZReg,     
+                    isXInterceptReg, isZInterceptReg, 
+                    isStandardize, isVerbose, 
+                    stepsize, setStepsize, 
+                    funArgs...)
+  
+  return rslts
+end
+
+

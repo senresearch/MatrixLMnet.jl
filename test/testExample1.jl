@@ -72,5 +72,5 @@ est_B_Net = est1.B[:, :, 3, 1]
 est2 = mlmnet(fista!, dat, λ, isZIntercept = false, isXIntercept = false)
 est_B_Lasso = est2.B[:, :, 3]
 
-@test est_B_Net == est_B_Lasso
+println("Lasso vs Elastic Net when α=1 test: ", @test est_B_Net == est_B_Lasso)
 
