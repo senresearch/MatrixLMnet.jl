@@ -239,7 +239,7 @@ function mlmnetNet(data::RawData,
                 funArgs...)
     
     # Get the function according to the selected method             
-    fun = getFunc(method);
+    fun = get_func(method);
 
     # Ensure that isXReg and isZReg have same length as columns of X and Z
     if length(isXReg) != data.p

@@ -260,3 +260,29 @@ function calc_grad(Xi::AbstractArray{Float64,1}, Zj::AbstractArray{Float64,1},
     
     return -sum(transpose(Xi)*resid*Zj)
 end
+
+"""
+    get_func(method)
+
+Return actual module function name according to method name according to a dictionnary.
+
+# Arguments 
+
+- method = String describing selected method. The method can be "ista",
+ "fista", "fista_bt" or "admm".
+
+# Value 
+
+A function
+
+"""
+function get_func(method::String )
+    
+    dictMethod = Dict("ista"=>ista!,
+                        "fista"=>fistaNet!,
+                        "fista_bt"=>fista_bt!,
+                        "admm"=>admm!);
+
+    
+    return dictMethod[method]
+end
