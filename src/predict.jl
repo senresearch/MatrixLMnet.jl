@@ -67,11 +67,11 @@ function coef_2d(MLMNet::Mlmnet)
     coeffs = coef(MLMNet)
     
     # Initialize 2d array to store flattened coefficients
-    coeffs2d = Array{Float64}(undef, size(coeffs,2)*size(coeffs,3), 
-                              size(coeffs,1))
+    coeffs2d = Array{Float64}(undef, size(coeffs,1)*size(coeffs,2), 
+                              size(coeffs,3))
     # Iterate through each coefficient slice
     for i in 1:size(coeffs,1)
-        coeffs2d[:,i] = vec(coeffs[i,:,:])
+        coeffs2d[:,i] = vec(coeffs[:,:,i])
     end
     
     return coeffs2d
@@ -151,12 +151,12 @@ function predict(MLMNet::Mlmnet,
                  newPredictors::Predictors=MLMNet.data.predictors)
     
     # Initialize 3d array for storing predictions
-    all_preds = Array{Float64}(undef, length(MLMNet.lambdas), 
-                               size(newPredictors.X,1), 
-                               size(newPredictors.Z,1))
+    all_preds = Array{Float64}(undef, size(newPredictors.X,1), size(newPredictors.Z,1), 
+                                length(MLMNet.lambdas))
+                                
 	# Calculate new predictions for each lambda
     for i = 1:length(MLMNet.lambdas)
-        all_preds[i,:,:] = predict(MLMNet, MLMNet.lambdas[i], newPredictors)
+        all_preds[:,:,i] = predict(MLMNet, MLMNet.lambdas[i], newPredictors)
     end
     
     return all_preds
@@ -280,12 +280,12 @@ Calculate residuals of an MLMNet object
 function resid(MLMNet::Mlmnet, newData::RawData=MLMNet.data)
     
     # Initialize 3d array for storing residuals
-    all_resid = Array{Float64}(undef, length(MLMNet.lambdas), 
-                               newData.n, newData.m)
+    all_resid = Array{Float64}(undef, newData.n, newData.m,
+                                length(MLMNet.lambdas))
     
     # Calculate residuals for each lambda
     for i = 1:length(MLMNet.lambdas)
-        all_resid[i,:,:] = resid(MLMNet, MLMNet.lambdas[i], newData)
+        all_resid[:,:,i] = resid(MLMNet, MLMNet.lambdas[i], newData)
     end
     
     return all_resid
@@ -327,17 +327,17 @@ Extract coefficients from Mlmnet object at a given lambda
 2d array of coefficients 
 
 """
-function coef(MLMNet::MlmnetNet, lambdaL1::Float64, lambdaL2::Float64)
+function coef(MLMNet::MlmnetNet, lambda::Float64, alpha::Float64)
     
     # Find the index corresponding to the lambda of interest
-    idx = findall([isapprox(lam1, lambdaL1) for lam1 in MLMNet.lambdasL1])
-    idy = findall([isapprox(lam2, lambdaL2) for lam2 in MLMNet.lambdasL2])
+    idx = findall([isapprox(lam, lambda) for lam in MLMNet.lambdas])
+    idy = findall([isapprox(alp, alpha) for alp in MLMNet.alphas])
     if (length(idx) == 0)
-        error("This lambdaL1 was not used in the MLMNet object.")
+        error("This lambda was not used in the MLMNet object.")
     end
 
     if (length(idy) == 0)
-        error("This lambdaL2 was not used in the MLMNet object.")
+        error("This alpha was not used in the MLMNet object.")
     end
     
     # Return the coefficient slice for the lambda of interest
@@ -366,12 +366,12 @@ function coef_3d(MLMNet::MlmnetNet)
     coeffs = coef(MLMNet) # this is a 4-dimensional array
     
     # Initialize 2d array to store flattened coefficients
-    coeffs3d = Array{Float64}(undef, size(coeffs,3)*size(coeffs,4), 
-                              size(coeffs,1), size(coeffs,2))
+    coeffs3d = Array{Float64}(undef, size(coeffs,1)*size(coeffs,2), 
+                              size(coeffs,3), size(coeffs,4))
 
     # Iterate through each coefficient slice
-    for i in 1:size(coeffs, 1), j in size(coeffs, 2)
-        coeffs3d[:,:,i,j] = vec(coeffs[i,j,:,:])
+    for j in 1:size(coeffs, 4), i in size(coeffs, 3)
+        coeffs3d[:,i,j] = vec(coeffs[:,:,i,j])
     end
     
     return coeffs3d
@@ -379,7 +379,7 @@ end
 
 
 """
-    predict(MLMNet, lambdaL1, lambdaL2, newPredictors)
+    predict(MLMNet, lambda, alpha, newPredictors)
 
 Calculate new predictions based on Mlmnet object and given a lambda 
 
@@ -395,7 +395,7 @@ Calculate new predictions based on Mlmnet object and given a lambda
 2d array of predicted values
 
 """
-function predict(MLMNet::MlmnetNet, lambdaL1::Float64, lambdaL2::Float64,
+function predict(MLMNet::MlmnetNet, lambda::Float64, alpha::Float64,
                  newPredictors::Predictors=MLMNet.data.predictors)
     
     # Include X and Z intercepts in new predictors if necessary
@@ -427,7 +427,7 @@ function predict(MLMNet::MlmnetNet, lambdaL1::Float64, lambdaL2::Float64,
     end
     
     # Calculate new predictions
-    return calc_preds(newPredictors.X, newPredictors.Z, coef(MLMNet, lambdaL1, lambdaL2))
+    return calc_preds(newPredictors.X, newPredictors.Z, coef(MLMNet, lambda, alpha))
 end 
 
 
@@ -451,12 +451,12 @@ function predict(MLMNet::MlmnetNet,
                  newPredictors::Predictors=MLMNet.data.predictors)
     
     # Initialize 4d array for storing predictions
-    all_preds = Array{Float64}(undef, length(MLMNet.lambdasL1), length(MLMNet.lambdasL2),
-                               size(newPredictors.X,1), 
-                               size(newPredictors.Z,1))
+    all_preds = Array{Float64}(undef, size(newPredictors.X,1), size(newPredictors.Z,1),
+                               length(MLMNet.lambdas), length(MLMNet.alphas))
+
 	# Calculate new predictions for each lambda
-    for i = 1:length(MLMNet.lambdasL1), j = 1:length(MLMNet.lambdasL2)
-        all_preds[i,j,:,:] = predict(MLMNet, MLMNet.lambdasL1[i], MLMNet.lambdasL2[j], 
+    for j = 1:length(MLMNet.alphas), i = 1:length(MLMNet.lambdas)
+        all_preds[:,:,i,j] = predict(MLMNet, MLMNet.lambdas[i], MLMNet.alphas[j], 
                                         newPredictors)
     end
     
@@ -479,9 +479,9 @@ Calculate fitted values of an Mlmnet object, given a lambda
 2d array of fitted values
 
 """
-function fitted(MLMNet::MlmnetNet, lambdaL1::Float64, lambdaL2::Float64)
+function fitted(MLMNet::MlmnetNet, lambda::Float64, alpha::Float64)
     
-    return predict(MLMNet, lambdaL1, lambdaL2)
+    return predict(MLMNet, lambda, alpha)
 end
 
 
@@ -522,7 +522,7 @@ Calculate residuals of an MLMNet object, given a lambda
 2d array of residuals
 
 """
-function resid(MLMNet::MlmnetNet, lambdaL1::Float64, lambdaL2::Float64, newData::RawData=MLMNet.data)
+function resid(MLMNet::MlmnetNet, lambda::Float64, alpha::Float64, newData::RawData=MLMNet.data)
     
     # Include X and Z intercepts in new data if necessary
     if MLMNet.data.predictors.isXIntercept==true && 
@@ -558,7 +558,7 @@ function resid(MLMNet::MlmnetNet, lambdaL1::Float64, lambdaL2::Float64, newData:
     
     # Calculate residuals
     return calc_resid(get_X(newData), get_Y(newData), get_Z(newData), 
-                      coef(MLMNet, lambdaL1, lambdaL2))
+                      coef(MLMNet, lambda, alpha))
 end
 
 
@@ -581,12 +581,12 @@ Calculate residuals of an MLMNet object
 function resid(MLMNet::MlmnetNet, newData::RawData=MLMNet.data)
     
     # Initialize 4d array for storing residuals
-    all_resid = Array{Float64}(undef, length(MLMNet.lambdasL1), length(MLMNet.lambdasL2), 
-                               newData.n, newData.m)
+    all_resid = Array{Float64}(undef, newData.n, newData.m,
+                                length(MLMNet.lambdas), length(MLMNet.alphas))
     
     # Calculate residuals for each lambda
-    for i = 1:length(MLMNet.lambdasL1), j = 1:length(MLMNet.lambdasL2)
-        all_resid[i,j,:,:] = resid(MLMNet, MLMNet.lambdasL1[i], MLMNet.lambdasL2[j], newData)
+    for j = 1:length(MLMNet.alphas), i = 1:length(MLMNet.lambdas)
+        all_resid[:,:,i,j] = resid(MLMNet, MLMNet.lambdas[i], MLMNet.alphas[j], newData)
     end
     
     return all_resid

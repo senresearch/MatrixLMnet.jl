@@ -10,9 +10,7 @@ mutable struct MlmnetNet_cv
     MLMNets::Array{MlmnetNet,1} 
     # Lambda penalties
     lambdas::Array{Float64,1}
-    alpha::Float64
-    lambdasL1::Array{Float64,1}
-    lambdasL2::Array{Float64,1}  
+    alphas::Array{Float64,1}
     
     # Response and predictor matrices
     data::RawData 
@@ -29,9 +27,9 @@ mutable struct MlmnetNet_cv
     # for each lambdaL1 and lambdaL2
     propZero::Array{Float64,3} 
     
-    MlmnetNet_cv(MLMNets, lambdasL1, lambdasL2, data, rowFolds, colFolds, dig) = 
-        new(MLMNets, lambdasL1, lambdasL2, data, rowFolds, colFolds, 
-            calc_mseNet(MLMNets, data, lambdasL1, lambdasL2, rowFolds, colFolds), 
+    MlmnetNet_cv(MLMNets, lambdas, alphas, data, rowFolds, colFolds, dig) = 
+        new(MLMNets, lambdas, alphas, data, rowFolds, colFolds, 
+            calc_mseNet(MLMNets, data, lambdasL1, lambdasL2, rowFolds, colFolds), # issue change to alpha lambda
             calc_prop_zeroNet(MLMNets, lambdasL1, lambdasL2; dig=dig))
 end
 
@@ -157,7 +155,7 @@ function mlmnetNet_cv(data::RawData,
                                               setStepsize=setStepsize, 
                                               funArgs...), dataFolds)
     
-    return MlmnetNet_cv(MLMNets, lambdasL1, lambdasL2, data, rowFolds, colFolds, dig)
+    return MlmnetNet_cv(MLMNets, lambdas, alphas, data, rowFolds, colFolds, dig) # issue: should be a different struct
 end
 
 
@@ -221,10 +219,11 @@ An Mlmnet_cv object.
 Folds are computed in parallel when possible. 
 
 """
-function mlmnetNet_cv(fun::Function, data::RawData, 
-                   lambdasL1::AbstractArray{Float64,1}, 
-                   lambdasL2::AbstractArray{Float64,1},
-                   rowFolds::Array{Array{Int64,1},1}, nColFolds::Int64; 
+function mlmnetNet_cv(data::RawData, 
+                   lambdas::AbstractArray{Float64,1}, 
+                   alphas::AbstractArray{Float64,1},
+                   rowFolds::Array{Array{Int64,1},1}, nColFolds::Int64;
+                   method::String="ista", isNaive::Bool=false, 
                    isXIntercept::Bool=true, isZIntercept::Bool=true, 
                    isXReg::BitArray{1}=trues(size(get_X(data), 2)), 
                    isZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
@@ -238,7 +237,8 @@ function mlmnetNet_cv(fun::Function, data::RawData,
     
     # Pass in user input row folds and randomly generated column folds to the 
     # base mlmnet_cv function
-    mlmnetNet_cv(fun, data, lambdasL1, lambdasL2, rowFolds, colFolds; 
+    mlmnetNet_cv(data, lambdas, alphas, rowFolds, colFolds; 
+              method = method, isNaive= isNaive,
               isXIntercept=isXIntercept, isZIntercept=isZIntercept, 
               isXReg=isXReg, isZReg=isZReg, 
               isXInterceptReg=isXInterceptReg, 
@@ -310,10 +310,11 @@ An Mlmnet_cv object.
 Folds are computed in parallel when possible. 
 
 """
-function mlmnetNet_cv(fun::Function, data::RawData, 
-                   lambdasL1::AbstractArray{Float64,1},
-                   lambdasL2::AbstractArray{Float64,1}, 
+function mlmnetNet_cv(data::RawData, 
+                   lambdas::AbstractArray{Float64,1},
+                   alphas::AbstractArray{Float64,1}, 
                    nRowFolds::Int64, colFolds::Array{Array{Int64,1},1}; 
+                   method::String="ista", isNaive::Bool=false,
                    isXIntercept::Bool=true, isZIntercept::Bool=true, 
                    isXReg::BitArray{1}=trues(size(get_X(data), 2)), 
                    isZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
@@ -327,7 +328,8 @@ function mlmnetNet_cv(fun::Function, data::RawData,
     
     # Pass in randomly generated row folds and user input column folds to the 
     # base mlmnet_cv function
-    mlmnetNet_cv(fun, data, lambdasL1, lambdasL2, rowFolds, colFolds; 
+    mlmnetNet_cv(data, lambdas, alphas, rowFolds, colFolds; 
+              method = method, isNaive= isNaive,
               isXIntercept=isXIntercept, isZIntercept=isZIntercept, 
               isXReg=isXReg, isZReg=isZReg, 
               isXInterceptReg=isXInterceptReg, 

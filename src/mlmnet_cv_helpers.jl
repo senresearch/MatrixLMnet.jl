@@ -164,7 +164,7 @@ function calc_mse(MLMNets::AbstractArray{Mlmnet,1}, data::RawData,
         resids = resid(MLMNets[j], holdoutFolds[j]) 
         for i in 1:length(lambdas)
             # MSE for lambda i and fold j   
-            mse[i,j] = mean(resids[i,:,:].^2) 
+            mse[i,j] = mean(resids[:,:,i].^2) 
         end
     end
 
@@ -216,7 +216,7 @@ function calc_prop_zero(MLMNets::AbstractArray{Mlmnet,1},
         for i in 1:length(lambdas)
             # Proportion of zero interaction coefficients for lambda i and 
             # fold j  
-            propZero[i,j] = mean(round.(coef(MLMNets[j])[i,xIdx,zIdx], 
+            propZero[i,j] = mean(round.(coef(MLMNets[j])[xIdx,zIdx,i], 
                                         digits=dig) .== 0) 
         end
     end
@@ -247,8 +247,8 @@ number of folds.
 
 """
 function calc_mseNet(MLMNets::AbstractArray{MlmnetNet,1}, data::RawData, 
-                  lambdasL1::AbstractArray{Float64,1}, 
-                  lambdasL2::AbstractArray{Float64,1},
+                  lambdas::AbstractArray{Float64,1}, 
+                  alphas::AbstractArray{Float64,1},
                   rowFolds::Array{Array{Int64,1},1}, 
                   colFolds::Array{Array{Int64,1},1})
 
@@ -272,15 +272,15 @@ function calc_mseNet(MLMNets::AbstractArray{MlmnetNet,1}, data::RawData,
     end
   
     # Initialize array to store test MSEs 
-    mse = Array{Float64}(undef, length(lambdasL1), length(lambdasL2), nFolds)
+    mse = Array{Float64}(undef, length(lambdas), length(alphas), nFolds)
     
     # Iterate through all folds and lambdas to calculate test MSE
     for j in 1:nFolds
         # Residuals for all lambdasL1 and lambdasL2 at fold j
         resids = resid(MLMNets[j], holdoutFolds[j]) 
-        for i in 1:length(lambdasL1), k in 1:length(lambdasL2)
+        for i in 1:length(lambdas), k in 1:length(alphas)
             # MSE for (lambdaL1 i, lambdaL2 k) and fold j   
-            mse[i,k,j] = mean(resids[i,k,:,:].^2) 
+            mse[i,k,j] = mean(resids[:,:,i,k].^2) 
         end
     end
 
@@ -311,15 +311,15 @@ number of folds.
 
 """
 function calc_prop_zeroNet(MLMNets::AbstractArray{MlmnetNet,1}, 
-                        lambdasL1::AbstractArray{Float64,1},
-                        lambdasL2::AbstractArray{Float64,1}; 
+                        lambdas::AbstractArray{Float64,1},
+                        alphas::AbstractArray{Float64,1}; 
                         dig::Int64=12)
     
     # Number of folds
     nFolds = length(MLMNets)
   
     # Initialize array to store proportions of zero interactions 
-    propZero = Array{Float64}(undef, length(lambdasL1), length(lambdasL2), nFolds)
+    propZero = Array{Float64}(undef, length(lambdas), length(alphas), nFolds)
 
     # Boolean arrays used to subset coefficients for interactions only
     xIdx = trues(MLMNets[1].data.p)
@@ -330,10 +330,10 @@ function calc_prop_zeroNet(MLMNets::AbstractArray{MlmnetNet,1},
     # Iterate through all folds and lambdas to calculate proportion of zero 
     # interaction coefficients 
     for j in 1:nFolds
-        for i in 1:length(lambdasL1), k in 1:length(lambdasL2)
+        for k in 1:length(alphas),i in 1:length(lambdas)
             # Proportion of zero interaction coefficients for lambda i and 
             # fold j  
-            propZero[i,k,j] = mean(round.(coef(MLMNets[j])[i,k,xIdx,zIdx], 
+            propZero[i,k,j] = mean(round.(coef(MLMNets[j])[xIdx,zIdx,i,k], 
                                         digits=dig) .== 0) 
         end
     end
