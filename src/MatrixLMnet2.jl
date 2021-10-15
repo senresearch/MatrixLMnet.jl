@@ -29,7 +29,6 @@ export Response, Predictors, RawData, get_X, get_Z, get_Y, contr,
 # Helper functions
 include("std_helpers.jl")
 include("mlmnet_helpers.jl")
-include("utils.jl")
 
 # L1 algorithms
 include("cd.jl")
