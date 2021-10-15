@@ -278,10 +278,10 @@ A function
 """
 function get_func(method::String )
     
-    dictMethod = Dict("ista"=>ista!,
+    dictMethod = Dict("ista"=>istaNet!,
                         "fista"=>fistaNet!,
-                        "fista_bt"=>fista_bt!,
-                        "admm"=>admm!);
+                        "fista_bt"=>fistaNet_bt!,
+                        "admm"=>admmNet!);
 
     
     return dictMethod[method]

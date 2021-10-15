@@ -15,9 +15,9 @@ using BenchmarkTools
 include("../src/sim_helpers.jl")
 
 
-######################################################
-# TEST 1 Lasso vs Elastic Net (𝛼=1) - Simulated Data #
-######################################################
+####################################################
+# TEST Lasso vs Elastic Net (𝛼=1) - Simulated Data #
+####################################################
 
 #=
 Description:
@@ -64,6 +64,37 @@ dat = RawData(Response(Y), Predictors(X, Z));
 λ = [10.0, 5.0, 3.0]
 α = [1.0]
 
+#############################################
+# TEST 1 Lasso vs Elastic Net (𝛼=1) - ista #
+#############################################
+
+
+# Elastic net penalized regression
+est1 = mlmnetNet(dat, λ, α, method = "ista", isZIntercept = false, isXIntercept = false, isVerbose = false);
+est_B_Net = est1.B[:, :, 3, 1];
+
+# Elastic net penalized regression
+est3 = mlmnetNet(dat, λ, method = "ista",  isZIntercept = false, isXIntercept = false, isVerbose = false);
+est_B_Net3 = est1.B[:, :, 3, 1];
+
+# Lasso penalized regression
+est2 = mlmnet(ista!, dat, λ, isZIntercept = false, isXIntercept = false, isVerbose = false);
+est_B_Lasso = est2.B[:, :, 3];
+
+
+
+println("Lasso vs Elastic Net when α=1 test 1 - ista: ", @test est_B_Net3 == est_B_Lasso)
+
+@btime  mlmnetNet(dat, λ, α, method = "ista", isZIntercept = false, isXIntercept = false, isVerbose = false);
+
+@btime  mlmnetNet(dat, λ, method = "ista",  isZIntercept = false, isXIntercept = false, isVerbose = false);
+
+@btime  mlmnet(ista!, dat, λ, isZIntercept = false, isXIntercept = false, isVerbose = false);
+
+#############################################
+# TEST 2 Lasso vs Elastic Net (𝛼=1) - fista #
+#############################################
+
 
 # Elastic net penalized regression
 est1 = mlmnetNet(dat, λ, α, method = "fista", isZIntercept = false, isXIntercept = false, isVerbose = false);
@@ -79,11 +110,66 @@ est_B_Lasso = est2.B[:, :, 3];
 
 
 
-println("Lasso vs Elastic Net when α=1 test 1: ", @test est_B_Net3 == est_B_Lasso)
+println("Lasso vs Elastic Net when α=1 test 2 - fista: ", @test est_B_Net3 == est_B_Lasso)
 
-# @btime  mlmnetNet(dat, λ, α, method = "fista", isZIntercept = false, isXIntercept = false, isVerbose = false);
+@btime  mlmnetNet(dat, λ, α, method = "fista", isZIntercept = false, isXIntercept = false, isVerbose = false);
 
-# @btime  mlmnetNet(dat, λ, method = "fista",  isZIntercept = false, isXIntercept = false, isVerbose = false);
+@btime  mlmnetNet(dat, λ, method = "fista",  isZIntercept = false, isXIntercept = false, isVerbose = false);
 
-# @btime  mlmnet(fista!, dat, λ, isZIntercept = false, isXIntercept = false, isVerbose = false);
+@btime  mlmnet(fista!, dat, λ, isZIntercept = false, isXIntercept = false, isVerbose = false);
+
+##########################################################
+# TEST 3 Lasso vs Elastic Net (𝛼=1) - fista backtracking #
+##########################################################
+
+
+# Elastic net penalized regression
+est1 = mlmnetNet(dat, λ, α, method = "fista_bt", isZIntercept = false, isXIntercept = false, isVerbose = false);
+est_B_Net = est1.B[:, :, 3, 1];
+
+# Elastic net penalized regression
+est3 = mlmnetNet(dat, λ, method = "fista_bt",  isZIntercept = false, isXIntercept = false, isVerbose = false);
+est_B_Net3 = est1.B[:, :, 3, 1];
+
+# Lasso penalized regression
+est2 = mlmnet(fista_bt!, dat, λ, isZIntercept = false, isXIntercept = false, isVerbose = false);
+est_B_Lasso = est2.B[:, :, 3];
+
+
+
+println("Lasso vs Elastic Net when α=1 test 3 - fista_bt: ", @test est_B_Net3 == est_B_Lasso)
+
+@btime  mlmnetNet(dat, λ, α, method = "fista_bt", isZIntercept = false, isXIntercept = false, isVerbose = false);
+
+@btime  mlmnetNet(dat, λ, method = "fista_bt",  isZIntercept = false, isXIntercept = false, isVerbose = false);
+
+@btime  mlmnet(fista_bt!, dat, λ, isZIntercept = false, isXIntercept = false, isVerbose = false);
+
+############################################
+# TEST 4 Lasso vs Elastic Net (𝛼=1) - admm #
+############################################
+
+
+# Elastic net penalized regression
+est1 = mlmnetNet(dat, λ, α, method = "admm", isZIntercept = false, isXIntercept = false, isVerbose = false);
+est_B_Net = est1.B[:, :, 3, 1];
+
+# Elastic net penalized regression
+est3 = mlmnetNet(dat, λ, method = "admm",  isZIntercept = false, isXIntercept = false, isVerbose = false);
+est_B_Net3 = est1.B[:, :, 3, 1];
+
+# Lasso penalized regression
+est2 = mlmnet(admm!, dat, λ, isZIntercept = false, isXIntercept = false, isVerbose = false);
+est_B_Lasso = est2.B[:, :, 3];
+
+
+
+println("Lasso vs Elastic Net when α=1 test 3 - admm: ", @test est_B_Net3 == est_B_Lasso)
+
+@btime  mlmnetNet(dat, λ, α, method = "admm", isZIntercept = false, isXIntercept = false, isVerbose = false);
+
+@btime  mlmnetNet(dat, λ, method = "admm",  isZIntercept = false, isXIntercept = false, isVerbose = false);
+
+@btime  mlmnet(admm!, dat, λ, isZIntercept = false, isXIntercept = false, isVerbose = false);
+
 
