@@ -20,7 +20,7 @@ Generate `k` non-overlapping folds.
 function make_folds(n::Int64, k::Int64=10, k2::Int64=k)
     
     if k > 1
-        # When k > 1, run the Kfolds function from MLBase to create folds
+        # When k > 1, run the Kfolds function from MLBase to create folds of length ~ n*(1-1/k)
         return collect(Array{Int64,1}, Kfold(n, k))
     elseif k == 1 
         # When k = 1, repeat all indices 1:n k2 times

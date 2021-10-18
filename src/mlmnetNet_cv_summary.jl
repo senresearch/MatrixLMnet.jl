@@ -163,18 +163,18 @@ function lambdaNet_min(MLMNet_cv::MlmnetNet_cv)
     min1StdErrIdy = argmin(abs.(mseMean[1:minIdx[1], 1:minIdy[1]].-mse1StdErr))[2]
     
     # Pull out summary information for these two lambdas
-    out = hcat(MLMNet_cv.lambdasL1[minIdx], MLMNet_cv.lambdasL2[minIdy], 
+    out = hcat(MLMNet_cv.lambdas[minIdx], MLMNet_cv.alphas[minIdy], 
                mseMean[minIdx, minIdy], prop_zeroMean[minIdx, minIdy])
-    out2 = hcat(MLMNet_cv.lambdasL1[min1StdErrIdx], MLMNet_cv.lambdasL2[min1StdErrIdy], 
+    out2 = hcat(MLMNet_cv.lambdas[min1StdErrIdx], MLMNet_cv.alphas[min1StdErrIdy], 
                 mseMean[min1StdErrIdx, min1StdErrIdy], 
                 prop_zeroMean[min1StdErrIdx, min1StdErrIdy])
     out = DataFrame(vcat(out, out2))
 
-    colnames = ["lambda1", "lambda2", "AvgMSE", "AvgPercentZero"];
+    colnames = ["Lambda", "Alpha", "AvgMSE", "AvgPercentZero"];
     rename!(out, Symbol.(colnames))
 
     # Add names first column
-    insertcols!(out, 1, :Name => ["(L1, L2)_min", "(L1, L2)_min1se"])
+    insertcols!(out, 1, :Name => ["(𝜆, 𝛼)_min", "(𝜆, 𝛼)_min1se"])
     # Add indices as second column
     insertcols!(out, 2, :Index => [Tuple([minIdx, minIdy]), Tuple([min1StdErrIdx, min1StdErrIdy])])
     

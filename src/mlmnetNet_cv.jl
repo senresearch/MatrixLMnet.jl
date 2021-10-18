@@ -238,7 +238,7 @@ function mlmnetNet_cv(data::RawData,
     # Pass in user input row folds and randomly generated column folds to the 
     # base mlmnet_cv function
     mlmnetNet_cv(data, lambdas, alphas, rowFolds, colFolds; 
-              method = method, isNaive= isNaive,
+              method=method, isNaive=isNaive,
               isXIntercept=isXIntercept, isZIntercept=isZIntercept, 
               isXReg=isXReg, isZReg=isZReg, 
               isXInterceptReg=isXInterceptReg, 
@@ -329,7 +329,7 @@ function mlmnetNet_cv(data::RawData,
     # Pass in randomly generated row folds and user input column folds to the 
     # base mlmnet_cv function
     mlmnetNet_cv(data, lambdas, alphas, rowFolds, colFolds; 
-              method = method, isNaive= isNaive,
+              method=method, isNaive=isNaive,
               isXIntercept=isXIntercept, isZIntercept=isZIntercept, 
               isXReg=isXReg, isZReg=isZReg, 
               isXInterceptReg=isXInterceptReg, 
@@ -441,4 +441,47 @@ function mlmnetNet_cv(data::RawData,
               isZInterceptReg=isZInterceptReg, 
               isVerbose=isVerbose, isStandardize=isStandardize, 
               stepsize=stepsize, setStepsize=setStepsize, dig=dig, funArgs...)
+end
+
+
+"""
+    mlmnetNet_cv(fun, data, lambdas, nRowFolds, nColFolds; 
+              isXIntercept, isZIntercept, isXReg, isZReg, 
+              isXInterceptReg, isZInterceptReg, isStandardize, isVerbose, 
+              stepsize, setStepsize, dig, funArgs...)
+
+Performs cross-validation for `mlmnet` using non-overlapping row and column 
+folds randomly generated using calls to `make_folds`. Calls the base 
+`mlmnet_cv` function. 
+
+
+"""
+function mlmnetNet_cv(data::RawData, 
+                      lambdas::Array{Float64,1},
+                      nRowFolds::Int64=10, nColFolds::Int64=10;
+                      method::String="ista", 
+                      isNaive::Bool=false,
+                      isXIntercept::Bool=true, isZIntercept::Bool=true, 
+                      isXReg::BitArray{1}=trues(size(get_X(data), 2)), 
+                      isZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
+                      isXInterceptReg::Bool=false, isZInterceptReg::Bool=false, 
+                      isStandardize::Bool=true, isVerbose::Bool=true, 
+                      stepsize::Float64=0.01, setStepsize::Bool=true, 
+                      dig::Int64=12, funArgs...)
+
+
+
+    alphas = [1.0]
+
+    # Pass in randomly generated row and column folds to the base mlmnet_cv 
+    # function
+    mlmnetNet_cv(data, lambdas, alphas, nRowFolds, nColFolds; 
+                  method=method, isNaive=isNaive, 
+                  isXIntercept=isXIntercept, isZIntercept=isZIntercept, 
+                  isXReg=isXReg, isZReg=isZReg, 
+                  isXInterceptReg=isXInterceptReg, 
+                  isZInterceptReg=isZInterceptReg, 
+                  isVerbose=isVerbose, isStandardize=isStandardize, 
+                  stepsize=stepsize, setStepsize=setStepsize, dig=dig, funArgs...)
+
 end

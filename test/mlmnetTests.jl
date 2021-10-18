@@ -23,7 +23,7 @@ include("../src/sim_helpers.jl")
 Description:
 -----------
 
-Model: 𝐘 = 𝐗 𝛃 𝐙 + 𝜎𝜖, with 𝜖∼𝑁(0,1) 𝛃
+Model: 𝐘 = 𝐗 𝛃 𝐙' + 𝜎𝜖, with 𝜖∼𝑁(0,1) 
 
 Simulate data set consisting  of 20/20/200 observations and 8 predictors.
 We let 𝛽₁ = (3, 1.5, 0, 0, 2, 0, 0, 0), 𝛽₂ = (0, 1.5, 0, 3.5, 2, 0, 0 , 2) where
@@ -49,7 +49,6 @@ end
 X = simulateCorrelatedData(matCor, n);
 
 # Generate response
-Random.seed!(705)
 Y1 = X*β1 + σ*rand(Normal(0, 1), n);
 Y2 = X*β2 + σ*rand(Normal(0, 1), n);
 Y = hcat(Y1, Y2);
@@ -172,4 +171,4 @@ println("Lasso vs Elastic Net when α=1 test 3 - admm: ", @test est_B_Net3 == es
 
 @btime  mlmnet(admm!, dat, λ, isZIntercept = false, isXIntercept = false, isVerbose = false);
 
-
+println("Tests finished!")
