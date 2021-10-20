@@ -99,30 +99,30 @@ function predict(MLMNet::Mlmnet, lambda::Float64,
                  newPredictors::Predictors=MLMNet.data.predictors)
     
     # Include X and Z intercepts in new predictors if necessary
-    if MLMNet.data.predictors.isXIntercept==true && 
-       newPredictors.isXIntercept==false
+    if MLMNet.data.predictors.hasXIntercept==true && 
+       newPredictors.hasXIntercept==false
         newPredictors.X = add_intercept(newPredictors.X)
-        newPredictors.isXIntercept = true
+        newPredictors.hasXIntercept = true
         println("Adding X intercept to newPredictors.")
   	end
-    if MLMNet.data.predictors.isZIntercept==true && 
-       newPredictors.isZIntercept==false
+    if MLMNet.data.predictors.hasZIntercept==true && 
+       newPredictors.hasZIntercept==false
         newPredictors.Z = add_intercept(newPredictors.Z)
-        newPredictors.isZIntercept = true
+        newPredictors.hasZIntercept = true
         println("Adding Z intercept to newPredictors.")
   	end
 
     # Remove X and Z intercepts in new predictors if necessary
-    if MLMNet.data.predictors.isXIntercept==false && 
-       newPredictors.isXIntercept==true
+    if MLMNet.data.predictors.hasXIntercept==false && 
+       newPredictors.hasXIntercept==true
         newPredictors.X = remove_intercept(newPredictors.X)
-        newPredictors.isXIntercept = false
+        newPredictors.hasXIntercept = false
         println("Removing X intercept from newPredictors.")
     end
-    if MLMNet.data.predictors.isZIntercept==false && 
-       newPredictors.isZIntercept==true
+    if MLMNet.data.predictors.hasZIntercept==false && 
+       newPredictors.hasZIntercept==true
         newPredictors.Z = remove_intercept(newPredictors.Z)
-        newPredictors.isZIntercept = false
+        newPredictors.hasZIntercept = false
         println("Removing Z intercept from newPredictors.")
     end
     
@@ -224,33 +224,33 @@ Calculate residuals of an MLMNet object, given a lambda
 function resid(MLMNet::Mlmnet, lambda::Float64, newData::RawData=MLMNet.data)
     
     # Include X and Z intercepts in new data if necessary
-    if MLMNet.data.predictors.isXIntercept==true && 
-       newData.predictors.isXIntercept==false
+    if MLMNet.data.predictors.hasXIntercept==true && 
+       newData.predictors.hasXIntercept==false
         newData.predictors.X = add_intercept(newData.predictors.X)
-        newData.predictors.isXIntercept = true
+        newData.predictors.hasXIntercept = true
         newData.p = newData.p + 1
         println("Adding X intercept to newData.")
     end
-    if MLMNet.data.predictors.isZIntercept==true && 
-       newData.predictors.isZIntercept==false
+    if MLMNet.data.predictors.hasZIntercept==true && 
+       newData.predictors.hasZIntercept==false
         newData.predictors.Z = add_intercept(newData.predictors.Z)
-        newData.predictors.isZIntercept = true
+        newData.predictors.hasZIntercept = true
         newData.q = newData.q + 1
         println("Adding Z intercept to newData.")
     end
     
     # Remove X and Z intercepts in new data if necessary
-    if MLMNet.data.predictors.isXIntercept==false && 
-       newData.predictors.isXIntercept==true
+    if MLMNet.data.predictors.hasXIntercept==false && 
+       newData.predictors.hasXIntercept==true
         newData.predictors.X = remove_intercept(newData.predictors.X)
-        newData.predictors.isXIntercept = false
+        newData.predictors.hasXIntercept = false
         newData.p = newData.p - 1
         println("Removing X intercept from newData.")
     end
-    if MLMNet.data.predictors.isZIntercept==false && 
-       newData.predictors.isZIntercept==true
+    if MLMNet.data.predictors.hasZIntercept==false && 
+       newData.predictors.hasZIntercept==true
         newData.predictors.Z = remove_intercept(newData.predictors.Z)
-        newData.predictors.isZIntercept = false
+        newData.predictors.hasZIntercept = false
         newData.q = newData.q - 1
         println("Removing Z intercept from newData.")
     end
@@ -399,30 +399,30 @@ function predict(MLMNet::MlmnetNet, lambda::Float64, alpha::Float64,
                  newPredictors::Predictors=MLMNet.data.predictors)
     
     # Include X and Z intercepts in new predictors if necessary
-    if MLMNet.data.predictors.isXIntercept==true && 
-       newPredictors.isXIntercept==false
+    if MLMNet.data.predictors.hasXIntercept==true && 
+       newPredictors.hasXIntercept==false
         newPredictors.X = add_intercept(newPredictors.X)
-        newPredictors.isXIntercept = true
+        newPredictors.hasXIntercept = true
         println("Adding X intercept to newPredictors.")
   	end
-    if MLMNet.data.predictors.isZIntercept==true && 
-       newPredictors.isZIntercept==false
+    if MLMNet.data.predictors.hasZIntercept==true && 
+       newPredictors.hasZIntercept==false
         newPredictors.Z = add_intercept(newPredictors.Z)
-        newPredictors.isZIntercept = true
+        newPredictors.hasZIntercept = true
         println("Adding Z intercept to newPredictors.")
   	end
 
     # Remove X and Z intercepts in new predictors if necessary
-    if MLMNet.data.predictors.isXIntercept==false && 
-       newPredictors.isXIntercept==true
+    if MLMNet.data.predictors.hasXIntercept==false && 
+       newPredictors.hasXIntercept==true
         newPredictors.X = remove_intercept(newPredictors.X)
-        newPredictors.isXIntercept = false
+        newPredictors.hasXIntercept = false
         println("Removing X intercept from newPredictors.")
     end
-    if MLMNet.data.predictors.isZIntercept==false && 
-       newPredictors.isZIntercept==true
+    if MLMNet.data.predictors.hasZIntercept==false && 
+       newPredictors.hasZIntercept==true
         newPredictors.Z = remove_intercept(newPredictors.Z)
-        newPredictors.isZIntercept = false
+        newPredictors.hasZIntercept = false
         println("Removing Z intercept from newPredictors.")
     end
     
@@ -525,33 +525,33 @@ Calculate residuals of an MLMNet object, given a lambda
 function resid(MLMNet::MlmnetNet, lambda::Float64, alpha::Float64, newData::RawData=MLMNet.data)
     
     # Include X and Z intercepts in new data if necessary
-    if MLMNet.data.predictors.isXIntercept==true && 
-       newData.predictors.isXIntercept==false
+    if MLMNet.data.predictors.hasXIntercept==true && 
+       newData.predictors.hasXIntercept==false
         newData.predictors.X = add_intercept(newData.predictors.X)
-        newData.predictors.isXIntercept = true
+        newData.predictors.hasXIntercept = true
         newData.p = newData.p + 1
         println("Adding X intercept to newData.")
     end
-    if MLMNet.data.predictors.isZIntercept==true && 
-       newData.predictors.isZIntercept==false
+    if MLMNet.data.predictors.hasZIntercept==true && 
+       newData.predictors.hasZIntercept==false
         newData.predictors.Z = add_intercept(newData.predictors.Z)
-        newData.predictors.isZIntercept = true
+        newData.predictors.hasZIntercept = true
         newData.q = newData.q + 1
         println("Adding Z intercept to newData.")
     end
     
     # Remove X and Z intercepts in new data if necessary
-    if MLMNet.data.predictors.isXIntercept==false && 
-       newData.predictors.isXIntercept==true
+    if MLMNet.data.predictors.hasXIntercept==false && 
+       newData.predictors.hasXIntercept==true
         newData.predictors.X = remove_intercept(newData.predictors.X)
-        newData.predictors.isXIntercept = false
+        newData.predictors.hasXIntercept = false
         newData.p = newData.p - 1
         println("Removing X intercept from newData.")
     end
-    if MLMNet.data.predictors.isZIntercept==false && 
-       newData.predictors.isZIntercept==true
+    if MLMNet.data.predictors.hasZIntercept==false && 
+       newData.predictors.hasZIntercept==true
         newData.predictors.Z = remove_intercept(newData.predictors.Z)
-        newData.predictors.isZIntercept = false
+        newData.predictors.hasZIntercept = false
         newData.q = newData.q - 1
         println("Removing Z intercept from newData.")
     end

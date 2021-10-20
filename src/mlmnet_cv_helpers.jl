@@ -151,8 +151,8 @@ function calc_mse(MLMNets::AbstractArray{Mlmnet,1}, data::RawData,
                                                    collect(1:data.n)),:], 
                              get_Z(data)[findnotin(colFolds[i], 
                                                    collect(1:data.m)),:], 
-                             data.predictors.isXIntercept, 
-                             data.predictors.isZIntercept))
+                             data.predictors.hasXIntercept, 
+                             data.predictors.hasZIntercept))
     end
   
     # Initialize array to store test MSEs 
@@ -206,9 +206,9 @@ function calc_prop_zero(MLMNets::AbstractArray{Mlmnet,1},
 
     # Boolean arrays used to subset coefficients for interactions only
     xIdx = trues(MLMNets[1].data.p)
-    xIdx[1] = MLMNets[1].data.predictors.isXIntercept==false
+    xIdx[1] = MLMNets[1].data.predictors.hasXIntercept==false
     zIdx = trues(MLMNets[1].data.q)
-    zIdx[1] = MLMNets[1].data.predictors.isZIntercept==false 
+    zIdx[1] = MLMNets[1].data.predictors.hasZIntercept==false 
   
     # Iterate through all folds and lambdas to calculate proportion of zero 
     # interaction coefficients 
@@ -267,8 +267,8 @@ function calc_mseNet(MLMNets::AbstractArray{MlmnetNet,1}, data::RawData,
                                                    collect(1:data.n)),:], 
                              get_Z(data)[findnotin(colFolds[i], 
                                                    collect(1:data.m)),:], 
-                             data.predictors.isXIntercept, 
-                             data.predictors.isZIntercept))
+                             data.predictors.hasXIntercept, 
+                             data.predictors.hasZIntercept))
     end
   
     # Initialize array to store test MSEs 
@@ -323,9 +323,9 @@ function calc_prop_zeroNet(MLMNets::AbstractArray{MlmnetNet,1},
 
     # Boolean arrays used to subset coefficients for interactions only
     xIdx = trues(MLMNets[1].data.p)
-    xIdx[1] = MLMNets[1].data.predictors.isXIntercept==false
+    xIdx[1] = MLMNets[1].data.predictors.hasXIntercept==false
     zIdx = trues(MLMNets[1].data.q)
-    zIdx[1] = MLMNets[1].data.predictors.isZIntercept==false 
+    zIdx[1] = MLMNets[1].data.predictors.hasZIntercept==false 
   
     # Iterate through all folds and lambdas to calculate proportion of zero 
     # interaction coefficients 

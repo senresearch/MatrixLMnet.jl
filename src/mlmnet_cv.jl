@@ -35,8 +35,8 @@ end
 
 """
     mlmnet_cv(fun, data, lambdas, rowFolds, colFolds; 
-              isXIntercept, isZIntercept, isXReg, isZReg, 
-              isXInterceptReg, isZInterceptReg, isStandardize, isVerbose, 
+              hasXIntercept, hasZIntercept, toXReg, toZReg, 
+              toXInterceptReg, toZInterceptReg, toStandardize, isVerbose, 
               stepsize, setStepsize, dig, funArgs...)
 
 Performs cross-validation for `mlmnet` using row and column folds from user 
@@ -59,21 +59,21 @@ input.
 
 # Keyword arguments
 
-- isXIntercept = boolean flag indicating whether or not to include an `X` 
+- hasXIntercept = boolean flag indicating whether or not to include an `X` 
   intercept (row main effects). Defaults to `true`. 
-- isZIntercept = boolean flag indicating whether or not to include a `Z` 
+- hasZIntercept = boolean flag indicating whether or not to include a `Z` 
   intercept (column main effects). Defaults to `true`.
-- isXReg = 1d array of bit flags indicating whether or not to regularize each 
+- toXReg = 1d array of bit flags indicating whether or not to regularize each 
   of the `X` (row) effects. Defaults to 2d array of `true`s with length 
   equal to the number of `X` effects (equivalent to `data.p`). 
-- isZReg = 1d array of bit flags indicating whether or not to regularize each 
+- toZReg = 1d array of bit flags indicating whether or not to regularize each 
   of the `Z` (column) effects. Defaults to 2d array of `true`s with length 
   equal to the number of `Z` effects (equivalent to `data.q`). 
-- isXInterceptReg = boolean flag indicating whether or not to regularize the 
+- toXInterceptReg = boolean flag indicating whether or not to regularize the 
   `X` intercept Defaults to `false`. 
-- isZInterceptReg = boolean flag indicating whether or not to regularize the 
+- toZInterceptReg = boolean flag indicating whether or not to regularize the 
   `Z` intercept. Defaults to `false`. 
-- isStandardize = boolean flag indicating if the columns of `X` and `Z` 
+- toStandardize = boolean flag indicating if the columns of `X` and `Z` 
   should be standardized (to mean 0, standard deviation 1). Defaults to `true`.
 - isVerbose = boolean flag indicating whether or not to print messages.  
   Defaults to `true`. 
@@ -99,11 +99,11 @@ function mlmnet_cv(fun::Function, data::RawData,
                    lambdas::AbstractArray{Float64,1}, 
                    rowFolds::Array{Array{Int64,1},1}, 
                    colFolds::Array{Array{Int64,1},1}; 
-                   isXIntercept::Bool=true, isZIntercept::Bool=true, 
-                   isXReg::BitArray{1}=trues(size(get_X(data),2)), 
-                   isZReg::BitArray{1}=trues(size(get_Z(data),2)), 
-                   isXInterceptReg::Bool=false, isZInterceptReg::Bool=false, 
-                   isStandardize::Bool=true, isVerbose::Bool=true, 
+                   hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                   toXReg::BitArray{1}=trues(size(get_X(data),2)), 
+                   toZReg::BitArray{1}=trues(size(get_Z(data),2)), 
+                   toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
+                   toStandardize::Bool=true, isVerbose::Bool=true, 
                    stepsize::Float64=0.01, setStepsize::Bool=true, 
                    dig::Int64=12, funArgs...)
                    # tuningMode::String = "l1, l2"
@@ -130,20 +130,20 @@ function mlmnet_cv(fun::Function, data::RawData,
                                                     colFolds[i]]), 
                                Predictors(get_X(data)[rowFolds[i],:], 
                                           get_Z(data)[colFolds[i],:],  
-                                          data.predictors.isXIntercept, 
-                                          data.predictors.isZIntercept))
+                                          data.predictors.hasXIntercept, 
+                                          data.predictors.hasZIntercept))
     end
     
 
     # Run mlmnet on each RawData object, in parallel when possible
 
     MLMNets = Distributed.pmap(data -> mlmnet(fun, data, lambdas; 
-                                              isXIntercept=isXIntercept, 
-                                              isZIntercept=isZIntercept, 
-                                              isXReg=isXReg, isZReg=isZReg, 
-                                              isXInterceptReg=isXInterceptReg, 
-                                              isZInterceptReg=isZInterceptReg, 
-                                              isStandardize=isStandardize, 
+                                              hasXIntercept=hasXIntercept, 
+                                              hasZIntercept=hasZIntercept, 
+                                              toXReg=toXReg, toZReg=toZReg, 
+                                              toXInterceptReg=toXInterceptReg, 
+                                              toZInterceptReg=toZInterceptReg, 
+                                              toStandardize=toStandardize, 
                                               isVerbose=isVerbose, 
                                               stepsize=stepsize, 
                                               setStepsize=setStepsize, 
@@ -155,8 +155,8 @@ end
 
 """
     mlmnet_cv(fun, data, lambdas, rowFolds, nColFolds; 
-              isXIntercept, isZIntercept, isXReg, isZReg, 
-              isXInterceptReg, isZInterceptReg, isStandardize, isVerbose, 
+              hasXIntercept, hasZIntercept, toXReg, toZReg, 
+              toXInterceptReg, toZInterceptReg, toStandardize, isVerbose, 
               stepsize, setStepsize, dig, funArgs...)
 
 Performs cross-validation for `mlmnet` using row folds from user input and 
@@ -178,21 +178,21 @@ Calls the base `mlmnet_cv` function.
 
 # Keyword arguments
 
-- isXIntercept = boolean flag indicating whether or not to include an `X` 
+- hasXIntercept = boolean flag indicating whether or not to include an `X` 
   intercept (row main effects). Defaults to `true`. 
-- isZIntercept = boolean flag indicating whether or not to include a `Z` 
+- hasZIntercept = boolean flag indicating whether or not to include a `Z` 
   intercept (column main effects). Defaults to `true`.
-- isXReg = 1d array of bit flags indicating whether or not to regularize each 
+- toXReg = 1d array of bit flags indicating whether or not to regularize each 
   of the `X` (row) effects. Defaults to 2d array of `true`s with length 
   equal to the number of `X` effects (equivalent to `data.p`). 
-- isZReg = 1d array of bit flags indicating whether or not to regularize each 
+- toZReg = 1d array of bit flags indicating whether or not to regularize each 
   of the `Z` (column) effects. Defaults to 2d array of `true`s with length 
   equal to the number of `Z` effects (equivalent to `data.q`). 
-- isXInterceptReg = boolean flag indicating whether or not to regularize the 
+- toXInterceptReg = boolean flag indicating whether or not to regularize the 
   `X` intercept Defaults to `false`. 
-- isZInterceptReg = boolean flag indicating whether or not to regularize the 
+- toZInterceptReg = boolean flag indicating whether or not to regularize the 
   `Z` intercept. Defaults to `false`. 
-- isStandardize = boolean flag indicating if the columns of `X` and `Z` 
+- toStandardize = boolean flag indicating if the columns of `X` and `Z` 
   should be standardized (to mean 0, standard deviation 1). Defaults to `true`.
 - isVerbose = boolean flag indicating whether or not to print messages.  
   Defaults to `true`. 
@@ -216,11 +216,11 @@ Folds are computed in parallel when possible.
 function mlmnet_cv(fun::Function, data::RawData, 
                    lambdas::AbstractArray{Float64,1}, 
                    rowFolds::Array{Array{Int64,1},1}, nColFolds::Int64; 
-                   isXIntercept::Bool=true, isZIntercept::Bool=true, 
-                   isXReg::BitArray{1}=trues(size(get_X(data),2)), 
-                   isZReg::BitArray{1}=trues(size(get_Z(data),2)), 
-                   isXInterceptReg::Bool=false, isZInterceptReg::Bool=false, 
-                   isStandardize::Bool=true, isVerbose::Bool=true, 
+                   hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                   toXReg::BitArray{1}=trues(size(get_X(data),2)), 
+                   toZReg::BitArray{1}=trues(size(get_Z(data),2)), 
+                   toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
+                   toStandardize::Bool=true, isVerbose::Bool=true, 
                    stepsize::Float64=0.01, setStepsize::Bool=true, 
                    dig::Int64=12, funArgs...)
     
@@ -230,19 +230,19 @@ function mlmnet_cv(fun::Function, data::RawData,
     # Pass in user input row folds and randomly generated column folds to the 
     # base mlmnet_cv function
     mlmnet_cv(fun, data, lambdas, rowFolds, colFolds; 
-              isXIntercept=isXIntercept, isZIntercept=isZIntercept, 
-              isXReg=isXReg, isZReg=isZReg, 
-              isXInterceptReg=isXInterceptReg, 
-              isZInterceptReg=isZInterceptReg, 
-              isVerbose=isVerbose, isStandardize=isStandardize, 
+              hasXIntercept=hasXIntercept, hasZIntercept=hasZIntercept, 
+              toXReg=toXReg, toZReg=toZReg, 
+              toXInterceptReg=toXInterceptReg, 
+              toZInterceptReg=toZInterceptReg, 
+              isVerbose=isVerbose, toStandardize=toStandardize, 
               stepsize=stepsize, setStepsize=setStepsize, dig=dig, funArgs...)
 end
 
 
 """
     mlmnet_cv(fun, data, lambdas, nRowFolds, colFolds; 
-              isXIntercept, isZIntercept, isXReg, isZReg, 
-              isXInterceptReg, isZInterceptReg, isStandardize, isVerbose, 
+              hasXIntercept, hasZIntercept, toXReg, toZReg, 
+              toXInterceptReg, toZInterceptReg, toStandardize, isVerbose, 
               stepsize, setStepsize, dig, funArgs...)
 
 Performs cross-validation for `mlmnet` using non-overlapping row folds 
@@ -264,21 +264,21 @@ input. Calls the base `mlmnet_cv` function.
 
 # Keyword arguments
 
-- isXIntercept = boolean flag indicating whether or not to include an `X` 
+- hasXIntercept = boolean flag indicating whether or not to include an `X` 
   intercept (row main effects). Defaults to `true`. 
-- isZIntercept = boolean flag indicating whether or not to include a `Z` 
+- hasZIntercept = boolean flag indicating whether or not to include a `Z` 
   intercept (column main effects). Defaults to `true`.
-- isXReg = 1d array of bit flags indicating whether or not to regularize each 
+- toXReg = 1d array of bit flags indicating whether or not to regularize each 
   of the `X` (row) effects. Defaults to 2d array of `true`s with length 
   equal to the number of `X` effects (equivalent to `data.p`). 
-- isZReg = 1d array of bit flags indicating whether or not to regularize each 
+- toZReg = 1d array of bit flags indicating whether or not to regularize each 
   of the `Z` (column) effects. Defaults to 2d array of `true`s with length 
   equal to the number of `Z` effects (equivalent to `data.q`). 
-- isXInterceptReg = boolean flag indicating whether or not to regularize the 
+- toXInterceptReg = boolean flag indicating whether or not to regularize the 
   `X` intercept Defaults to `false`. 
-- isZInterceptReg = boolean flag indicating whether or not to regularize the 
+- toZInterceptReg = boolean flag indicating whether or not to regularize the 
   `Z` intercept. Defaults to `false`. 
-- isStandardize = boolean flag indicating if the columns of `X` and `Z` 
+- toStandardize = boolean flag indicating if the columns of `X` and `Z` 
   should be standardized (to mean 0, standard deviation 1). Defaults to `true`.
 - isVerbose = boolean flag indicating whether or not to print messages.  
   Defaults to `true`. 
@@ -302,11 +302,11 @@ Folds are computed in parallel when possible.
 function mlmnet_cv(fun::Function, data::RawData, 
                    lambdas::AbstractArray{Float64,1}, 
                    nRowFolds::Int64, colFolds::Array{Array{Int64,1},1}; 
-                   isXIntercept::Bool=true, isZIntercept::Bool=true, 
-                   isXReg::BitArray{1}=trues(size(get_X(data),2)), 
-                   isZReg::BitArray{1}=trues(size(get_Z(data),2)), 
-                   isXInterceptReg::Bool=false, isZInterceptReg::Bool=false, 
-                   isStandardize::Bool=true, isVerbose::Bool=true, 
+                   hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                   toXReg::BitArray{1}=trues(size(get_X(data),2)), 
+                   toZReg::BitArray{1}=trues(size(get_Z(data),2)), 
+                   toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
+                   toStandardize::Bool=true, isVerbose::Bool=true, 
                    stepsize::Float64=0.01, setStepsize::Bool=true, 
                    dig::Int64=12, funArgs...)
     
@@ -316,19 +316,19 @@ function mlmnet_cv(fun::Function, data::RawData,
     # Pass in randomly generated row folds and user input column folds to the 
     # base mlmnet_cv function
     mlmnet_cv(fun, data, lambdas, rowFolds, colFolds; 
-              isXIntercept=isXIntercept, isZIntercept=isZIntercept, 
-              isXReg=isXReg, isZReg=isZReg, 
-              isXInterceptReg=isXInterceptReg, 
-              isZInterceptReg=isZInterceptReg, 
-              isVerbose=isVerbose, isStandardize=isStandardize, 
+              hasXIntercept=hasXIntercept, hasZIntercept=hasZIntercept, 
+              toXReg=toXReg, toZReg=toZReg, 
+              toXInterceptReg=toXInterceptReg, 
+              toZInterceptReg=toZInterceptReg, 
+              isVerbose=isVerbose, toStandardize=toStandardize, 
               stepsize=stepsize, setStepsize=setStepsize, dig=dig, funArgs...)
 end
 
 
 """
     mlmnet_cv(fun, data, lambdas, nRowFolds, nColFolds; 
-              isXIntercept, isZIntercept, isXReg, isZReg, 
-              isXInterceptReg, isZInterceptReg, isStandardize, isVerbose, 
+              hasXIntercept, hasZIntercept, toXReg, toZReg, 
+              toXInterceptReg, toZInterceptReg, toStandardize, isVerbose, 
               stepsize, setStepsize, dig, funArgs...)
 
 Performs cross-validation for `mlmnet` using non-overlapping row and column 
@@ -350,21 +350,21 @@ folds randomly generated using calls to `make_folds`. Calls the base
 
 # Keyword arguments
 
-- isXIntercept = boolean flag indicating whether or not to include an `X` 
+- hasXIntercept = boolean flag indicating whether or not to include an `X` 
   intercept (row main effects). Defaults to `true`. 
-- isZIntercept = boolean flag indicating whether or not to include a `Z` 
+- hasZIntercept = boolean flag indicating whether or not to include a `Z` 
   intercept (column main effects). Defaults to `true`.
-- isXReg = 1d array of bit flags indicating whether or not to regularize each 
+- toXReg = 1d array of bit flags indicating whether or not to regularize each 
   of the `X` (row) effects. Defaults to 2d array of `true`s with length 
   equal to the number of `X` effects (equivalent to `data.p`). 
-- isZReg = 1d array of bit flags indicating whether or not to regularize each 
+- toZReg = 1d array of bit flags indicating whether or not to regularize each 
   of the `Z` (column) effects. Defaults to 2d array of `true`s with length 
   equal to the number of `Z` effects (equivalent to `data.q`). 
-- isXInterceptReg = boolean flag indicating whether or not to regularize the 
+- toXInterceptReg = boolean flag indicating whether or not to regularize the 
   `X` intercept Defaults to `false`. 
-- isZInterceptReg = boolean flag indicating whether or not to regularize the 
+- toZInterceptReg = boolean flag indicating whether or not to regularize the 
   `Z` intercept. Defaults to `false`. 
-- isStandardize = boolean flag indicating if the columns of `X` and `Z` 
+- toStandardize = boolean flag indicating if the columns of `X` and `Z` 
   should be standardized (to mean 0, standard deviation 1). Defaults to `true`.
 - isVerbose = boolean flag indicating whether or not to print messages.  
   Defaults to `true`. 
@@ -402,11 +402,11 @@ be less consequential.
 """
 function mlmnet_cv(fun::Function, data::RawData, lambdas::Array{Float64,1}, 
                    nRowFolds::Int64=10, nColFolds::Int64=10; 
-                   isXIntercept::Bool=true, isZIntercept::Bool=true, 
-                   isXReg::BitArray{1}=trues(size(get_X(data),2)), 
-                   isZReg::BitArray{1}=trues(size(get_Z(data),2)), 
-                   isXInterceptReg::Bool=false, isZInterceptReg::Bool=false, 
-                   isStandardize::Bool=true, isVerbose::Bool=true, 
+                   hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                   toXReg::BitArray{1}=trues(size(get_X(data),2)), 
+                   toZReg::BitArray{1}=trues(size(get_Z(data),2)), 
+                   toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
+                   toStandardize::Bool=true, isVerbose::Bool=true, 
                    stepsize::Float64=0.01, setStepsize::Bool=true, 
                    dig::Int64=12, funArgs...)
 	
@@ -417,10 +417,10 @@ function mlmnet_cv(fun::Function, data::RawData, lambdas::Array{Float64,1},
     # Pass in randomly generated row and column folds to the base mlmnet_cv 
     # function
     mlmnet_cv(fun, data, lambdas, rowFolds, colFolds; 
-              isXIntercept=isXIntercept, isZIntercept=isZIntercept, 
-              isXReg=isXReg, isZReg=isZReg, 
-              isXInterceptReg=isXInterceptReg, 
-              isZInterceptReg=isZInterceptReg, 
-              isVerbose=isVerbose, isStandardize=isStandardize, 
+              hasXIntercept=hasXIntercept, hasZIntercept=hasZIntercept, 
+              toXReg=toXReg, toZReg=toZReg, 
+              toXInterceptReg=toXInterceptReg, 
+              toZInterceptReg=toZInterceptReg, 
+              isVerbose=isVerbose, toStandardize=toStandardize, 
               stepsize=stepsize, setStepsize=setStepsize, dig=dig, funArgs...)
 end

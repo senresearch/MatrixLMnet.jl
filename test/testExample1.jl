@@ -65,11 +65,11 @@ dat = RawData(Response(Y), Predictors(X, Z));
 
 
 # Elastic net penalized regression
-est1 = mlmnetNet(fistaNet!, dat, λ, α, isZIntercept = false, isXIntercept = false)
+est1 = mlmnetNet(fistaNet!, dat, λ, α, hasZIntercept = false, hasXIntercept = false)
 est_B_Net = est1.B[:, :, 3, 1]
 
 # Lasso penalized regression
-est2 = mlmnet(fista!, dat, λ, isZIntercept = false, isXIntercept = false)
+est2 = mlmnet(fista!, dat, λ, hasZIntercept = false, hasXIntercept = false)
 est_B_Lasso = est2.B[:, :, 3]
 
 println("Lasso vs Elastic Net when α=1 test: ", @test est_B_Net == est_B_Lasso)

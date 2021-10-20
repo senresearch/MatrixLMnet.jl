@@ -132,8 +132,8 @@ end
 
 """
     mlmnet(fun, data, lambdas; 
-           isXIntercept, isZIntercept, isXReg, isZReg, 
-           isXInterceptReg, isZInterceptReg, isStandardize, isVerbose, 
+           hasXIntercept, hasZIntercept, toXReg, toZReg, 
+           toXInterceptReg, toZInterceptReg, toStandardize, isVerbose, 
            stepsize, setStepsize, funArgs...)
 
 Standardizes X and Z predictor matrices, calculates fixed step size, performs 
@@ -150,21 +150,21 @@ order. If they are not in descending order, they will be sorted.
 
 # Keyword arguments
 
-- isXIntercept = boolean flag indicating whether or not to include an `X` 
+- hasXIntercept = boolean flag indicating whether or not to include an `X` 
   intercept (row main effects). Defaults to `true`. 
-- isZIntercept = boolean flag indicating whether or not to include a `Z` 
+- hasZIntercept = boolean flag indicating whether or not to include a `Z` 
   intercept (column main effects). Defaults to `true`.
-- isXReg = 1d array of bit flags indicating whether or not to regularize each 
+- toXReg = 1d array of bit flags indicating whether or not to regularize each 
   of the `X` (row) effects. Defaults to 2d array of `true`s with length 
   equal to the number of `X` effects (equivalent to `data.p`). 
-- isZReg = 1d array of bit flags indicating whether or not to regularize each 
+- toZReg = 1d array of bit flags indicating whether or not to regularize each 
   of the `Z` (column) effects. Defaults to 2d array of `true`s with length 
   equal to the number of `Z` effects (equivalent to `data.q`). 
-- isXInterceptReg = boolean flag indicating whether or not to regularize the 
+- toXInterceptReg = boolean flag indicating whether or not to regularize the 
   `X` intercept Defaults to `false`. 
-- isZInterceptReg = boolean flag indicating whether or not to regularize the 
+- toZInterceptReg = boolean flag indicating whether or not to regularize the 
   `Z` intercept. Defaults to `false`. 
-- isStandardize = boolean flag indicating if the columns of `X` and `Z` 
+- toStandardize = boolean flag indicating if the columns of `X` and `Z` 
   should be standardized (to mean 0, standard deviation 1). Defaults to `true`.
 - isVerbose = boolean flag indicating whether or not to print messages.  
   Defaults to `true`. 
@@ -198,75 +198,75 @@ be less consequential.
 
 """
 function mlmnet(fun::Function, data::RawData, lambdas::AbstractArray{Float64,1}; 
-                isXIntercept::Bool=true, isZIntercept::Bool=true, 
-                isXReg::BitArray{1}=trues(data.p), 
-                isZReg::BitArray{1}=trues(data.q),     
-                isXInterceptReg::Bool=false, isZInterceptReg::Bool=false, 
-                isStandardize::Bool=true, isVerbose::Bool=true, 
+                hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                toXReg::BitArray{1}=trues(data.p), 
+                toZReg::BitArray{1}=trues(data.q),     
+                toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
+                toStandardize::Bool=true, isVerbose::Bool=true, 
                 stepsize::Float64=0.01, setStepsize::Bool=true, funArgs...)
     
-    # Ensure that isXReg and isZReg have same length as columns of X and Z
-    if length(isXReg) != data.p
-        error("isXReg does not have same length as number of columns in X.")
+    # Ensure that toXReg and toZReg have same length as columns of X and Z
+    if length(toXReg) != data.p
+        error("toXReg does not have same length as number of columns in X.")
     end
-    if length(isZReg) != data.q
-        error("isZReg does not have same length as number of columns in Z.")
+    if length(toZReg) != data.q
+        error("toZReg does not have same length as number of columns in Z.")
     end 
     
     # Add X and Z intercepts if necessary
-    # Update isXReg and isZReg accordingly
-    if isXIntercept==true && data.predictors.isXIntercept==false
+    # Update toXReg and toZReg accordingly
+    if hasXIntercept==true && data.predictors.hasXIntercept==false
         data.predictors.X = add_intercept(data.predictors.X)
-        data.predictors.isXIntercept = true
+        data.predictors.hasXIntercept = true
         data.p = data.p + 1
-        isXReg = vcat(isXInterceptReg, isXReg)
+        toXReg = vcat(toXInterceptReg, toXReg)
     end
-    if isZIntercept==true && data.predictors.isZIntercept==false
+    if hasZIntercept==true && data.predictors.hasZIntercept==false
         data.predictors.Z = add_intercept(data.predictors.Z)
-        data.predictors.isZIntercept = true
+        data.predictors.hasZIntercept = true
         data.q = data.q + 1
-        isZReg = vcat(isZInterceptReg, isZReg)
+        toZReg = vcat(toZInterceptReg, toZReg)
     end
     
     # Remove X and Z intercepts in new predictors if necessary
-    # Update isXReg and isZReg accordingly
-    if isXIntercept==false && data.predictors.isXIntercept==true
+    # Update toXReg and toZReg accordingly
+    if hasXIntercept==false && data.predictors.hasXIntercept==true
         data.predictors.X = remove_intercept(data.predictors.X)
-        data.predictors.isXIntercept = false
+        data.predictors.hasXIntercept = false
         data.p = data.p - 1
-        isXReg = isXReg[2:end]
+        toXReg = toXReg[2:end]
     end
-    if isZIntercept==false && data.predictors.isZIntercept==true
+    if hasZIntercept==false && data.predictors.hasZIntercept==true
         data.predictors.Z = remove_intercept(data.predictors.Z)
-        data.predictors.isZIntercept = false
+        data.predictors.hasZIntercept = false
         data.q = data.q - 1
-        isZReg = isZReg[2:end]
+        toZReg = toZReg[2:end]
     end
     
-    # Update isXReg and isZReg accordingly when intercept is already included
-    if isXIntercept==true && data.predictors.isXIntercept==true
-        isXReg[1] = isXInterceptReg
+    # Update toXReg and toZReg accordingly when intercept is already included
+    if hasXIntercept==true && data.predictors.hasXIntercept==true
+        toXReg[1] = toXInterceptReg
     end
-    if isZIntercept==true && data.predictors.isZIntercept==true
-        isZReg[1] = isZInterceptReg
+    if hasZIntercept==true && data.predictors.hasZIntercept==true
+        toZReg[1] = toZInterceptReg
     end
 	
     # Matrix to keep track of which coefficients to regularize.
-    reg = isXReg.*transpose(isZReg) 
+    reg = toXReg.*transpose(toZReg) 
     # Indices corresponding to regularized X covariates. 
-    regXidx = findall(isXReg) 
+    regXidx = findall(toXReg) 
     # Indices corresponding to regularized Z covariates. 
-    regZidx = findall(isZReg) 
+    regZidx = findall(toZReg) 
 
     # Standardize predictors, if necessary. 
-    if (isStandardize==true)
+    if (toStandardize==true)
         # If predictors will be standardized, copy the predictor matrices.
         X = copy(get_X(data))
         Z = copy(get_Z(data))
 
         # Standardize predictors
-        meansX, normsX, = standardize!(X, isXIntercept) 
-        meansZ, normsZ, = standardize!(Z, isZIntercept)
+        meansX, normsX, = standardize!(X, hasXIntercept) 
+        meansZ, normsZ, = standardize!(Z, hasZIntercept)
         # If X and Z are standardized, set the norm to nothing
         norms = nothing 
     else 
@@ -289,7 +289,7 @@ function mlmnet(fun::Function, data::RawData, lambdas::AbstractArray{Float64,1};
         ZTZ = transpose(Z)*Z 
         
         # Step size is the reciprocal of the maximum eigenvalue of kron(Z, X)
-        if isStandardize==true
+        if toStandardize==true
             # Standardizing X and Z results in complex eigenvalues
             # Hack is to square the singular values to get the eigenvalues (ZFY)
             eig_X = (svd(XTX).S).^2
@@ -313,11 +313,11 @@ function mlmnet(fun::Function, data::RawData, lambdas::AbstractArray{Float64,1};
   
     # Back-transform coefficient estimates, if necessary. 
     # Case if including both X and Z intercepts. 
-    if isStandardize == true && (isXIntercept==true) && (isZIntercept==true)
+    if toStandardize == true && (hasXIntercept==true) && (hasZIntercept==true)
         backtransform!(coeffs, meansX, meansZ, normsX, normsZ, get_Y(data), 
                        data.predictors.X, data.predictors.Z)
-    elseif isStandardize == true # Otherwise
-        backtransform!(coeffs, isXIntercept, isZIntercept, meansX, meansZ, 
+    elseif toStandardize == true # Otherwise
+        backtransform!(coeffs, hasXIntercept, hasZIntercept, meansX, meansZ, 
                        normsX, normsZ)
     end
     

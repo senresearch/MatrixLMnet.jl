@@ -37,12 +37,12 @@ lambdasL1 = [10.0, 5.0]
 lambdasL2 = [0.0]
 
 # Random.seed!(705)
-est = mlmnetNet(fistaNet!, dat, lambdasL1, lambdasL2, isZIntercept = false, isXIntercept = false, 
+est = mlmnetNet(fistaNet!, dat, lambdasL1, lambdasL2, hasZIntercept = false, hasXIntercept = false, 
                 setStepsize = true);
 est_Net = est.B[2, 1, :, :]
 
 # Random.seed!(705)
-est_2 = mlmnet(fista!, dat, lambdasL1, isZIntercept = false, isXIntercept = false, 
+est_2 = mlmnet(fista!, dat, lambdasL1, hasZIntercept = false, hasXIntercept = false, 
                 setStepsize = true);
 est_Lasso = est_2.B[2, :, :]
 
@@ -77,7 +77,7 @@ est_Lasso = est_2.B[2, :, :]
 # lambdasL1 = [10.0, 5.0]
 # lambdasL2 = [0.0]
 
-# est_2 = mlmnet(fista!, dat, lambdasL1, isZIntercept = false, isXIntercept = false);
+# est_2 = mlmnet(fista!, dat, lambdasL1, hasZIntercept = false, hasXIntercept = false);
 # est_Lasso = est_2.B[2, :, :]
 
 @test est_Lasso == est_Net
