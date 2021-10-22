@@ -27,31 +27,31 @@ export Response, Predictors, RawData, get_X, get_Z, get_Y, contr,
 
 
 # Helper functions
-include("std_helpers.jl")
-include("mlmnet_helpers.jl")
+include("utilities\std_helpers.jl")
+include("mlmnet\mlmnet_helpers.jl")
 
 # L1 algorithms
-include("cd.jl")
-include("ista.jl")
-include("istb.jl")
-include("fista.jl")
-include("fista_bt.jl")
-include("admm.jl")
+include("methods\cd.jl")
+include("methods\ista.jl")
+include("methods\istb.jl")
+include("methods\fista.jl")
+include("methods\fista_bt.jl")
+include("methods\admm.jl")
 
 # Elastic-net algorithms
-include("istaNet.jl")
-include("fistaNet.jl")
-include("fistaNet_bt.jl")
-include("admmNet.jl")
+include("methods\istaNet.jl")
+include("methods\fistaNet.jl")
+include("methods\fistaNet_bt.jl")
+include("methods\admmNet.jl")
 
 # Top level functions that call L1 algorithms using warm starts
-include("mlmnet.jl")
-include("mlmnetNet.jl")
+include("mlmnet\mlmnet.jl")
+include("mlmnet\mlmnetNet.jl")
 # Predictions and residuals
-include("predict.jl")
+include("utilities\predict.jl")
 
 # Permutations
-include("mlmnet_perms.jl")
+include("mlmnet\mlmnet_perms.jl")
 
 # Cross-validation
 include("mlmnet_cv_helpers.jl")

@@ -12,7 +12,7 @@ using BenchmarkTools
 ####################
 # External sources #
 ####################
-include("../src/sim_helpers.jl")
+include("sim_helpers.jl")
 
 
 ####################################################
