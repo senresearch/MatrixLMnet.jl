@@ -118,7 +118,7 @@ Calculates test MSE for each of the CV folds for each lambda.
 
 # Arguments 
 
-- MLMNets = 1d array of Mlmnet objects resulting from running cross validation
+- MLMNets = 1d array of MlmnetDeprecated objects resulting from running cross validation
 - data = RawData object used to generate MLMNets
 - lambdas = 1d array of floats consisting of lambda penalties used to 
   generate MLMNets
@@ -131,7 +131,7 @@ Calculates test MSE for each of the CV folds for each lambda.
 number of folds. 
 
 """
-function calc_mse(MLMNets::AbstractArray{Mlmnet,1}, data::RawData, 
+function calc_mse(MLMNets::AbstractArray{MlmnetDeprecated,1}, data::RawData, 
                   lambdas::AbstractArray{Float64,1}, 
                   rowFolds::Array{Array{Int64,1},1}, 
                   colFolds::Array{Array{Int64,1},1})
@@ -180,7 +180,7 @@ folds for each lambda.
 
 # Arguments 
 
-- MLMNets = 1d array of Mlmnet objects resulting from running cross validation
+- MLMNets = 1d array of MlmnetDeprecated objects resulting from running cross validation
 - lambdas = 1d array of floats consisting of lambda penalties used to 
   generate MLMNets
 
@@ -194,7 +194,7 @@ folds for each lambda.
 number of folds. 
 
 """
-function calc_prop_zero(MLMNets::AbstractArray{Mlmnet,1}, 
+function calc_prop_zero(MLMNets::AbstractArray{MlmnetDeprecated,1}, 
                         lambdas::AbstractArray{Float64,1}; 
                         dig::Int64=12)
     
@@ -231,7 +231,7 @@ Calculates test MSE for each of the CV folds for each lambda.
 
 # Arguments 
 
-- MLMNets = 1d array of MlmnetNet objects resulting from running cross validation
+- MLMNets = 1d array of Mlmnet objects resulting from running cross validation
 - data = RawData object used to generate MLMNets
 - lambdasL1 = 1d array of floats consisting of lambda penalties used to 
   generate MLMNets
@@ -246,7 +246,7 @@ Calculates test MSE for each of the CV folds for each lambda.
 number of folds. 
 
 """
-function calc_mseNet(MLMNets::AbstractArray{MlmnetNet,1}, data::RawData, 
+function calc_mseNet(MLMNets::AbstractArray{Mlmnet,1}, data::RawData, 
                   lambdas::AbstractArray{Float64,1}, 
                   alphas::AbstractArray{Float64,1},
                   rowFolds::Array{Array{Int64,1},1}, 
@@ -296,7 +296,7 @@ folds for each lambda.
 
 # Arguments 
 
-- MLMNets = 1d array of Mlmnet objects resulting from running cross validation
+- MLMNets = 1d array of MlmnetDeprecated objects resulting from running cross validation
 - lambdas = 1d array of floats consisting of lambda penalties used to 
   generate MLMNets
 
@@ -310,7 +310,7 @@ folds for each lambda.
 number of folds. 
 
 """
-function calc_prop_zeroNet(MLMNets::AbstractArray{MlmnetNet,1}, 
+function calc_prop_zeroNet(MLMNets::AbstractArray{Mlmnet,1}, 
                         lambdas::AbstractArray{Float64,1},
                         alphas::AbstractArray{Float64,1}; 
                         dig::Int64=12)

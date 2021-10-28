@@ -1,9 +1,9 @@
 """
-    update_fistaNet!(B, B_prev, A, resid, resid_B, grad, X, Y, Z, norms, lambda, 
+    update_fista!(B, B_prev, A, resid, resid_B, grad, X, Y, Z, norms, lambda, 
                   reg, iter, stepsize)
 
-Updates coefficient estimates in place for each FISTA iteration based on the Elastic-net
-silution, when `X` and `Z` are both standardized. 
+Updates coefficient estimates in place for each FISTA iteration when `X` and 
+`Z` are both standardized. 
 
 # Arguments 
 
@@ -22,8 +22,7 @@ silution, when `X` and `Z` are both standardized.
 - Z = 2d array of floats consisting of the column covariates, with all 
   categorical variables coded in appropriate contrasts
 - norms = `nothing`
-- lambdaL1 = l1 penalty, a floating scalar
-- lambdaL2 = l2 penalty, a floating scalar
+- lambda = lambda penalty, a floating scalar
 - reg = 2d array of bits, indicating whether or not to regularize each of the 
   coefficients
 - iter = 1d array consisting of a single integer keeping track of how many 
@@ -35,7 +34,7 @@ silution, when `X` and `Z` are both standardized.
 None; updates coefficients in place
 
 """
-function update_fistaNet!(B::AbstractArray{Float64,2}, 
+function update_fista!(B::AbstractArray{Float64,2}, 
                        B_prev::AbstractArray{Float64,2}, 
                        A::AbstractArray{Float64,2}, 
                        resid::AbstractArray{Float64,2}, 
@@ -44,8 +43,7 @@ function update_fistaNet!(B::AbstractArray{Float64,2},
                        X::AbstractArray{Float64,2}, 
                        Y::AbstractArray{Float64,2}, 
                        Z::AbstractArray{Float64,2}, 
-                       norms::Nothing, lambdaL1::Float64, lambdaL2::Float64,
-                       reg::BitArray{2}, 
+                       norms::Nothing, lambda::Float64, reg::BitArray{2}, 
                        iter::AbstractArray{Int64,1}, 
                        stepsize::AbstractArray{Float64,1})
     
@@ -61,11 +59,11 @@ function update_fistaNet!(B::AbstractArray{Float64,2},
             B_prev[i,j] = B[i,j] 
         end
         
-        B[i,j] = A[i,j] - stepsize[1] * grad[i,j] # RSS updates
+        B[i,j] = A[i,j] - stepsize[1] * grad[i,j] # L2 updates
         # Apply shrinkage to regularized coefficients
         if reg[i,j] 
-            B[i,j] = prox(A[i,j], grad[i,j], sign(B[i,j]), lambdaL1, norms, 
-                          stepsize[1])/(1+2*lambdaL2*stepsize[1])
+            B[i,j] = prox(A[i,j], grad[i,j], sign(B[i,j]), lambda, norms, 
+                          stepsize[1])
         end
         
         # Update extrapolated coefficient
@@ -102,8 +100,7 @@ Updates coefficient estimates in place for each FISTA iteration when `X` and
   categorical variables coded in appropriate contrasts
 - norms = 2d array of floats consisting of the norms corresponding to each 
   coefficient
-- lambdaL1 = l1 penalty, a floating scalar
-- lambdaL2 = l2 penalty, a floating scalar
+- lambda = lambda penalty, a floating scalar
 - reg = 2d array of bits, indicating whether or not to regularize each of the 
   coefficients
 - iter = 1d array consisting of a single integer keeping track of how many 
@@ -115,7 +112,7 @@ Updates coefficient estimates in place for each FISTA iteration when `X` and
 None; updates coefficients in place
 
 """
-function update_fistaNet!(B::AbstractArray{Float64,2}, 
+function update_fista!(B::AbstractArray{Float64,2}, 
                        B_prev::AbstractArray{Float64,2}, 
                        A::AbstractArray{Float64,2}, 
                        resid::AbstractArray{Float64,2}, 
@@ -125,8 +122,7 @@ function update_fistaNet!(B::AbstractArray{Float64,2},
                        Y::AbstractArray{Float64,2}, 
                        Z::AbstractArray{Float64,2}, 
                        norms::AbstractArray{Float64,2}, 
-                       lambdaL1::Float64, lambdaL2::Float64, 
-                       reg::BitArray{2}, 
+                       lambda::Float64, reg::BitArray{2}, 
                        iter::AbstractArray{Int64,1}, 
                        stepsize::AbstractArray{Float64,1})
     
@@ -145,8 +141,8 @@ function update_fistaNet!(B::AbstractArray{Float64,2},
         B[i,j] = A[i,j] - stepsize[1] * grad[i,j]./norms[i,j] # L2 updates
         # Apply shrinkage to regularized coefficients
         if reg[i,j] 
-            B[i,j] = prox(A[i,j], grad[i,j], sign(B[i,j]), lambdaL1, norms[i,j], 
-                          stepsize[1])/(1+2*lambdaL2*stepsize[1])
+            B[i,j] = prox(A[i,j], grad[i,j], sign(B[i,j]), lambda, norms[i,j], 
+                          stepsize[1])
         end
         
         # Update extrapolated coefficient
@@ -159,10 +155,10 @@ end
 
 
 """
-    fistaNet!(X, Y, Z, lambda, B, regXidx, regZidx, reg, norms; 
+    fista!(X, Y, Z, lambda, B, regXidx, regZidx, reg, norms; 
            isVerbose, stepsize, thresh, maxiter)
 
-Performs the Elastic-net version FISTA with fixed step size.
+Performs FISTA with fixed step size.
 
 # Arguments
 
@@ -171,8 +167,7 @@ Performs the Elastic-net version FISTA with fixed step size.
 - Y = 2d array of floats consisting of the multivariate response
 - Z = 2d array of floats consisting of the column covariates, with all 
   categorical variables coded in appropriate contrasts
-- lambdaL1 = l1 penalty, a floating scalar
-- lambdaL2 = l2 penalty, a floating scalar
+- lambda = lambda penalty, a floating scalar
 - B = 2d array of floats consisting of starting coefficient estimates
 - regXidx = 1d array of indices corresponding to regularized X covariates
 - regZidx = 1d array of indices corresponding to regularized Z covariates
@@ -208,18 +203,13 @@ used as the fixed step size. Note that obtaining the eigenvalues when `X`
 and/or `Z` are very large may exceed computational limitations. 
 
 """
-function fistaNet!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2}, 
-                Z::AbstractArray{Float64,2}, 
-                lambda::Float64, alpha::Float64,
+function fista!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2}, 
+                Z::AbstractArray{Float64,2}, lambda::Float64, 
                 B::AbstractArray{Float64,2}, 
                 regXidx::AbstractArray{Int64,1}, 
                 regZidx::AbstractArray{Int64,1}, reg::BitArray{2}, norms; 
                 isVerbose::Bool=true, stepsize::Float64=0.01, 
                 thresh::Float64=10.0^(-7), maxiter::Int=10^10)
-
-    # Re-parametrize the Elastic-net tuning parameters
-    lambdaL1 = lambda*alpha
-    lambdaL2 = lambda*(1-alpha)
   
     # Pre-allocating arrays to store residuals for extrapolated coefficients 
     # and gradient. 
@@ -240,7 +230,7 @@ function fistaNet!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
     # Placeholder to store the old criterion 
     oldcrit = 1.0 
     # Calculate the current criterion
-    crit = criterionNet(B[regXidx, regZidx], resid_B, lambdaL1, lambdaL2, crit_denom) 
+    crit = criterion(B[regXidx, regZidx], resid_B, lambda, crit_denom) 
     
     stepsize = [stepsize]
     iter = [0]
@@ -250,10 +240,10 @@ function fistaNet!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
         # Store the current criterion
         oldcrit = crit 
         # Update the coefficient estimates
-        update_fistaNet!(B, B_prev, A, resid, resid_B, grad, X, Y, Z, norms, 
-                      lambdaL1, lambdaL2, reg, iter, stepsize) 
+        update_fista!(B, B_prev, A, resid, resid_B, grad, X, Y, Z, norms, 
+                      lambda, reg, iter, stepsize) 
         # Calculate the criterion after updating
-        crit = criterionNet(B[regXidx, regZidx], resid_B, lambdaL1, lambdaL2, crit_denom) 
+        crit = criterion(B[regXidx, regZidx], resid_B, lambda, crit_denom) 
         
         iter[:] = iter .+ 1 # Increment the number of iterations
         # Warning message if coefficient estimates do not converge.

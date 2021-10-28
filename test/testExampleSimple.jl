@@ -37,7 +37,7 @@ lambdasL1 = [10.0, 5.0]
 lambdasL2 = [0.0]
 
 # Random.seed!(705)
-est = mlmnetNet(fistaNet!, dat, lambdasL1, lambdasL2, hasZIntercept = false, hasXIntercept = false, 
+est = mlmnet(fista!, dat, lambdasL1, lambdasL2, hasZIntercept = false, hasXIntercept = false, 
                 setStepsize = true);
 est_Net = est.B[2, 1, :, :]
 

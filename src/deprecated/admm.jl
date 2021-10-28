@@ -1,13 +1,12 @@
 """
-    proxNet1(v, lambda)
+    prox1(v, lambda)
 
-Proximal operator for the Elastic-net penalisation component updates in ADMM. 
+Proximal operator for the L1 norm updates in ADMM. 
 
 # Arguments 
 
 - v = float; value to update
-- lambdaL1 = l1 penalty, a floating scalar
-- lambdaL2 = l1 penalty, a floating scalar
+- lambda = lambda penalty, a floating scalar
 
 # Value 
 
@@ -15,15 +14,16 @@ Proximal operator for the Elastic-net penalisation component updates in ADMM.
 
 """
 
-function proxNet1(v::Float64, lambda::Float64)
+function prox1(v::Float64, lambda::Float64)
 
     return max(0.0, abs(v)-lambda) * sign(v)
 end
 
-"""
-    proxNet2(v, rho, u, l)
 
-Proximal operator for the residual sum of squares component updates in ADMM. 
+"""
+    prox2(v, rho, u, l)
+
+Proximal operator for the L2 norm updates in ADMM. 
 
 # Arguments 
 
@@ -38,7 +38,7 @@ Proximal operator for the residual sum of squares component updates in ADMM.
 
 """
 
-function proxNet2(v::Float64, rho::Float64, 
+function prox2(v::Float64, rho::Float64, 
                u::Float64, l::Float64)
     
     return (u + rho*v) / (l + rho)
@@ -46,7 +46,7 @@ end
 
 
 """
-    update_admmNet!(B, B0, B2, resid, X, Y, Z, Qx, Qz, U, L, lambdaL1, lambdaL2, 
+    update_admm!(B, B0, B2, resid, X, Y, Z, Qx, Qz, U, L, lambda, 
                  regXidx, regZidx, rho, r, s, tau_incr, tau_decr, mu)
 
 Updates coefficient estimates in place for each ADMM iteration. 
@@ -67,8 +67,7 @@ Updates coefficient estimates in place for each ADMM iteration.
 - U = 2d array of floats consisting of the transformed Y matrix
 - L = 2d array of floats consisting of the kronecker product of the 
   eigenvalues of X and Z
-- lambdaL1 = l1 penalty, a floating scalar
-- lambdaL2 = l2 penalty, a floating scalar
+- lambda = lambda penalty, a floating scalar
 - regXidx = 1d array of indices corresponding to regularized X covariates
 - regZidx = 1d array of indices corresponding to regularized Z covariates
 - rho = float; parameter that controls ADMM tuning. 
@@ -93,7 +92,7 @@ criteria is less than the threshold `thresh`.
 `rho` controls ADMM tuning and can be specified by the user. 
 
 """
-function update_admmNet!(B::AbstractArray{Float64,2}, 
+function update_admm!(B::AbstractArray{Float64,2}, 
                       B0::AbstractArray{Float64,2}, 
                       B2::AbstractArray{Float64,2}, 
                       resid::AbstractArray{Float64,2}, 
@@ -104,7 +103,7 @@ function update_admmNet!(B::AbstractArray{Float64,2},
                       Qz::AbstractArray{Float64,2}, 
                       U::AbstractArray{Float64,2}, 
                       L::AbstractArray{Float64,2}, 
-                      lambdaL1::Float64, lambdaL2::Float64, 
+                      lambda::Float64, 
                       regXidx::AbstractArray{Int64,1}, 
                       regZidx::AbstractArray{Int64,1}, 
                       rho::AbstractArray{Float64,1}, 
@@ -120,11 +119,11 @@ function update_admmNet!(B::AbstractArray{Float64,2},
     # Transform B0
     mul!(B0, transpose(Qx), B0*Qz) 
     # Perform L2 updates and transform B0 back
-    mul!(B0, Qx * proxNet2.(B0, rho[1], U, L), transpose(Qz))
+    mul!(B0, Qx * prox2.(B0, rho[1], U, L), transpose(Qz))
     
     # L1 updates
     B .= B0 .+ B2
-    B[regXidx,regZidx] .= proxNet1.(B[regXidx,regZidx], lambdaL1/rho[1])/(1+lambdaL2/rho[1])
+    B[regXidx,regZidx] .= prox1.(B[regXidx,regZidx], lambda/rho[1])
 
     # Primal residuals 
     r .= B0 .- B
@@ -150,7 +149,7 @@ end
 
 
 """
-    admmNet!(X, Y, Z, lambdaL1, lambdaL2, B, regXidx, regZidx, reg, norms, Qx, Qz, U, L; 
+    admm!(X, Y, Z, lambda, B, regXidx, regZidx, reg, norms, Qx, Qz, U, L; 
           isVerbose, stepsize, rho, setRho, thresh, maxiter, 
           tau_incr, tau_decr, mu)
 
@@ -208,8 +207,8 @@ criteria is less than the threshold `thresh`.
 `rho` controls ADMM tuning and can be specified by the user. 
 
 """
-function admmNet!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2}, 
-               Z::AbstractArray{Float64,2}, lambda::Float64, alpha::Float64,
+function admm!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2}, 
+               Z::AbstractArray{Float64,2}, lambda::Float64, 
                B::AbstractArray{Float64,2}, 
                regXidx::AbstractArray{Int64,1}, 
                regZidx::AbstractArray{Int64,1}, reg::BitArray{2}, norms, 
@@ -220,23 +219,17 @@ function admmNet!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
                thresh::Float64=10.0^(-7), maxiter::Int=10^10, 
                tau_incr::Float64=2.0, tau_decr::Float64=2.0, mu::Float64=10.0)
     
-
-    # Re-parametrize the Elastic-net tuning parameters
-    lambdaL1 = lambda*alpha
-    lambdaL2 = lambda*(1-alpha)
-    
     # Set the ADMM tuning parameter, rho
     if setRho == true 
         # Get smallest and largest eigenvalues
         mineig = minimum(L)
         maxeig = maximum(L)
         
-        gamma = lambdaL1/sqrt(1+lambdaL2)
         # Set the value of rho
-        if gamma < mineig
+        if lambda < mineig
             rho = mineig
-        elseif gamma > maxeig
-            rho = gamma
+        elseif lambda > maxeig
+            rho = lambda
         else
             rho = maxeig
         end
@@ -260,7 +253,7 @@ function admmNet!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
     # Placeholder to store the old criterion 
     oldcrit = 1.0 
     # Calculate the current criterion
-    crit = criterionNet(B[regXidx, regZidx], resid, lambdaL1, lambdaL2, crit_denom) 
+    crit = criterion(B[regXidx, regZidx], resid, lambda, crit_denom) 
     
     iter = 0
     # Iterate until coefficients converge or maximum iterations have been 
@@ -270,11 +263,11 @@ function admmNet!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
         oldcrit = crit 
 
         # Update the coefficient estimates
-        update_admmNet!(B, B0, B2, resid, X, Y, Z, Qx, Qz, U, L, lambdaL1, lambdaL2,
+        update_admm!(B, B0, B2, resid, X, Y, Z, Qx, Qz, U, L, lambda, 
                      regXidx, regZidx, rho, r, s, tau_incr, tau_incr, mu)
 
         # Calculate the criterion after updating
-        crit = criterionNet(B[regXidx, regZidx], resid, lambdaL1, lambdaL2, crit_denom) 
+        crit = criterion(B[regXidx, regZidx], resid, lambda, crit_denom) 
 
         iter += 1 # Increment the number of iterations
         # Print warning message if coefficient estimates do not converge.

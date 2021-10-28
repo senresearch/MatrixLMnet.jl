@@ -6,8 +6,8 @@ Type for storing the results of running cross-validation for `mlmnet`
 """
 mutable struct MlmnetNet_cv 
     
-    # Mlmnet objects
-    MLMNets::Array{MlmnetNet,1} 
+    # MlmnetDeprecated objects
+    MLMNets::Array{Mlmnet,1} 
     # Lambda penalties
     lambdas::Array{Float64,1}
     alphas::Array{Float64,1}
@@ -142,7 +142,7 @@ function mlmnetNet_cv(data::RawData,
 
     # Run mlmnet on each RawData object, in parallel when possible
 
-    MLMNets = Distributed.pmap(data -> mlmnetNet(data, lambdas, alphas;
+    MLMNets = Distributed.pmap(data -> mlmnet(data, lambdas, alphas;
                                               method=method, isNaive=isNaive, 
                                               hasXIntercept=hasXIntercept, 
                                               hasZIntercept=hasZIntercept, 

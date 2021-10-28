@@ -6,8 +6,8 @@ Type for storing the results of running cross-validation for `mlmnet`
 """
 mutable struct Mlmnet_cv 
     
-    # Mlmnet objects
-    MLMNets::Array{Mlmnet, 1} 
+    # MlmnetDeprecated objects
+    MLMNets::Array{MlmnetDeprecated, 1} 
     # Lambda penalties
     lambdas::Array{Float64,1} 
     

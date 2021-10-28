@@ -1,18 +1,18 @@
 """
     coef(MLMNet)
 
-Extract all coefficients from Mlmnet object
+Extract all coefficients from MlmnetDeprecated object
 
 # Arguments 
 
-- MLMNet = Mlmnet object
+- MLMNet = MlmnetDeprecated object
 
 # Value
 
 3d array of coefficients 
 
 """
-function coef(MLMNet::Mlmnet)
+function coef(MLMNet::MlmnetDeprecated)
     
     return MLMNet.B
 end
@@ -21,11 +21,11 @@ end
 """
     coef(MLMNet, lambda)
 
-Extract coefficients from Mlmnet object at a given lambda 
+Extract coefficients from MlmnetDeprecated object at a given lambda 
 
 # Arguments 
 
-- MLMNet = Mlmnet object
+- MLMNet = MlmnetDeprecated object
 - lambda = lambda penalty to use, a floating scalar
 
 # Value
@@ -33,7 +33,7 @@ Extract coefficients from Mlmnet object at a given lambda
 2d array of coefficients 
 
 """
-function coef(MLMNet::Mlmnet, lambda::Float64)
+function coef(MLMNet::MlmnetDeprecated, lambda::Float64)
     
     # Find the index corresponding to the lambda of interest
     idx = findall([isapprox(lam, lambda) for lam in MLMNet.lambdas]) 
@@ -49,11 +49,11 @@ end
 """
     coef_2d(MLMNet)
 
-Extract coefficients from Mlmnet object as a flattened 2d array
+Extract coefficients from MlmnetDeprecated object as a flattened 2d array
 
 # Arguments 
 
-- MLMNet = Mlmnet object
+- MLMNet = MlmnetDeprecated object
 
 # Value
 
@@ -61,7 +61,7 @@ Extract coefficients from Mlmnet object as a flattened 2d array
 different lambda
 
 """
-function coef_2d(MLMNet::Mlmnet)
+function coef_2d(MLMNet::MlmnetDeprecated)
     
     # Extract coefficients
     coeffs = coef(MLMNet)
@@ -81,11 +81,11 @@ end
 """
     predict(MLMNet, lambda, newPredictors)
 
-Calculate new predictions based on Mlmnet object and given a lambda 
+Calculate new predictions based on MlmnetDeprecated object and given a lambda 
 
 # Arguments 
 
-- MLMNet = Mlmnet object
+- MLMNet = MlmnetDeprecated object
 - lambda = lambda penalty to use, a floating scalar
 - newPredictors = Predictors object. Defaults to the data.predictors field 
   in the MLM object used to fit the model. 
@@ -95,7 +95,7 @@ Calculate new predictions based on Mlmnet object and given a lambda
 2d array of predicted values
 
 """
-function predict(MLMNet::Mlmnet, lambda::Float64, 
+function predict(MLMNet::MlmnetDeprecated, lambda::Float64, 
                  newPredictors::Predictors=MLMNet.data.predictors)
     
     # Include X and Z intercepts in new predictors if necessary
@@ -134,11 +134,11 @@ end
 """
     predict(MLMNet, newPredictors)
 
-Calculate new predictions based on Mlmnet object
+Calculate new predictions based on MlmnetDeprecated object
 
 # Arguments 
 
-- MLMNet = Mlmnet object
+- MLMNet = MlmnetDeprecated object
 - newPredictors = Predictors object. Defaults to the data.predictors field 
   in the MLM object used to fit the model. 
 
@@ -147,7 +147,7 @@ Calculate new predictions based on Mlmnet object
 3d array of predicted values
 
 """
-function predict(MLMNet::Mlmnet, 
+function predict(MLMNet::MlmnetDeprecated, 
                  newPredictors::Predictors=MLMNet.data.predictors)
     
     # Initialize 3d array for storing predictions
@@ -166,11 +166,11 @@ end
 """
     fitted(MLMNet, lambda)
 
-Calculate fitted values of an Mlmnet object, given a lambda 
+Calculate fitted values of an MlmnetDeprecated object, given a lambda 
 
 # Arguments 
 
-- MLMNet = Mlmnet object
+- MLMNet = MlmnetDeprecated object
 - lambda = lambda penalty to use, a floating scalar
 
 # Value
@@ -178,7 +178,7 @@ Calculate fitted values of an Mlmnet object, given a lambda
 2d array of fitted values
 
 """
-function fitted(MLMNet::Mlmnet, lambda::Float64)
+function fitted(MLMNet::MlmnetDeprecated, lambda::Float64)
     
     return predict(MLMNet, lambda)
 end
@@ -187,18 +187,18 @@ end
 """
     fitted(MLMNet)
 
-Calculate fitted values of an Mlmnet object
+Calculate fitted values of an MlmnetDeprecated object
 
 # Arguments 
 
-- MLMNet = Mlmnet object
+- MLMNet = MlmnetDeprecated object
 
 # Value
 
 3d array of fitted values
 
 """
-function fitted(MLMNet::Mlmnet)
+function fitted(MLMNet::MlmnetDeprecated)
     
     return predict(MLMNet)
 end
@@ -211,7 +211,7 @@ Calculate residuals of an MLMNet object, given a lambda
 
 # Arguments 
 
-- MLM = Mlmnet object
+- MLM = MlmnetDeprecated object
 - lambda = lambda penalty to use, a floating scalar
 - newData = RawData object. Defaults to the data field in the MLM object 
   used to fit the model. 
@@ -221,7 +221,7 @@ Calculate residuals of an MLMNet object, given a lambda
 2d array of residuals
 
 """
-function resid(MLMNet::Mlmnet, lambda::Float64, newData::RawData=MLMNet.data)
+function resid(MLMNet::MlmnetDeprecated, lambda::Float64, newData::RawData=MLMNet.data)
     
     # Include X and Z intercepts in new data if necessary
     if MLMNet.data.predictors.hasXIntercept==true && 
@@ -268,7 +268,7 @@ Calculate residuals of an MLMNet object
 
 # Arguments 
 
-- MLMNet = Mlmnet object
+- MLMNet = MlmnetDeprecated object
 - newData = RawData object. Defaults to the data field in the MLM object 
   used to fit the model. 
 
@@ -277,7 +277,7 @@ Calculate residuals of an MLMNet object
 3d array of residuals
 
 """
-function resid(MLMNet::Mlmnet, newData::RawData=MLMNet.data)
+function resid(MLMNet::MlmnetDeprecated, newData::RawData=MLMNet.data)
     
     # Initialize 3d array for storing residuals
     all_resid = Array{Float64}(undef, newData.n, newData.m,
@@ -295,18 +295,18 @@ end
 """
     coef(MLMNet)
 
-Extract all coefficients from Mlmnet object
+Extract all coefficients from MlmnetDeprecated object
 
 # Arguments 
 
-- MLMNet = Mlmnet object
+- MLMNet = MlmnetDeprecated object
 
 # Value
 
 3d array of coefficients 
 
 """
-function coef(MLMNet::MlmnetNet)
+function coef(MLMNet::Mlmnet)
     
     return MLMNet.B
 end
@@ -315,11 +315,11 @@ end
 """
     coef(MLMNet, lambda)
 
-Extract coefficients from Mlmnet object at a given lambda 
+Extract coefficients from MlmnetDeprecated object at a given lambda 
 
 # Arguments 
 
-- MLMNet = Mlmnet object
+- MLMNet = MlmnetDeprecated object
 - lambda = lambda penalty to use, a floating scalar
 
 # Value
@@ -327,7 +327,7 @@ Extract coefficients from Mlmnet object at a given lambda
 2d array of coefficients 
 
 """
-function coef(MLMNet::MlmnetNet, lambda::Float64, alpha::Float64)
+function coef(MLMNet::Mlmnet, lambda::Float64, alpha::Float64)
     
     # Find the index corresponding to the lambda of interest
     idx = findall([isapprox(lam, lambda) for lam in MLMNet.lambdas])
@@ -348,11 +348,11 @@ end
 """
     coef_2d(MLMNet)
 
-Extract coefficients from Mlmnet object as a flattened 2d array
+Extract coefficients from MlmnetDeprecated object as a flattened 2d array
 
 # Arguments 
 
-- MLMNet = Mlmnet object
+- MLMNet = MlmnetDeprecated object
 
 # Value
 
@@ -360,7 +360,7 @@ Extract coefficients from Mlmnet object as a flattened 2d array
 different lambdaL1 and lambdaL2
 
 """
-function coef_3d(MLMNet::MlmnetNet)
+function coef_3d(MLMNet::Mlmnet)
     
     # Extract coefficients
     coeffs = coef(MLMNet) # this is a 4-dimensional array
@@ -381,11 +381,11 @@ end
 """
     predict(MLMNet, lambda, alpha, newPredictors)
 
-Calculate new predictions based on Mlmnet object and given a lambda 
+Calculate new predictions based on MlmnetDeprecated object and given a lambda 
 
 # Arguments 
 
-- MLMNet = Mlmnet object
+- MLMNet = MlmnetDeprecated object
 - lambda = lambda penalty to use, a floating scalar
 - newPredictors = Predictors object. Defaults to the data.predictors field 
   in the MLM object used to fit the model. 
@@ -395,7 +395,7 @@ Calculate new predictions based on Mlmnet object and given a lambda
 2d array of predicted values
 
 """
-function predict(MLMNet::MlmnetNet, lambda::Float64, alpha::Float64,
+function predict(MLMNet::Mlmnet, lambda::Float64, alpha::Float64,
                  newPredictors::Predictors=MLMNet.data.predictors)
     
     # Include X and Z intercepts in new predictors if necessary
@@ -434,11 +434,11 @@ end
 """
     predict(MLMNet, newPredictors)
 
-Calculate new predictions based on Mlmnet object
+Calculate new predictions based on MlmnetDeprecated object
 
 # Arguments 
 
-- MLMNet = Mlmnet object
+- MLMNet = MlmnetDeprecated object
 - newPredictors = Predictors object. Defaults to the data.predictors field 
   in the MLM object used to fit the model. 
 
@@ -447,7 +447,7 @@ Calculate new predictions based on Mlmnet object
 4d array of predicted values
 
 """
-function predict(MLMNet::MlmnetNet, 
+function predict(MLMNet::Mlmnet, 
                  newPredictors::Predictors=MLMNet.data.predictors)
     
     # Initialize 4d array for storing predictions
@@ -467,11 +467,11 @@ end
 """
     fitted(MLMNet, lambda)
 
-Calculate fitted values of an Mlmnet object, given a lambda 
+Calculate fitted values of an MlmnetDeprecated object, given a lambda 
 
 # Arguments 
 
-- MLMNet = Mlmnet object
+- MLMNet = MlmnetDeprecated object
 - lambda = lambda penalty to use, a floating scalar
 
 # Value
@@ -479,7 +479,7 @@ Calculate fitted values of an Mlmnet object, given a lambda
 2d array of fitted values
 
 """
-function fitted(MLMNet::MlmnetNet, lambda::Float64, alpha::Float64)
+function fitted(MLMNet::Mlmnet, lambda::Float64, alpha::Float64)
     
     return predict(MLMNet, lambda, alpha)
 end
@@ -488,18 +488,18 @@ end
 """
     fitted(MLMNet)
 
-Calculate fitted values of an Mlmnet object
+Calculate fitted values of an MlmnetDeprecated object
 
 # Arguments 
 
-- MLMNet = Mlmnet object
+- MLMNet = MlmnetDeprecated object
 
 # Value
 
 3d array of fitted values
 
 """
-function fitted(MLMNet::MlmnetNet)
+function fitted(MLMNet::Mlmnet)
     
     return predict(MLMNet)
 end
@@ -512,7 +512,7 @@ Calculate residuals of an MLMNet object, given a lambda
 
 # Arguments 
 
-- MLM = Mlmnet object
+- MLM = MlmnetDeprecated object
 - lambda = lambda penalty to use, a floating scalar
 - newData = RawData object. Defaults to the data field in the MLM object 
   used to fit the model. 
@@ -522,7 +522,7 @@ Calculate residuals of an MLMNet object, given a lambda
 2d array of residuals
 
 """
-function resid(MLMNet::MlmnetNet, lambda::Float64, alpha::Float64, newData::RawData=MLMNet.data)
+function resid(MLMNet::Mlmnet, lambda::Float64, alpha::Float64, newData::RawData=MLMNet.data)
     
     # Include X and Z intercepts in new data if necessary
     if MLMNet.data.predictors.hasXIntercept==true && 
@@ -569,7 +569,7 @@ Calculate residuals of an MLMNet object
 
 # Arguments 
 
-- MLMNet = Mlmnet object
+- MLMNet = MlmnetDeprecated object
 - newData = RawData object. Defaults to the data field in the MLM object 
   used to fit the model. 
 
@@ -578,7 +578,7 @@ Calculate residuals of an MLMNet object
 3d array of residuals
 
 """
-function resid(MLMNet::MlmnetNet, newData::RawData=MLMNet.data)
+function resid(MLMNet::Mlmnet, newData::RawData=MLMNet.data)
     
     # Initialize 4d array for storing residuals
     all_resid = Array{Float64}(undef, newData.n, newData.m,

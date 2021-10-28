@@ -23,32 +23,7 @@ end
 
 
 """
-    criterion(B, resid, lambda, crit_denom)
-
-Calculate the criterion for the L1 penalty
-
-# Arguments 
-
-- B = 2d array of floats consisting of regularized coefficient estimates
-- resid = 2d array of floats consisting of the residuals
-- lambda = lambda penalty, a floating scalar
-- crit_denom = 1d array of 2 integers, the denominators of the criterion
-
-# Value 
-
-A floating scalar
-
-"""
-function criterion(B::AbstractArray{Float64,2}, 
-                   resid::AbstractArray{Float64,2}, 
-                   lambda::Float64, crit_denom::AbstractArray{Int64,1})
-    
-    return 0.5 * sum(abs2, resid)/crit_denom[1] + 
-             lambda * sum(abs, B)/crit_denom[2]
-end
-
-"""
-    criterionNet(B, resid, lambdaL1, lambdaL2, crit_denom)
+    criterion(B, resid, lambdaL1, lambdaL2, crit_denom)
 
 Calculate the criterion for the Elastic-net penalty
 
@@ -65,7 +40,7 @@ Calculate the criterion for the Elastic-net penalty
 A floating scalar
 
 """
-function criterionNet(B::AbstractArray{Float64,2}, 
+function criterion(B::AbstractArray{Float64,2}, 
                    resid::AbstractArray{Float64,2}, 
                    lambdaL1::Float64, lambdaL2::Float64, crit_denom::AbstractArray{Int64,1})
     
@@ -278,11 +253,10 @@ A function
 """
 function get_func(method::String )
     
-    dictMethod = Dict("ista"=>istaNet!,
-                        "fista"=>fistaNet!,
-                        "fista_bt"=>fistaNet_bt!,
-                        "admm"=>admmNet!);
+    dictMethod = Dict("ista"=>ista!,
+                        "fista"=>fista!,
+                        "fista_bt"=>fista_bt!,
+                        "admm"=>admm!);
 
-    
     return dictMethod[method]
 end
