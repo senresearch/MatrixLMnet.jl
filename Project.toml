@@ -1,6 +1,6 @@
 name = "MatrixLMnet2"
 uuid = "1741ad21-9c37-460f-90b7-a3d76335463f"
-authors = ["Jane Liang", "Zifan Yu", "Gregory Farage"]
+authors = ["Jane Liang", "Zifan Yu", "Gregory Farage", Saunak Sen]
 version = "0.1.0"
 
 [deps]
