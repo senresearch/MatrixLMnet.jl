@@ -37,6 +37,8 @@ include("deprecated/admm.jl")
 include("deprecated/mlmnet.jl")
 include("deprecated/mlmnet_helpers.jl")
 
+include("deprecated/mlmnet_cv.jl")
+include("deprecated/mlmnet_cv_summary.jl")
 
 # Optimizing algorithms
 include("methods/cd.jl")
