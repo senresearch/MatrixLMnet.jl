@@ -41,7 +41,7 @@ Calculates average test MSE across folds.
 1d array of floats
 	
 """
-function calc_avg_mse(MLMNet_cv::Mlmnet_cv) 
+function calc_avg_mse(MLMNet_cv::Mlmnet_cvDeprecated) 
     
     return valid_reduce2(MLMNet_cv.mse, mean)[:,1]
 end
@@ -61,7 +61,7 @@ Calculates average proportion of zero interaction coefficients across folds.
 1d array of floats
 	
 """
-function calc_avg_prop_zero(MLMNet_cv::Mlmnet_cv)
+function calc_avg_prop_zero(MLMNet_cv::Mlmnet_cvDeprecated)
     
     return valid_reduce2(MLMNet_cv.propZero, mean)[:,1]
 end
@@ -87,7 +87,7 @@ DataFrame summarizing average MSE and proportion of zero interactions across
 folds for each lambda. 
 	
 """
-function mlmnet_cv_summary(MLMNet_cv::Mlmnet_cv)
+function mlmnet_cv_summary(MLMNet_cv::Mlmnet_cvDeprecated)
     
     # Calculate summary information across folds
     out_df = DataFrame(hcat(MLMNet_cv.lambdas, calc_avg_mse(MLMNet_cv), 
@@ -116,7 +116,7 @@ the minimum average test MSE across folds and the MSE that is one standard
 error greater. 
     
 """
-function lambda_min(MLMNet_cv::Mlmnet_cv)
+function lambda_min(MLMNet_cv::Mlmnet_cvDeprecated)
     
     # Calculate average test MSE across folds.
     mseMean = calc_avg_mse(MLMNet_cv)

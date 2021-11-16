@@ -1,10 +1,10 @@
 """
-    Mlmnet_cv(MLMNets, lambdas, data, rowFolds, colFolds)
+    Mlmnet_cvDeprecated(MLMNets, lambdas, alphas, data, rowFolds, colFolds)
 
 Type for storing the results of running cross-validation for `mlmnet`
 
 """
-mutable struct MlmnetNet_cv 
+mutable struct Mlmnet_cv 
     
     # MlmnetDeprecated objects
     MLMNets::Array{Mlmnet,1} 
@@ -27,7 +27,7 @@ mutable struct MlmnetNet_cv
     # for each lambdaL1 and lambdaL2
     propZero::Array{Float64,3} 
     
-    MlmnetNet_cv(MLMNets, lambdas, alphas, data, rowFolds, colFolds, dig) = 
+    Mlmnet_cv(MLMNets, lambdas, alphas, data, rowFolds, colFolds, dig) = 
         new(MLMNets, lambdas, alphas, data, rowFolds, colFolds, 
             calc_mseNet(MLMNets, data, lambdas, alphas, rowFolds, colFolds), # issue change to alpha lambda
             calc_prop_zeroNet(MLMNets, lambdas, alphas; dig=dig))
@@ -90,7 +90,7 @@ input.
 
 # Value
 
-An Mlmnet_cv object. 
+An Mlmnet_cvDeprecated object. 
 
 # Some notes
 
@@ -98,7 +98,7 @@ This is the base `mlmnet_cv` function that all other variants call. Folds
 are computed in parallel when possible. 
 
 """
-function mlmnetNet_cv(data::RawData, 
+function mlmnet_cv(data::RawData, 
                    lambdas::AbstractArray{Float64,1},
                    alphas::AbstractArray{Float64,1}, 
                    rowFolds::Array{Array{Int64,1},1}, 
@@ -155,12 +155,12 @@ function mlmnetNet_cv(data::RawData,
                                               setStepsize=setStepsize, 
                                               funArgs...), dataFolds)
     
-    return MlmnetNet_cv(MLMNets, lambdas, alphas, data, rowFolds, colFolds, dig) # issue: should be a different struct
+    return Mlmnet_cv(MLMNets, lambdas, alphas, data, rowFolds, colFolds, dig) # issue: should be a different struct
 end
 
 
 """
-    mlmnetNet_cv(fun, data, lambdas, rowFolds, nColFolds; 
+    mlmnet_cv(fun, data, lambdas, rowFolds, nColFolds; 
               hasXIntercept, hasZIntercept, toXReg, toZReg, 
               toXInterceptReg, toZInterceptReg, toStandardize, isVerbose, 
               stepsize, setStepsize, dig, funArgs...)
@@ -212,14 +212,14 @@ Calls the base `mlmnet_cv` function.
 
 # Value
 
-An Mlmnet_cv object. 
+An Mlmnet_cvDeprecated object. 
 
 # Some notes
 
 Folds are computed in parallel when possible. 
 
 """
-function mlmnetNet_cv(data::RawData, 
+function mlmnet_cv(data::RawData, 
                    lambdas::AbstractArray{Float64,1}, 
                    alphas::AbstractArray{Float64,1},
                    rowFolds::Array{Array{Int64,1},1}, nColFolds::Int64;
@@ -237,7 +237,7 @@ function mlmnetNet_cv(data::RawData,
     
     # Pass in user input row folds and randomly generated column folds to the 
     # base mlmnet_cv function
-    mlmnetNet_cv(data, lambdas, alphas, rowFolds, colFolds; 
+    mlmnet_cv(data, lambdas, alphas, rowFolds, colFolds; 
               method=method, isNaive=isNaive,
               hasXIntercept=hasXIntercept, hasZIntercept=hasZIntercept, 
               toXReg=toXReg, toZReg=toZReg, 
@@ -249,7 +249,7 @@ end
 
 
 """
-    mlmnetNet_cv(fun, data, lambdasL1, lambdasL2, nRowFolds, colFolds; 
+    mlmnet_cv(fun, data, lambdasL1, lambdasL2, nRowFolds, colFolds; 
               hasXIntercept, hasZIntercept, toXReg, toZReg, 
               toXInterceptReg, toZInterceptReg, toStandardize, isVerbose, 
               stepsize, setStepsize, dig, funArgs...)
@@ -303,14 +303,14 @@ input. Calls the base `mlmnet_cv` function.
 
 # Value
 
-An Mlmnet_cv object. 
+An Mlmnet_cvDeprecated object. 
 
 # Some notes
 
 Folds are computed in parallel when possible. 
 
 """
-function mlmnetNet_cv(data::RawData, 
+function mlmnet_cv(data::RawData, 
                    lambdas::AbstractArray{Float64,1},
                    alphas::AbstractArray{Float64,1}, 
                    nRowFolds::Int64, colFolds::Array{Array{Int64,1},1}; 
@@ -328,7 +328,7 @@ function mlmnetNet_cv(data::RawData,
     
     # Pass in randomly generated row folds and user input column folds to the 
     # base mlmnet_cv function
-    mlmnetNet_cv(data, lambdas, alphas, rowFolds, colFolds; 
+    mlmnet_cv(data, lambdas, alphas, rowFolds, colFolds; 
               method=method, isNaive=isNaive,
               hasXIntercept=hasXIntercept, hasZIntercept=hasZIntercept, 
               toXReg=toXReg, toZReg=toZReg, 
@@ -340,7 +340,7 @@ end
 
 
 """
-    mlmnetNet_cv(fun, data, lambdasL1, lambdasL2, nRowFolds, nColFolds; 
+    mlmnet_cv(fun, data, lambdasL1, lambdasL2, nRowFolds, nColFolds; 
               hasXIntercept, hasZIntercept, toXReg, toZReg, 
               toXInterceptReg, toZInterceptReg, toStandardize, isVerbose, 
               stepsize, setStepsize, dig, funArgs...)
@@ -392,7 +392,7 @@ folds randomly generated using calls to `make_folds`. Calls the base
 
 # Value
 
-An Mlmnet_cv object. 
+An Mlmnet_cvDeprecated object. 
 
 # Some notes
 
@@ -414,7 +414,7 @@ too quickly can cause the criterion to diverge. We have found that setting
 be less consequential. 
 
 """
-function mlmnetNet_cv(data::RawData, 
+function mlmnet_cv(data::RawData, 
                    lambdas::Array{Float64,1}, alphas::Array{Float64,1},
                    nRowFolds::Int64=10, nColFolds::Int64=10;
                    method::String="ista", 
@@ -433,7 +433,7 @@ function mlmnetNet_cv(data::RawData,
     
     # Pass in randomly generated row and column folds to the base mlmnet_cv 
     # function
-    mlmnetNet_cv(data, lambdas, alphas, rowFolds, colFolds; 
+    mlmnet_cv(data, lambdas, alphas, rowFolds, colFolds; 
               method=method, isNaive=isNaive, 
               hasXIntercept=hasXIntercept, hasZIntercept=hasZIntercept, 
               toXReg=toXReg, toZReg=toZReg, 
@@ -445,7 +445,7 @@ end
 
 
 """
-    mlmnetNet_cv(fun, data, lambdas, nRowFolds, nColFolds; 
+    mlmnet_cv(fun, data, lambdas, nRowFolds, nColFolds; 
               hasXIntercept, hasZIntercept, toXReg, toZReg, 
               toXInterceptReg, toZInterceptReg, toStandardize, isVerbose, 
               stepsize, setStepsize, dig, funArgs...)
@@ -456,7 +456,7 @@ folds randomly generated using calls to `make_folds`. Calls the base
 
 
 """
-function mlmnetNet_cv(data::RawData, 
+function mlmnet_cv(data::RawData, 
                       lambdas::Array{Float64,1},
                       nRowFolds::Int64=10, nColFolds::Int64=10;
                       method::String="ista", 
@@ -475,7 +475,7 @@ function mlmnetNet_cv(data::RawData,
 
     # Pass in randomly generated row and column folds to the base mlmnet_cv 
     # function
-    mlmnetNet_cv(data, lambdas, alphas, nRowFolds, nColFolds; 
+    mlmnet_cv(data, lambdas, alphas, nRowFolds, nColFolds; 
                   method=method, isNaive=isNaive, 
                   hasXIntercept=hasXIntercept, hasZIntercept=hasZIntercept, 
                   toXReg=toXReg, toZReg=toZReg, 
