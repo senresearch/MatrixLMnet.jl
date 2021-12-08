@@ -29,8 +29,8 @@ mutable struct Mlmnet_cv
     
     Mlmnet_cv(MLMNets, lambdas, alphas, data, rowFolds, colFolds, dig) = 
         new(MLMNets, lambdas, alphas, data, rowFolds, colFolds, 
-            calc_mseNet(MLMNets, data, lambdas, alphas, rowFolds, colFolds), # issue change to alpha lambda
-            calc_prop_zeroNet(MLMNets, lambdas, alphas; dig=dig))
+            calc_mse(MLMNets, data, lambdas, alphas, rowFolds, colFolds), # issue change to alpha lambda
+            calc_prop_zero(MLMNets, lambdas, alphas; dig=dig))
 end
 
 
