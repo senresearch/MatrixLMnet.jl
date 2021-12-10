@@ -214,16 +214,6 @@ too quickly can cause the criterion to diverge. We have found that setting
 be less consequential. 
 
 """
-# function mlmnet(fun::Function, data::RawData, # To delete
-#                 lambdas::AbstractArray{Float64,1}, alphas::AbstractArray{Float64,1};
-#                 isNaive::Bool=false,
-#                 hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
-#                 toXReg::BitArray{1}=trues(data.p), 
-#                 toZReg::BitArray{1}=trues(data.q),     
-#                 toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
-#                 toStandardize::Bool=true, isVerbose::Bool=true, 
-#                 stepsize::Float64=0.01, setStepsize::Bool=true, 
-#                 funArgs...)
 function mlmnet(data::RawData, 
                 lambdas::AbstractArray{Float64,1}, alphas::AbstractArray{Float64,1};
                 method::String = "ista", 
@@ -369,10 +359,10 @@ function mlmnet(data::RawData,
     # Back-transform coefficient estimates, if necessary. 
     # Case if including both X and Z intercepts:
     if toStandardize == true && (hasXIntercept==true) && (hasZIntercept==true)
-        backtransform!(coeffs, meansX, meansZ, normsX, normsZ, get_Y(data),  # issue# should be backtransformNet!
+        backtransform!(coeffs, meansX, meansZ, normsX, normsZ, get_Y(data),  # issue# should be backtransformNet! ✓
                        data.predictors.X, data.predictors.Z)
     elseif toStandardize == true # Otherwise
-        backtransformNet!(coeffs, hasXIntercept, hasZIntercept, meansX, meansZ, 
+        backtransform!(coeffs, hasXIntercept, hasZIntercept, meansX, meansZ, 
                        normsX, normsZ)
     end
 
@@ -394,6 +384,7 @@ function mlmnet(data::RawData,
          stepsize, setStepsize, funArgs...)
 
 """
+
 function mlmnet(data::RawData, 
               lambdas::AbstractArray{Float64,1};
               method::String = "ista", 

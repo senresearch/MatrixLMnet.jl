@@ -19,10 +19,10 @@ using MLBase
 export Response, Predictors, RawData, get_X, get_Z, get_Y, contr, 
     add_intercept, remove_intercept, shuffle_rows, shuffle_cols,
     cd!, cd_active!, ista!, fista!, fista_bt!, admm!, 
-    MlmnetDeprecated, mlmnet, Mlmnet, coef, coef_2d, predict, fitted, resid, 
+    mlmnet, Mlmnet, coef, coef_2d, predict, fitted, resid, 
     mlmnet_perms, 
-    make_folds, make_folds_conds, Mlmnet_cvDeprecated, mlmnet_cv, Mlmnet_cv, mlmnet_cv,
-    avg_mse, lambda_min, lambdaNet_min, avg_prop_zero, mlmnet_cv_summary, mlmnetNet_cv_summary
+    make_folds, make_folds_conds, mlmnet_cv, Mlmnet_cv, mlmnet_cv,
+    avg_mse, lambda_min, avg_prop_zero, mlmnet_cv_summary
 
 
 # Helper functions
@@ -30,15 +30,15 @@ include("utilities/std_helpers.jl")
 include("mlmnet/mlmnet_helpers.jl")
 
 # Deprecated L1 algorithms
-include("deprecated/ista.jl")
-include("deprecated/fista.jl")
-include("deprecated/fista_bt.jl")
-include("deprecated/admm.jl")
-include("deprecated/mlmnet.jl")
-include("deprecated/mlmnet_helpers.jl")
+# include("deprecated/ista.jl")
+# include("deprecated/fista.jl")
+# include("deprecated/fista_bt.jl")
+# include("deprecated/admm.jl")
+# include("deprecated/mlmnet.jl")
+# include("deprecated/mlmnet_helpers.jl")
 
-include("deprecated/mlmnet_cv.jl")
-include("deprecated/mlmnet_cv_summary.jl")
+# include("deprecated/mlmnet_cv.jl")
+# include("deprecated/mlmnet_cv_summary.jl")
 
 # Optimizing algorithms
 include("methods/cd.jl")
@@ -60,11 +60,5 @@ include("mlmnet/mlmnet_perms.jl")
 include("crossvalidation/mlmnet_cv_helpers.jl")
 include("crossvalidation/mlmnet_cv.jl")
 include("crossvalidation/mlmnet_cv_summary.jl")
-
-# Cross-validation for Elastic-net
-include("crossvalidation/mlmnet_cv.jl")
-include("crossvalidation/mlmnetNet_cv_summary.jl")
-
-
 
 end

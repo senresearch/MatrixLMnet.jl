@@ -89,7 +89,7 @@ DataFrame summarizing average MSE and proportion of zero interactions across
 folds for each lambda. 
 	
 """
-function mlmnetNet_cv_summary(MLMNet_cv::Mlmnet_cv)
+function mlmnet_cv_summary(MLMNet_cv::Mlmnet_cv)
     
     # Calculate summary information across folds
 
@@ -127,7 +127,7 @@ end
 
 
 """
-    lambdaNet_min(MLMNet_cv)
+    lambda_min(MLMNet_cv)
     
 Returns summary information for lambdas corresponding to the minimum average 
 test MSE across folds and the MSE one that is standard error greater. 
@@ -143,7 +143,7 @@ the minimum average test MSE across folds and the MSE that is one standard
 error greater. 
     
 """
-function lambdaNet_min(MLMNet_cv::Mlmnet_cv)
+function lambda_min(MLMNet_cv::Mlmnet_cv)
     # Calculate average proportion of zeros
     prop_zeroMean = calc_avg_prop_zero(MLMNet_cv)
     

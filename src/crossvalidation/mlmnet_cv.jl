@@ -35,10 +35,15 @@ end
 
 
 """
-    mlmnet_cv(fun, data, lambdasL1, lambdasL2, rowFolds, colFolds; 
-              hasXIntercept, hasZIntercept, toXReg, toZReg, 
-              toXInterceptReg, toZInterceptReg, toStandardize, isVerbose, 
-              stepsize, setStepsize, dig, funArgs...)
+    mlmnet_cv(data, lambdas, alphas, rowFolds, colFolds; 
+              method ="ista", isNaive = false,
+              hasXIntercept = true, hasZIntercept = true, 
+              toXReg = trues(size(get_X(data), 2)), 
+              toZReg =trues(size(get_Z(data), 2)), 
+              toXInterceptReg = false, toZInterceptReg = false, 
+              toStandardize = true, isVerbose = true, 
+              stepsize = 0.01, setStepsize = true, 
+              dig = 12, funArgs...)
 
 Performs cross-validation for `mlmnet` using row and column folds from user 
 input. 
@@ -219,6 +224,7 @@ An Mlmnet_cvDeprecated object.
 Folds are computed in parallel when possible. 
 
 """
+
 function mlmnet_cv(data::RawData, 
                    lambdas::AbstractArray{Float64,1}, 
                    alphas::AbstractArray{Float64,1},
@@ -310,6 +316,7 @@ An Mlmnet_cvDeprecated object.
 Folds are computed in parallel when possible. 
 
 """
+
 function mlmnet_cv(data::RawData, 
                    lambdas::AbstractArray{Float64,1},
                    alphas::AbstractArray{Float64,1}, 
@@ -414,6 +421,7 @@ too quickly can cause the criterion to diverge. We have found that setting
 be less consequential. 
 
 """
+
 function mlmnet_cv(data::RawData, 
                    lambdas::Array{Float64,1}, alphas::Array{Float64,1},
                    nRowFolds::Int64=10, nColFolds::Int64=10;
@@ -456,6 +464,7 @@ folds randomly generated using calls to `make_folds`. Calls the base
 
 
 """
+
 function mlmnet_cv(data::RawData, 
                       lambdas::Array{Float64,1},
                       nRowFolds::Int64=10, nColFolds::Int64=10;

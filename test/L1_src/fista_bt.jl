@@ -48,7 +48,7 @@ function update_fista2!(B::AbstractArray{Float64,2},
     end 
     
     # Update residuals based on coefficient estimates
-    calc_resid!(resid_B, X, Y, Z, B) 
+    MatrixLM.calc_resid!(resid_B, X, Y, Z, B) 
 end
 
 
@@ -104,7 +104,7 @@ function update_fista2!(B::AbstractArray{Float64,2},
     end 
     
     # Update residuals based on coefficient estimates
-    calc_resid!(resid_B, X, Y, Z, B) 
+    MatrixLM.calc_resid!(resid_B, X, Y, Z, B) 
 end
 
 
@@ -170,7 +170,7 @@ function outer_update_fista_bt!(B::AbstractArray{Float64,2},
         
         if looped== false # First time entering while loop
             # Update residuals based on extrapolated coefficients 
-            calc_resid!(resid, X, Y, Z, A) 
+            MatrixLM.calc_resid!(resid, X, Y, Z, A) 
             # Update gradient
             calc_grad!(grad, X, Z, resid) 
         
@@ -274,7 +274,7 @@ function fista_bt!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
     grad = Array{Float64}(undef, size(B))
     
     # Calculate residuals 
-    calc_resid!(resid, X, Y, Z, B) 
+    MatrixLM.calc_resid!(resid, X, Y, Z, B) 
     # Initialize residuals using coefficient estimates
     resid_B = copy(resid) 
     # Store coefficients from previous iteration

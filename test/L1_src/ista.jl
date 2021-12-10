@@ -53,7 +53,7 @@ function update_ista!(B::AbstractArray{Float64,2},
     end 
     
     # Update residuals
-    calc_resid!(resid, X, Y, Z, B) 
+    MatrixLM.calc_resid!(resid, X, Y, Z, B) 
 end
 
 
@@ -114,7 +114,7 @@ function update_ista!(B::AbstractArray{Float64,2},
     end 
     
     # Update residuals
-    calc_resid!(resid, X, Y, Z, B)
+    MatrixLM.calc_resid!(resid, X, Y, Z, B)
 end
 
 
@@ -180,7 +180,7 @@ function ista!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
     grad = Array{Float64}(undef, size(B))
     
     # Calculate residuals 
-    calc_resid!(resid, X, Y, Z, B) 
+    MatrixLM.calc_resid!(resid, X, Y, Z, B) 
     
     # Denominators of criterion
     crit_denom = [size(X,1)*size(Z,1), size(X,2)*size(Z,2)] 

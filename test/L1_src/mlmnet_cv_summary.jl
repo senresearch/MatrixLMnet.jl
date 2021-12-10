@@ -100,7 +100,7 @@ end
 
 
 """
-    lambda_min(MLMNet_cv)
+    lambda_min_deprecated(MLMNet_cv)
     
 Returns summary information for lambdas corresponding to the minimum average 
 test MSE across folds and the MSE one that is standard error greater. 
@@ -116,7 +116,7 @@ the minimum average test MSE across folds and the MSE that is one standard
 error greater. 
     
 """
-function lambda_min(MLMNet_cv::Mlmnet_cvDeprecated)
+function lambda_min_deprecated(MLMNet_cv::Mlmnet_cvDeprecated)
     
     # Calculate average test MSE across folds.
     mseMean = calc_avg_mse(MLMNet_cv)

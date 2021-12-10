@@ -37,7 +37,6 @@ Proximal operator for the L2 norm updates in ADMM.
 2d array of floats
 
 """
-
 function prox2(v::Float64, rho::Float64, 
                u::Float64, l::Float64)
     
@@ -134,7 +133,7 @@ function update_admm!(B::AbstractArray{Float64,2},
     B2 .+= r
   
     # Update residuals
-    calc_resid!(resid, X, Y, Z, B) 
+    MatrixLM.calc_resid!(resid, X, Y, Z, B) 
 
     # Update rho according to the relative size of the primal and dual residuals
     # Then re-scale B2 accordingly
@@ -237,7 +236,7 @@ function admm!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
     rho = [rho]
 
     # Calculate residuals 
-    resid = calc_resid(X, Y, Z, B)
+    resid = MatrixLM.calc_resid(X, Y, Z, B)
     # Initialize values for L2 updates
     B0 = copy(B)
     # Initialize values for dual updates

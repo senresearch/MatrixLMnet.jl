@@ -2,9 +2,13 @@
 
 [![Build Status](https://travis-ci.com/senresearch/MatrixLMnet.jl.svg?branch=master)](https://travis-ci.com/senresearch/MatrixLMnet.jl)
 
-Core functions to obtain L<sub>1</sub>-penalized estimates for matrix linear models. See the associated paper, ["Sparse matrix linear models for structured high-throughput data"](https://arxiv.org/abs/1712.05767), and its [reproducible code](https://github.com/senresearch/mlm_l1_supplement) for more details. 
+Package for L<sub>1</sub> and L<sub>2</sub> penalized estimation of
+ matrix linear models (bilinear models for matrix-valued data).
 
-`MatrixLMnet` is related to the [`MatrixLM`](https://github.com/senresearch/MatrixLM.jl) package, which provides core functions for closed-form least squares estimates for matrix linear models. 
+`MatrixLMnet` depends on the [`MatrixLM`](https://github.com/senresearch/MatrixLM.jl) package, 
+which provides core functions for closed-form least squares estimates for matrix linear models. 
+
+See the paper, ["Sparse matrix linear models for structured high-throughput data"](https://arxiv.org/abs/1712.05767), and its [reproducible code](https://github.com/senresearch/mlm_l1_supplement) for details on the L<sub>1</sub> penalized estimation.
 
 ## Installation 
 
