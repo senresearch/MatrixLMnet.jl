@@ -256,7 +256,8 @@ function get_func(method::String )
     dictMethod = Dict("ista"=>ista!,
                         "fista"=>fista!,
                         "fista_bt"=>fista_bt!,
-                        "admm"=>admm!);
+                        "admm"=>admm!,
+                        "cd"=>cd!);
 
     return dictMethod[method]
 end

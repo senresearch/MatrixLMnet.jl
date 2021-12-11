@@ -147,7 +147,7 @@ smmr_Lasso = lambda_min_deprecated(est2);
 
 
 
-println("CV Lasso vs Elastic Net when α=1 test 2 - fista_bt: ", @test smmr_Net3.AvgMSE == smmr_Lasso.AvgMSE && 
+println("CV Lasso vs Elastic Net when α=1 test 3 - fista_bt: ", @test smmr_Net3.AvgMSE == smmr_Lasso.AvgMSE && 
                                                             smmr_Net3.AvgPercentZero == smmr_Lasso.AvgPercentZero)
 
 @btime  MatrixLMnet2.mlmnet_cv(dat, λ, α, 10, 1, method = "fista_bt", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
@@ -179,7 +179,7 @@ smmr_Lasso = lambda_min_deprecated(est2);
 
 
 
-println("CV Lasso vs Elastic Net when α=1 test 2 - admm: ", @test smmr_Net3.AvgMSE == smmr_Lasso.AvgMSE && 
+println("CV Lasso vs Elastic Net when α=1 test 4 - admm: ", @test smmr_Net3.AvgMSE == smmr_Lasso.AvgMSE && 
                                                             smmr_Net3.AvgPercentZero == smmr_Lasso.AvgPercentZero)
 
 @btime  MatrixLMnet2.mlmnet_cv(dat, λ, α, 10, 1, method = "admm", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
@@ -187,6 +187,34 @@ println("CV Lasso vs Elastic Net when α=1 test 2 - admm: ", @test smmr_Net3.Avg
 @btime  MatrixLMnet2.mlmnet_cv(dat, λ, 10, 1, method = "admm",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
 
 @btime  mlmnet_cv(admm!, dat, λ, 10, 1, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+
+##########################################
+# TEST 5 Lasso vs Elastic Net (𝛼=1) - cd #
+##########################################
+
+# Elastic net penalized regression
+Random.seed!(2021)
+est1 = MatrixLMnet2.mlmnet_cv(dat, λ, α, 10, 1, method = "cd", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+smmr_Net1 = MatrixLMnet2.lambda_min(est1);
+
+# Elastic net penalized regression
+Random.seed!(2021)
+est3 = MatrixLMnet2.mlmnet_cv(dat, λ, 10, 1, method = "cd",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+smmr_Net3 = MatrixLMnet2.lambda_min(est3);
+
+# Lasso penalized regression
+Random.seed!(2021)
+est2 = mlmnet_cv(cd!, dat, λ, 10, 1, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+smmr_Lasso = lambda_min_deprecated(est2);
+
+println("Lasso vs Elastic Net when α=1 test 5 - cd: ", @test smmr_Net3.AvgMSE == smmr_Lasso.AvgMSE && 
+                                                             smmr_Net3.AvgPercentZero == smmr_Lasso.AvgPercentZero)
+
+@btime  MatrixLMnet2.mlmnet_cv(dat, λ, α, 10, 1, method = "cd", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+
+@btime  MatrixLMnet2.mlmnet_cv(dat, λ, 10, 1, method = "cd",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+
+@btime  mlmnet_cv(cd!, dat, λ, 10, 1, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
 
 println("Tests finished!")
 

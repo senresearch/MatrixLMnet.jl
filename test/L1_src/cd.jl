@@ -41,7 +41,7 @@ function inner_update_cd!(i::Int64, j::Int64, B::AbstractArray{Float64,2},
     b = reg[i,j] ? prox(b, gradient, b2sign, lambda, norms) : b2update 
       
     if b != B[i,j] 
-        ger!(B[i,j]-b, X[:,i], Z[:,j], resid) # Update residuals
+        MatrixLM.ger!(B[i,j]-b, X[:,i], Z[:,j], resid) # Update residuals
         B[i,j] = b # Update coefficient estimates in the current copy
     end 
 end
@@ -92,7 +92,7 @@ function inner_update_cd!(i::Int64, j::Int64, B::AbstractArray{Float64,2},
     b = reg[i,j] ? prox(b, gradient, b2sign, lambda, norms[i,j]) : b2update 
       
     if b != B[i,j] 
-        ger!(B[i,j]-b, X[:,i], Z[:,j], resid) # Update residuals
+        MatrixLM.ger!(B[i,j]-b, X[:,i], Z[:,j], resid) # Update residuals
         B[i,j] = b # Update coefficient estimates in the current copy
     end 
 end
@@ -333,22 +333,14 @@ criteria is less than the threshold `thresh`.
 
 """
 function cd!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2}, 
-             Z::AbstractArray{Float64,2}, lambda::Float64, alpha::Float64,
+             Z::AbstractArray{Float64,2}, lambda::Float64, 
              B::AbstractArray{Float64,2}, 
              regXidx::AbstractArray{Int64,1}, 
              regZidx::AbstractArray{Int64,1}, reg::BitArray{2}, norms; 
              isVerbose::Bool=true, stepsize::Float64=0.01, 
              isRandom::Bool=true, thresh::Float64=10.0^(-7), 
              maxiter::Int=10^10)
-    # Assign alpha to 1 with warning message
-    if alpha != 1
-      @warn "Only L1-penalized coordinate descent is available for the moment." 
-      alpha = 1
-    end
-    # Re-parametrize the Elastic-net tuning parameters
-    lambdaL1 = lambda*alpha
-    lambdaL2 = lambda*(1-alpha)
-    
+
     # Set the updates to random or cyclic. 
     if isRandom == true
         update! = update_cd_random!
@@ -359,13 +351,13 @@ function cd!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
     end
     
     # Calculate residuals 
-    resid = calc_resid(X, Y, Z, B)
+    resid = MatrixLM.calc_resid(X, Y, Z, B)
     # Denominators of criterion
     crit_denom = [size(X,1)*size(Z,1), size(X,2)*size(Z,2)] 
     # Placeholder to store the old criterion 
     oldcrit = 1.0 
     # Calculate the current criterion
-    crit = criterion(B[regXidx, regZidx], resid, lambdaL1, lambdaL2, crit_denom) 
+    crit = criterion(B[regXidx, regZidx], resid, lambda, crit_denom) 
 
     iter = 0
     # Iterate until coefficients converge or maximum iterations have been 
@@ -374,9 +366,9 @@ function cd!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
         # Store the current criterion
         oldcrit = crit 
         # Update the coefficient estimates
-        update!(B, resid, X, Z, norms, lambdaL1, reg) 
+        update!(B, resid, X, Z, norms, lambda, reg) 
         # Calculate the criterion after updating
-        crit = criterion(B[regXidx, regZidx], resid, lambdaL1, lambdaL2, crit_denom) 
+        crit = criterion(B[regXidx, regZidx], resid, lambda, crit_denom) 
 
         iter += 1 # Increment the number of iterations
         # Print warning message if coefficient estimates do not converge.
@@ -391,7 +383,7 @@ end
 
 
 """
-    cd_active!(X, Y, Z, lambda, alpha, B, regXidx, regZidx, reg, norms; 
+    cd_active!(X, Y, Z, lambda, B, regXidx, regZidx, reg, norms; 
                isVerbose, stepsize, isRandom, thresh, maxiter)
 
 Performs coordinate descent, taking advantage of the active set, using either 
@@ -436,22 +428,13 @@ criteria is less than the threshold `thresh`.
 
 """
 function cd_active!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2}, 
-                    Z::AbstractArray{Float64,2}, lambda::Float64, alpha::Float64,
+                    Z::AbstractArray{Float64,2}, lambda::Float64, 
                     B::AbstractArray{Float64,2}, 
                     regXidx::AbstractArray{Int64,1}, 
                     regZidx::AbstractArray{Int64,1}, reg::BitArray{2}, norms; 
                     isVerbose::Bool=true, stepsize::Float64=0.01, 
                     isRandom::Bool=true, thresh::Float64=10.0^(-7), 
                     maxiter::Int=10^10)
-
-    # Assign alpha to 1 with warning message
-    if alpha != 1
-      @warn "Only L1-penalized coordinate descent is available for the moment." 
-      alpha = 1
-    end
-    # Re-parametrize the Elastic-net tuning parameters
-    lambdaL1 = lambda*alpha
-    lambdaL2 = lambda*(1-alpha)
 
     # Set the updates to random or cyclic. 
     if isRandom == true
@@ -463,7 +446,7 @@ function cd_active!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
     end
 
     # Calculate residuals 
-    resid = calc_resid(X, Y, Z, B)
+    resid = MatrixLM.calc_resid(X, Y, Z, B)
     # Denominators of criterion
     crit_denom = [size(X,1)*size(Z,1), size(X,2)*size(Z,2)] 
     # Placeholder to store the old criterion 
@@ -472,9 +455,9 @@ function cd_active!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
     # Initial iteration of updates
     iter = 1 
     # Update the coefficient estimates
-    update!(B, resid, X, Z, norms, lambdaL1, reg) 
+    update!(B, resid, X, Z, norms, lambda, reg) 
     # Calculate the criterion after the first update
-    crit = criterion(B[regXidx, regZidx], resid, lambdaL1, lambdaL2, crit_denom) 
+    crit = criterion(B[regXidx, regZidx], resid, lambda, crit_denom) 
     
     # Indices of non-regularized coefficients
     nonreg_cart_idx = findall(reg.==false)
@@ -495,10 +478,10 @@ function cd_active!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
             # Store the current criterion
             oldcrit = crit 
             # Update the non-regularized and active coefficients
-            update_active!(B, resid, X, Z, norms, lambdaL1, reg, nonreg_idx, 
+            update_active!(B, resid, X, Z, norms, lambda, reg, nonreg_idx, 
                            active_idx) 
             # Calculate the criterion after updating
-            crit = criterion(B[regXidx, regZidx], resid, lambdaL1, lambdaL2, crit_denom) 
+            crit = criterion(B[regXidx, regZidx], resid, lambda, crit_denom) 
             
             iter += 1 # Increment the number of iterations
             # Warning message if coefficient estimates do not converge.
@@ -510,9 +493,9 @@ function cd_active!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
         # Store the current criterion
         oldcrit = crit 
         # Update the coefficient estimates
-        update!(B, resid, X, Z, norms, lambdaL1, reg) 
+        update!(B, resid, X, Z, norms, lambda, reg) 
         # Calculate the criterion after updating
-        crit = criterion(B[regXidx, regZidx], resid, lambdaL1, lambdaL2, crit_denom) 
+        crit = criterion(B[regXidx, regZidx], resid, lambda, crit_denom) 
         
         # Re-identify active set
         active_cart_idx = findall((B.!=0.0) .& (reg.==true))

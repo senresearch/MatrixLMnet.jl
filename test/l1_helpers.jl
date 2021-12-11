@@ -17,7 +17,7 @@ with lasso's results of the version 0.1.0.
 # include("sim_helpers.jl")
 
 # Get list of the sources files containing the functions of the lasso version
-dirLasso = realpath(joinpath(@__DIR__, "lasso"))
+dirLasso = realpath(joinpath(@__DIR__, "L1_src"))
 filesList = readdir(dirLasso)
 filesLasso = joinpath.(dirLasso, filesList)
 include.(filesLasso)
