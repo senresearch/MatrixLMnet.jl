@@ -1,4 +1,4 @@
-# MatrixLMnet: Core functions for penalized estimation for matrix linear models.
+# MatrixLMnet: Penalized estimation for matrix linear models
 
 [![Build Status](https://travis-ci.com/senresearch/MatrixLMnet.jl.svg?branch=master)](https://travis-ci.com/senresearch/MatrixLMnet.jl)
 
