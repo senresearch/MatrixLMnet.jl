@@ -1,7 +1,7 @@
 """
     mlmnet_perms(fun, data, lambdas; 
                  permFun, hasXIntercept, hasZIntercept, toXReg, toZReg, 
-                 toXInterceptReg, toZInterceptReg, toStandardize, isVerbose, 
+                 toXInterceptReg, toZInterceptReg, toNormalize, isVerbose, 
                  stepsize, setStepsize, funArgs...)
 
 Permutes response matrix Y in RawData object and then calls the mlmnet core 
@@ -32,7 +32,7 @@ function.
   `X` intercept Defaults to `false`. 
 - toZInterceptReg = boolean flag indicating whether or not to regularize the 
   `Z` intercept. Defaults to `false`. 
-- toStandardize = boolean flag indicating if the columns of `X` and `Z` 
+- toNormalize = boolean flag indicating if the columns of `X` and `Z` 
   should be standardized (to mean 0, standard deviation 1). Defaults to `true`.
 - isVerbose = boolean flag indicating whether or not to print messages.  
   Defaults to `true`. 
@@ -73,7 +73,7 @@ function mlmnet_perms(fun::Function, data::RawData,
                       toZReg::BitArray{1}=trues(data.q), 
                       toXInterceptReg::Bool=false, 
                       toZInterceptReg::Bool=false, 
-                      toStandardize::Bool=true, isVerbose::Bool=true, 
+                      toNormalize::Bool=true, isVerbose::Bool=true, 
                       stepsize::Float64=0.01, setStepsize=true, funArgs...)
     
     # Create RawData object with permuted Y
@@ -85,6 +85,6 @@ function mlmnet_perms(fun::Function, data::RawData,
                   toXReg=toXReg, toZReg=toZReg, 
                   toXInterceptReg=toXInterceptReg, 
                   toZInterceptReg=toZInterceptReg, 
-                  toStandardize=toStandardize, isVerbose=isVerbose, 
+                  toNormalize=toNormalize, isVerbose=isVerbose, 
                   stepsize=stepsize, setStepsize=setStepsize, funArgs...)
 end

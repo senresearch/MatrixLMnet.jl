@@ -133,10 +133,10 @@ end
 """
     mlmnet(fun, data, lambdas; 
            hasXIntercept, hasZIntercept, toXReg, toZReg, 
-           toXInterceptReg, toZInterceptReg, toStandardize, isVerbose, 
+           toXInterceptReg, toZInterceptReg, toNormalize, isVerbose, 
            stepsize, setStepsize, funArgs...)
 
-Standardizes X and Z predictor matrices, calculates fixed step size, performs 
+Centers and normalizes X and Z predictor matrices, calculates fixed step size, performs 
 the supplied method on a descending list of lambdas using ``warm starts'', 
 and backtransforms resulting coefficients, as is deemed necessary by the user 
 inputs.
@@ -164,7 +164,7 @@ order. If they are not in descending order, they will be sorted.
   `X` intercept Defaults to `false`. 
 - toZInterceptReg = boolean flag indicating whether or not to regularize the 
   `Z` intercept. Defaults to `false`. 
-- toStandardize = boolean flag indicating if the columns of `X` and `Z` 
+- toNormalize = boolean flag indicating if the columns of `X` and `Z` 
   should be standardized (to mean 0, standard deviation 1). Defaults to `true`.
 - isVerbose = boolean flag indicating whether or not to print messages.  
   Defaults to `true`. 
@@ -202,7 +202,7 @@ function mlmnet(fun::Function, data::RawData, lambdas::AbstractArray{Float64,1};
                 toXReg::BitArray{1}=trues(data.p), 
                 toZReg::BitArray{1}=trues(data.q),     
                 toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
-                toStandardize::Bool=true, isVerbose::Bool=true, 
+                toNormalize::Bool=true, isVerbose::Bool=true, 
                 stepsize::Float64=0.01, setStepsize::Bool=true, funArgs...)
     
     # Ensure that toXReg and toZReg have same length as columns of X and Z
@@ -258,15 +258,15 @@ function mlmnet(fun::Function, data::RawData, lambdas::AbstractArray{Float64,1};
     # Indices corresponding to regularized Z covariates. 
     regZidx = findall(toZReg) 
 
-    # Standardize predictors, if necessary. 
-    if (toStandardize==true)
+    # Centers and normalizes predictors, if necessary. 
+    if (toNormalize==true)
         # If predictors will be standardized, copy the predictor matrices.
         X = copy(get_X(data))
         Z = copy(get_Z(data))
 
-        # Standardize predictors
-        meansX, normsX, = standardize!(X, hasXIntercept) 
-        meansZ, normsZ, = standardize!(Z, hasZIntercept)
+        # Centers and normalizes predictors
+        meansX, normsX, = normalize!(X, hasXIntercept) 
+        meansZ, normsZ, = normalize!(Z, hasZIntercept)
         # If X and Z are standardized, set the norm to nothing
         norms = nothing 
     else 
@@ -289,7 +289,7 @@ function mlmnet(fun::Function, data::RawData, lambdas::AbstractArray{Float64,1};
         ZTZ = transpose(Z)*Z 
         
         # Step size is the reciprocal of the maximum eigenvalue of kron(Z, X)
-        if toStandardize==true
+        if toNormalize==true
             # Standardizing X and Z results in complex eigenvalues
             # Hack is to square the singular values to get the eigenvalues (ZFY)
             eig_X = (svd(XTX).S).^2
@@ -313,10 +313,10 @@ function mlmnet(fun::Function, data::RawData, lambdas::AbstractArray{Float64,1};
   
     # Back-transform coefficient estimates, if necessary. 
     # Case if including both X and Z intercepts. 
-    if toStandardize == true && (hasXIntercept==true) && (hasZIntercept==true)
+    if toNormalize == true && (hasXIntercept==true) && (hasZIntercept==true)
         backtransform!(coeffs, meansX, meansZ, normsX, normsZ, get_Y(data), 
                        data.predictors.X, data.predictors.Z)
-    elseif toStandardize == true # Otherwise
+    elseif toNormalize == true # Otherwise
         backtransform!(coeffs, hasXIntercept, hasZIntercept, meansX, meansZ, 
                        normsX, normsZ)
     end

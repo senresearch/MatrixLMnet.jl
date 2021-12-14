@@ -150,7 +150,7 @@ end
 
 
 """
-    admm!(X, Y, Z, lambdaL1, lambdaL2, B, regXidx, regZidx, reg, norms, Qx, Qz, U, L; 
+    admm!(X, Y, Z, lambda, alpha, B, regXidx, regZidx, reg, norms, Qx, Qz, U, L; 
           isVerbose, stepsize, rho, setRho, thresh, maxiter, 
           tau_incr, tau_decr, mu)
 
@@ -164,6 +164,7 @@ Performs ADMM.
 - Z = 2d array of floats consisting of the column covariates, with all 
   categorical variables coded in appropriate contrasts
 - lambda = lambda penalty, a floating scalar
+- alpha = parameter (ϵ[0, 1]) determining the mix of penalties between L1 and L2
 - B = 2d array of floats consisting of starting coefficient estimates
 - regXidx = 1d array of indices corresponding to regularized X covariates
 - regZidx = 1d array of indices corresponding to regularized Z covariates

@@ -1,7 +1,7 @@
 """
-    standardize!(A, isIntercept)
+    normalize!(A, isIntercept)
 
-Standardize the columns of A in place
+Normalize the columns of A in place after centering
 
 # Arguments 
 
@@ -11,11 +11,11 @@ Standardize the columns of A in place
 
 # Value 
 
-Standardizes A in place and returns 2d arrays of the column means and L2 
-norms of A before standardization. 
+Centers then normalizes A in place and returns 2d arrays of the column means and L2 
+norms of A before normalization. 
 
 """
-function standardize!(A::AbstractArray{Float64,2}, isIntercept::Bool)
+function normalize!(A::AbstractArray{Float64,2}, isIntercept::Bool)
     
     # If including intercept, subtract the column means from all other columns
     if isIntercept == true 

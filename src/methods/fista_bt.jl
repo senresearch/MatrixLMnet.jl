@@ -228,6 +228,7 @@ Performs FISTA with backtracking.
 - Z = 2d array of floats consisting of the column covariates, with all 
   categorical variables coded in appropriate contrasts
 - lambda = lambda penalty, a floating scalar
+- alpha = parameter (ϵ[0, 1]) determining the mix of penalties between L1 and L2
 - B = 2d array of floats consisting of starting coefficient estimates
 - regXidx = 1d array of indices corresponding to regularized X covariates
 - regZidx = 1d array of indices corresponding to regularized Z covariates

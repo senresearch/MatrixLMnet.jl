@@ -36,7 +36,7 @@ end
 """
     mlmnet_cv(fun, data, lambdas, rowFolds, colFolds; 
               hasXIntercept, hasZIntercept, toXReg, toZReg, 
-              toXInterceptReg, toZInterceptReg, toStandardize, isVerbose, 
+              toXInterceptReg, toZInterceptReg, toNormalize, isVerbose, 
               stepsize, setStepsize, dig, funArgs...)
 
 Performs cross-validation for `mlmnet` using row and column folds from user 
@@ -73,7 +73,7 @@ input.
   `X` intercept Defaults to `false`. 
 - toZInterceptReg = boolean flag indicating whether or not to regularize the 
   `Z` intercept. Defaults to `false`. 
-- toStandardize = boolean flag indicating if the columns of `X` and `Z` 
+- toNormalize = boolean flag indicating if the columns of `X` and `Z` 
   should be standardized (to mean 0, standard deviation 1). Defaults to `true`.
 - isVerbose = boolean flag indicating whether or not to print messages.  
   Defaults to `true`. 
@@ -103,7 +103,7 @@ function mlmnet_cv(fun::Function, data::RawData,
                    toXReg::BitArray{1}=trues(size(get_X(data),2)), 
                    toZReg::BitArray{1}=trues(size(get_Z(data),2)), 
                    toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
-                   toStandardize::Bool=true, isVerbose::Bool=true, 
+                   toNormalize::Bool=true, isVerbose::Bool=true, 
                    stepsize::Float64=0.01, setStepsize::Bool=true, 
                    dig::Int64=12, funArgs...)
                    # tuningMode::String = "l1, l2"
@@ -143,7 +143,7 @@ function mlmnet_cv(fun::Function, data::RawData,
                                               toXReg=toXReg, toZReg=toZReg, 
                                               toXInterceptReg=toXInterceptReg, 
                                               toZInterceptReg=toZInterceptReg, 
-                                              toStandardize=toStandardize, 
+                                              toNormalize=toNormalize, 
                                               isVerbose=isVerbose, 
                                               stepsize=stepsize, 
                                               setStepsize=setStepsize, 
@@ -156,7 +156,7 @@ end
 """
     mlmnet_cv(fun, data, lambdas, rowFolds, nColFolds; 
               hasXIntercept, hasZIntercept, toXReg, toZReg, 
-              toXInterceptReg, toZInterceptReg, toStandardize, isVerbose, 
+              toXInterceptReg, toZInterceptReg, toNormalize, isVerbose, 
               stepsize, setStepsize, dig, funArgs...)
 
 Performs cross-validation for `mlmnet` using row folds from user input and 
@@ -192,7 +192,7 @@ Calls the base `mlmnet_cv` function.
   `X` intercept Defaults to `false`. 
 - toZInterceptReg = boolean flag indicating whether or not to regularize the 
   `Z` intercept. Defaults to `false`. 
-- toStandardize = boolean flag indicating if the columns of `X` and `Z` 
+- toNormalize = boolean flag indicating if the columns of `X` and `Z` 
   should be standardized (to mean 0, standard deviation 1). Defaults to `true`.
 - isVerbose = boolean flag indicating whether or not to print messages.  
   Defaults to `true`. 
@@ -220,7 +220,7 @@ function mlmnet_cv(fun::Function, data::RawData,
                    toXReg::BitArray{1}=trues(size(get_X(data),2)), 
                    toZReg::BitArray{1}=trues(size(get_Z(data),2)), 
                    toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
-                   toStandardize::Bool=true, isVerbose::Bool=true, 
+                   toNormalize::Bool=true, isVerbose::Bool=true, 
                    stepsize::Float64=0.01, setStepsize::Bool=true, 
                    dig::Int64=12, funArgs...)
     
@@ -234,7 +234,7 @@ function mlmnet_cv(fun::Function, data::RawData,
               toXReg=toXReg, toZReg=toZReg, 
               toXInterceptReg=toXInterceptReg, 
               toZInterceptReg=toZInterceptReg, 
-              isVerbose=isVerbose, toStandardize=toStandardize, 
+              isVerbose=isVerbose, toNormalize=toNormalize, 
               stepsize=stepsize, setStepsize=setStepsize, dig=dig, funArgs...)
 end
 
@@ -242,7 +242,7 @@ end
 """
     mlmnet_cv(fun, data, lambdas, nRowFolds, colFolds; 
               hasXIntercept, hasZIntercept, toXReg, toZReg, 
-              toXInterceptReg, toZInterceptReg, toStandardize, isVerbose, 
+              toXInterceptReg, toZInterceptReg, toNormalize, isVerbose, 
               stepsize, setStepsize, dig, funArgs...)
 
 Performs cross-validation for `mlmnet` using non-overlapping row folds 
@@ -278,7 +278,7 @@ input. Calls the base `mlmnet_cv` function.
   `X` intercept Defaults to `false`. 
 - toZInterceptReg = boolean flag indicating whether or not to regularize the 
   `Z` intercept. Defaults to `false`. 
-- toStandardize = boolean flag indicating if the columns of `X` and `Z` 
+- toNormalize = boolean flag indicating if the columns of `X` and `Z` 
   should be standardized (to mean 0, standard deviation 1). Defaults to `true`.
 - isVerbose = boolean flag indicating whether or not to print messages.  
   Defaults to `true`. 
@@ -306,7 +306,7 @@ function mlmnet_cv(fun::Function, data::RawData,
                    toXReg::BitArray{1}=trues(size(get_X(data),2)), 
                    toZReg::BitArray{1}=trues(size(get_Z(data),2)), 
                    toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
-                   toStandardize::Bool=true, isVerbose::Bool=true, 
+                   toNormalize::Bool=true, isVerbose::Bool=true, 
                    stepsize::Float64=0.01, setStepsize::Bool=true, 
                    dig::Int64=12, funArgs...)
     
@@ -320,7 +320,7 @@ function mlmnet_cv(fun::Function, data::RawData,
               toXReg=toXReg, toZReg=toZReg, 
               toXInterceptReg=toXInterceptReg, 
               toZInterceptReg=toZInterceptReg, 
-              isVerbose=isVerbose, toStandardize=toStandardize, 
+              isVerbose=isVerbose, toNormalize=toNormalize, 
               stepsize=stepsize, setStepsize=setStepsize, dig=dig, funArgs...)
 end
 
@@ -328,7 +328,7 @@ end
 """
     mlmnet_cv(fun, data, lambdas, nRowFolds, nColFolds; 
               hasXIntercept, hasZIntercept, toXReg, toZReg, 
-              toXInterceptReg, toZInterceptReg, toStandardize, isVerbose, 
+              toXInterceptReg, toZInterceptReg, toNormalize, isVerbose, 
               stepsize, setStepsize, dig, funArgs...)
 
 Performs cross-validation for `mlmnet` using non-overlapping row and column 
@@ -364,7 +364,7 @@ folds randomly generated using calls to `make_folds`. Calls the base
   `X` intercept Defaults to `false`. 
 - toZInterceptReg = boolean flag indicating whether or not to regularize the 
   `Z` intercept. Defaults to `false`. 
-- toStandardize = boolean flag indicating if the columns of `X` and `Z` 
+- toNormalize = boolean flag indicating if the columns of `X` and `Z` 
   should be standardized (to mean 0, standard deviation 1). Defaults to `true`.
 - isVerbose = boolean flag indicating whether or not to print messages.  
   Defaults to `true`. 
@@ -406,7 +406,7 @@ function mlmnet_cv(fun::Function, data::RawData, lambdas::Array{Float64,1},
                    toXReg::BitArray{1}=trues(size(get_X(data),2)), 
                    toZReg::BitArray{1}=trues(size(get_Z(data),2)), 
                    toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
-                   toStandardize::Bool=true, isVerbose::Bool=true, 
+                   toNormalize::Bool=true, isVerbose::Bool=true, 
                    stepsize::Float64=0.01, setStepsize::Bool=true, 
                    dig::Int64=12, funArgs...)
 	
@@ -421,6 +421,6 @@ function mlmnet_cv(fun::Function, data::RawData, lambdas::Array{Float64,1},
               toXReg=toXReg, toZReg=toZReg, 
               toXInterceptReg=toXInterceptReg, 
               toZInterceptReg=toZInterceptReg, 
-              isVerbose=isVerbose, toStandardize=toStandardize, 
+              isVerbose=isVerbose, toNormalize=toNormalize, 
               stepsize=stepsize, setStepsize=setStepsize, dig=dig, funArgs...)
 end

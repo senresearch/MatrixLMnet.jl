@@ -1,5 +1,5 @@
 """
-    Mlmnet(B, lambdasL1, lambdasL2, data)
+    Mlmnet(B, lambdas, alphas, data)
 
 Type for storing the results of an mlmnet (Elastic net) model fit
 
@@ -35,7 +35,8 @@ using ``warm starts''.
   categorical variables coded in appropriate contrasts
 - lambdas = 1d array of floats consisting of the total penalties in descending 
   order. If they are not in descending order, they will be sorted.
-- alphas = a float variable, the penalty ratio
+- alphas = 1d array of floats consisting of the penalty ratio that 
+  determines the mix of penalties between L1 and L2
 - regXidx = 1d array of indices corresponding to regularized X covariates
 - regZidx = 1d array of indices corresponding to regularized Z covariates
 - reg = 2d array of bits, indicating whether or not to regularize each of the 
@@ -145,26 +146,35 @@ function mlmnet_pathwise(fun::Function, X::AbstractArray{Float64,2},
 end
 
 """
-    mlmnet(fun, data, lambdas, alpha; 
-           hasXIntercept, hasZIntercept, toXReg, toZReg, 
-           toXInterceptReg, toZInterceptReg, toStandardize, isVerbose, 
-           stepsize, setStepsize, funArgs...)
+    mlmnet(data, lambdas, alphas;
+           method = "ista", 
+           isNaive =false,
+           hasXIntercept=true, hasZIntercept=true, 
+           toXReg=trues(data.p), 
+           toZReg=trues(data.q),     
+           toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
+           toNormalize=true, isVerbose=true, 
+           stepsize=0.01, setStepsize=true, 
+           funArgs...)
+    
 
-Standardizes X and Z predictor matrices, calculates fixed step size, performs 
+Centers and normalizes X and Z predictor matrices, calculates fixed step size, performs 
 the supplied method on two descending lists of lambdas (each for L1 and L2) using ``warm starts'', 
 and backtransforms resulting coefficients, as is deemed necessary by the user 
 inputs.
 
 # Arguments
 
-- fun = function that applies the Elastic-net penalty estimate method
 - data = RawData object
 - lambdas = 1d array of floats consisting of the total penalties in descending 
   order. If they are not in descending order, they will be sorted. 
-- alpha = a float, the penalty ratio
+- alphas = 1d array of floats consisting of the penalty ratio that 
+  determines the mix of penalties between L1 and L2
 
 # Keyword arguments
 
+- methods = function name that applies the Elastic-net penalty estimate method;
+  default is `ista`, and the other methods are `fista`, `fista_bt`, `admm` and `cd`
 - isNaive = boolean flag indicating whether to solve the Naive or non-Naive 
   Elastic-net problem
 - hasXIntercept = boolean flag indicating whether or not to include an `X` 
@@ -181,7 +191,7 @@ inputs.
   `X` intercept Defaults to `false`. 
 - toZInterceptReg = boolean flag indicating whether or not to regularize the 
   `Z` intercept. Defaults to `false`. 
-- toStandardize = boolean flag indicating if the columns of `X` and `Z` 
+- toNormalize = boolean flag indicating if the columns of `X` and `Z` 
   should be standardized (to mean 0, standard deviation 1). Defaults to `true`.
 - isVerbose = boolean flag indicating whether or not to print messages.  
   Defaults to `true`. 
@@ -222,7 +232,7 @@ function mlmnet(data::RawData,
                 toXReg::BitArray{1}=trues(data.p), 
                 toZReg::BitArray{1}=trues(data.q),     
                 toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
-                toStandardize::Bool=true, isVerbose::Bool=true, 
+                toNormalize::Bool=true, isVerbose::Bool=true, 
                 stepsize::Float64=0.01, setStepsize::Bool=true, 
                 funArgs...)
     
@@ -290,15 +300,15 @@ function mlmnet(data::RawData,
     # Indices corresponding to regularized Z covariates. 
     regZidx = findall(toZReg) 
 
-    # Standardize predictors, if necessary. 
-    if (toStandardize==true)
+    # Centers and normalizes predictors, if necessary. 
+    if (toNormalize==true)
         # If predictors will be standardized, copy the predictor matrices.
         X = copy(get_X(data))
         Z = copy(get_Z(data))
 
-        # Standardize predictors
-        meansX, normsX, = standardize!(X, hasXIntercept) 
-        meansZ, normsZ, = standardize!(Z, hasZIntercept)
+        # Centers and normalizes predictors
+        meansX, normsX, = normalize!(X, hasXIntercept) 
+        meansZ, normsZ, = normalize!(Z, hasZIntercept)
         # If X and Z are standardized, set the norm to nothing
         norms = nothing 
     else 
@@ -324,7 +334,7 @@ function mlmnet(data::RawData,
         ZTZ = transpose(Z)*Z 
         
         # Step size is the reciprocal of the maximum eigenvalue of kron(Z, X)
-        if toStandardize==true
+        if toNormalize==true
             # Standardizing X and Z results in complex eigenvalues
 
             # Hack is to square the singular values to get the eigenvalues
@@ -358,10 +368,10 @@ function mlmnet(data::RawData,
 
     # Back-transform coefficient estimates, if necessary. 
     # Case if including both X and Z intercepts:
-    if toStandardize == true && (hasXIntercept==true) && (hasZIntercept==true)
+    if toNormalize == true && (hasXIntercept==true) && (hasZIntercept==true)
         backtransform!(coeffs, meansX, meansZ, normsX, normsZ, get_Y(data),  # issue# should be backtransformNet! ✓
                        data.predictors.X, data.predictors.Z)
-    elseif toStandardize == true # Otherwise
+    elseif toNormalize == true # Otherwise
         backtransform!(coeffs, hasXIntercept, hasZIntercept, meansX, meansZ, 
                        normsX, normsZ)
     end
@@ -380,7 +390,7 @@ function mlmnet(data::RawData,
   """
   mlmnet(data, lambdas; 
          method, hasXIntercept, hasZIntercept, toXReg, toZReg, 
-         toXInterceptReg, toZInterceptReg, toStandardize, isVerbose, 
+         toXInterceptReg, toZInterceptReg, toNormalize, isVerbose, 
          stepsize, setStepsize, funArgs...)
 
 """
@@ -393,7 +403,7 @@ function mlmnet(data::RawData,
               toXReg::BitArray{1}=trues(data.p), 
               toZReg::BitArray{1}=trues(data.q),     
               toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
-              toStandardize::Bool=true, isVerbose::Bool=true, 
+              toNormalize::Bool=true, isVerbose::Bool=true, 
               stepsize::Float64=0.01, setStepsize::Bool=true, 
               funArgs...)
   
@@ -404,7 +414,7 @@ function mlmnet(data::RawData,
                     isNaive, hasXIntercept, hasZIntercept, 
                     toXReg, toZReg,     
                     toXInterceptReg, toZInterceptReg, 
-                    toStandardize, isVerbose, 
+                    toNormalize, isVerbose, 
                     stepsize, setStepsize, 
                     funArgs...)
   
