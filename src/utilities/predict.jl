@@ -19,14 +19,16 @@ end
 
 
 """
-    coef(MLMNet, lambda)
+    coef(MLMNet, lambda, alpha)
 
 Extract coefficients from MlmnetDeprecated object at a given lambda 
 
 # Arguments 
 
-- MLMNet = MlmnetDeprecated object
+- MLMNet = Mlmnet object
 - lambda = lambda penalty to use, a floating scalar
+- alpha = alpha penalty to determine the mix of penalties between L1 and L2
+  a floating scalar
 
 # Value
 
@@ -52,18 +54,18 @@ end
 
 
 """
-    coef_2d(MLMNet)
+    coef_3d(MLMNet)
 
 Extract coefficients from MlmnetDeprecated object as a flattened 2d array
 
 # Arguments 
 
-- MLMNet = MlmnetDeprecated object
+- MLMNet = Mlmnet object
 
 # Value
 
 2d array of flattened coefficients, where each column corresponds to a 
-different lambdaL1 and lambdaL2
+different lambda and alpha
 
 """
 function coef_3d(MLMNet::Mlmnet)
@@ -91,8 +93,10 @@ Calculate new predictions based on MlmnetDeprecated object and given a lambda
 
 # Arguments 
 
-- MLMNet = MlmnetDeprecated object
+- MLMNet = Mlmnet object
 - lambda = lambda penalty to use, a floating scalar
+- alpha = alpha penalty to determine the mix of penalties between L1 and L2
+  a floating scalar
 - newPredictors = Predictors object. Defaults to the data.predictors field 
   in the MLM object used to fit the model. 
 
@@ -144,7 +148,7 @@ Calculate new predictions based on MlmnetDeprecated object
 
 # Arguments 
 
-- MLMNet = MlmnetDeprecated object
+- MLMNet = Mlmnet object
 - newPredictors = Predictors object. Defaults to the data.predictors field 
   in the MLM object used to fit the model. 
 
@@ -171,14 +175,16 @@ end
 
 
 """
-    fitted(MLMNet, lambda)
+    fitted(MLMNet, lambda, alpha)
 
 Calculate fitted values of an MlmnetDeprecated object, given a lambda 
 
 # Arguments 
 
-- MLMNet = MlmnetDeprecated object
+- MLMNet = Mlmnet object
 - lambda = lambda penalty to use, a floating scalar
+- alpha = alpha penalty to determine the mix of penalties between L1 and L2
+  a floating scalar
 
 # Value
 
@@ -194,11 +200,11 @@ end
 """
     fitted(MLMNet)
 
-Calculate fitted values of an MlmnetDeprecated object
+Calculate fitted values of an Mlmnet object
 
 # Arguments 
 
-- MLMNet = MlmnetDeprecated object
+- MLMNet = Mlmnet object
 
 # Value
 
@@ -212,14 +218,16 @@ end
 
 
 """
-    resid(MLMNet, lambdaL1, lambdaL2, newData)
+    resid(MLMNet, lambda, alpha, newData)
 
 Calculate residuals of an MLMNet object, given a lambda 
 
 # Arguments 
 
-- MLM = MlmnetDeprecated object
+- MLMNet = Mlmnet object
 - lambda = lambda penalty to use, a floating scalar
+- alpha = alpha penalty to determine the mix of penalties between L1 and L2
+  a floating scalar
 - newData = RawData object. Defaults to the data field in the MLM object 
   used to fit the model. 
 
@@ -275,7 +283,7 @@ Calculate residuals of an MLMNet object
 
 # Arguments 
 
-- MLMNet = MlmnetDeprecated object
+- MLMNet = Mlmnet object
 - newData = RawData object. Defaults to the data field in the MLM object 
   used to fit the model. 
 
