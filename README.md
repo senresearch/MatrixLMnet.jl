@@ -76,7 +76,7 @@ Create a 1d array of alpha parameter penalties values that determine the penalti
 
 
 ```
-alphas = [1]
+alphas = reverse(collect(0:0.1:1))
 ```
 
 L<sub>1</sub> and L<sub>2</sub>-penalized estimates for matrix linear models can be obtained by running `mlmnet`. In addition to the `RawData` object, `lambdas` and `alphas`, `mlmnet` requires as a keyword argument the function name for an algorithm used to fit Elastic Net penalized estimates. Current methods are: `"cd"` (coordinate descent), `"cd_active"` (active coordinate descent), `"ista"` (ISTA with fixed step size), `"fista"` (FISTA with fixed step size), `"fista_bt"` (FISTA with backtracking), and `"admm"` (ADMM). 
