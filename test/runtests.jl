@@ -1,7 +1,7 @@
-using MatrixLMnet2
+using MatrixLMnet
 using Test
 
-@testset "MatrixLMnet2" begin
+@testset "MatrixLMnet" begin
     include("l1_helpers.jl")
     include("mlmnetTests.jl")
     include("mlmnetCvTests.jl")

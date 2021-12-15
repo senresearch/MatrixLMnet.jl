@@ -168,7 +168,7 @@ function lambda_min(MLMNet_cv::Mlmnet_cv)
     out2 = hcat(MLMNet_cv.lambdas[min1StdErrIdx], MLMNet_cv.alphas[min1StdErrIdy], 
                 mseMean[min1StdErrIdx, min1StdErrIdy], 
                 prop_zeroMean[min1StdErrIdx, min1StdErrIdy])
-    out = DataFrame(vcat(out, out2))
+    out = DataFrame(vcat(out, out2), :auto)
 
     colnames = ["Lambda", "Alpha", "AvgMSE", "AvgPercentZero"];
     rename!(out, Symbol.(colnames))

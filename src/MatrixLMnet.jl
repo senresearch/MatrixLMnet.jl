@@ -1,4 +1,4 @@
-module MatrixLMnet2
+module MatrixLMnet
 
 
 using MatrixLM

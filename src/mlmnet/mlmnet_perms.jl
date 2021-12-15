@@ -92,14 +92,14 @@ function mlmnet_perms(data::RawData,
     dataPerm = RawData(Response(permFun(get_Y(data))), data.predictors)
     
     # Run penalty on the permuted data
-    return function mlmnet(dataPerm, lambdas, alphas; 
-                         method = method, isNaive=isNaive,
-                         hasXIntercept=hasXIntercept, hasZIntercept=hasZIntercept, 
-                         toXReg=toXReg, toZReg=toZReg, 
-                         toXInterceptReg=toXInterceptReg, toZInterceptReg=toZInterceptReg, 
-                         toNormalize=toNormalize, isVerbose=isVerbose, 
-                         stepsize=stepsize, setStepsize=setStepsize, 
-                         funArgs...)
+    return mlmnet(dataPerm, lambdas, alphas; 
+                    method = method, isNaive=isNaive,
+                    hasXIntercept=hasXIntercept, hasZIntercept=hasZIntercept, 
+                    toXReg=toXReg, toZReg=toZReg, 
+                    toXInterceptReg=toXInterceptReg, toZInterceptReg=toZInterceptReg, 
+                    toNormalize=toNormalize, isVerbose=isVerbose, 
+                    stepsize=stepsize, setStepsize=setStepsize, 
+                    funArgs...)
 
 end
 
@@ -136,7 +136,7 @@ function mlmnet_perms(data::RawData,
     alphas = [1.0] # default LASSO, 𝛼 = 1
 
     # Run L1-penalty on the permuted data
-    return function mlmnet(dataPerm, lambdas, alphas; 
+  rslts =  mlmnet(dataPerm, lambdas, alphas; 
                             method = method, isNaive=isNaive,
                             hasXIntercept=hasXIntercept, hasZIntercept=hasZIntercept, 
                             toXReg=toXReg, toZReg=toZReg, 

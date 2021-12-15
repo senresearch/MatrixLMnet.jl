@@ -1,12 +1,12 @@
 """
-    normalize!(A, isIntercept)
+    normalize!(A, hasIntercept)
 
 Normalize the columns of A in place after centering
 
 # Arguments 
 
 - A = 2d array of floats
-- isIntercept = boolean flag indicating whether the first column of A is the 
+- hasIntercept = boolean flag indicating whether the first column of A is the 
   intercept
 
 # Value 
@@ -15,10 +15,10 @@ Centers then normalizes A in place and returns 2d arrays of the column means and
 norms of A before normalization. 
 
 """
-function normalize!(A::AbstractArray{Float64,2}, isIntercept::Bool)
+function normalize!(A::AbstractArray{Float64,2}, hasIntercept::Bool)
     
     # If including intercept, subtract the column means from all other columns
-    if isIntercept == true 
+    if hasIntercept == true 
         means = mean(A, dims=1)
         A[:,2:end] = A[:,2:end].-transpose(means[2:end]) 
     else # Otherwise, subtract the column means from all columns

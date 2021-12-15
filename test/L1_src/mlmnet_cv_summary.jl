@@ -91,7 +91,7 @@ function mlmnet_cv_summary(MLMNet_cv::Mlmnet_cvDeprecated)
     
     # Calculate summary information across folds
     out_df = DataFrame(hcat(MLMNet_cv.lambdas, calc_avg_mse(MLMNet_cv), 
-                            calc_avg_prop_zero(MLMNet_cv)))
+                            calc_avg_prop_zero(MLMNet_cv)), :auto)
     # Useful names
     rename!(out_df, map(Meta.parse, ["Lambda", "AvgMSE", "AvgPercentZero"]))
     
