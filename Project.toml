@@ -1,5 +1,5 @@
 name = "MatrixLMnet"
-uuid = "436227dc-6146-11e9-240b-9df6ee45b799"
+uuid = "0427f977-27d0-4b54-a9f2-06f13bffb17d"
 authors = ["Jane Liang", "Zifan Yu", "Gregory Farage", "Saunak Sen"]
 version = "1.0.0"
 

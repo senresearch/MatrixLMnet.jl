@@ -1,6 +1,6 @@
 # MatrixLMnet: Core functions for penalized estimation for matrix linear models.
 
-[![Build Status](https://travis-ci.com/senresearch/MatrixLMnet.jl.svg?branch=master)](https://travis-ci.com/senresearch/MatrixLMnet.jl)
+[![Build Status](https://travis-ci.com/senresearch/MatrixLMnet.jl.svg?branch=main)](https://travis-ci.com/senresearch/MatrixLMnet.jl)
 
 Core functions to obtain L<sub>1</sub>-penalized estimates for matrix linear models. See the associated paper, ["Sparse matrix linear models for structured high-throughput data"](https://arxiv.org/abs/1712.05767), and its [reproducible code](https://github.com/senresearch/mlm_l1_supplement) for more details. 
 
@@ -18,7 +18,7 @@ Pkg.add("MatrixLMnet")
 For the most recent version, use:
 ```
 using Pkg
-Pkg.add(url = "https://github.com/senresearch/MatrixLMnet.jl", rev="master")
+Pkg.add(url = "https://github.com/senresearch/MatrixLMnet.jl", rev="main")
 ```
 
 ## Usage 
