@@ -6,14 +6,13 @@ using Distributions, Random, Statistics, LinearAlgebra, StatsBase
 using MatrixLMnet
 using DataFrames
 using Test
-using BenchmarkTools
-using Helium
+
 
 ####################
 # External sources #
 ####################
 include("sim_helpers.jl")
-# include("l1_helpers.jl")
+include("l1_helpers.jl")
 
 
 ####################################################
@@ -86,20 +85,11 @@ est_B_Net3 = est3.B[:, :, 3, 1];
 est2 = mlmnet(ista!, dat, λ, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
 est_B_Lasso = est2.B[:, :, 3];
 
-
-
 println("Lasso vs Elastic Net when α=1 test 1 - ista: ", @test est_B_Net3 == est_B_Lasso)
-
-@btime  MatrixLMnet.mlmnet(dat, λ, α, method = "ista", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-
-@btime  MatrixLMnet.mlmnet(dat, λ, method = "ista",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-
-@btime  mlmnet(ista!, dat, λ, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
 
 #############################################
 # TEST 2 Lasso vs Elastic Net (𝛼=1) - fista #
 #############################################
-
 
 # Elastic net penalized regression
 est1 = MatrixLMnet.mlmnet(dat, λ, α, method = "fista", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
@@ -113,20 +103,11 @@ est_B_Net3 = est3.B[:, :, 3, 1];
 est2 = mlmnet(fista!, dat, λ, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
 est_B_Lasso = est2.B[:, :, 3];
 
-
-
 println("Lasso vs Elastic Net when α=1 test 2 - fista: ", @test est_B_Net3 == est_B_Lasso)
-
-@btime  MatrixLMnet.mlmnet(dat, λ, α, method = "fista", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-
-@btime  MatrixLMnet.mlmnet(dat, λ, method = "fista",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-
-@btime  mlmnet(fista!, dat, λ, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
 
 ##########################################################
 # TEST 3 Lasso vs Elastic Net (𝛼=1) - fista backtracking #
 ##########################################################
-
 
 # Elastic net penalized regression
 est1 = MatrixLMnet.mlmnet(dat, λ, α, method = "fista_bt", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
@@ -140,20 +121,11 @@ est_B_Net3 = est1.B[:, :, 3, 1];
 est2 = mlmnet(fista_bt!, dat, λ, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
 est_B_Lasso = est2.B[:, :, 3];
 
-
-
 println("Lasso vs Elastic Net when α=1 test 3 - fista_bt: ", @test est_B_Net3 == est_B_Lasso)
-
-@btime  MatrixLMnet.mlmnet(dat, λ, α, method = "fista_bt", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-
-@btime  MatrixLMnet.mlmnet(dat, λ, method = "fista_bt",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-
-@btime  mlmnet(fista_bt!, dat, λ, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
 
 ############################################
 # TEST 4 Lasso vs Elastic Net (𝛼=1) - admm #
 ############################################
-
 
 # Elastic net penalized regression
 est1 = MatrixLMnet.mlmnet(dat, λ, α, method = "admm", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
@@ -167,15 +139,7 @@ est_B_Net3 = est1.B[:, :, 3, 1];
 est2 = mlmnet(admm!, dat, λ, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
 est_B_Lasso = est2.B[:, :, 3];
 
-
-
 println("Lasso vs Elastic Net when α=1 test 3 - admm: ", @test est_B_Net3 == est_B_Lasso)
-
-@btime  MatrixLMnet.mlmnet(dat, λ, α, method = "admm", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-
-@btime  MatrixLMnet.mlmnet(dat, λ, method = "admm",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-
-@btime  mlmnet(admm!, dat, λ, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
 
 ##########################################
 # TEST 5 Lasso vs Elastic Net (𝛼=1) - cd #
@@ -197,11 +161,5 @@ est2 = mlmnet(cd!, dat, λ, hasZIntercept = false, hasXIntercept = false, isVerb
 est_B_Lasso = est2.B[:, :, 3];
 
 println("Lasso vs Elastic Net when α=1 test 5 - cd: ", @test est_B_Net3 == est_B_Lasso)
-
-@btime  MatrixLMnet.mlmnet(dat, λ, α, method = "cd", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-
-@btime  MatrixLMnet.mlmnet(dat, λ, method = "cd",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-
-@btime  mlmnet(cd!, dat, λ, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
 
 println("Tests finished!")

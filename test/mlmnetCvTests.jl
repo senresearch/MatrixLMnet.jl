@@ -7,12 +7,12 @@ using MatrixLMnet
 using DataFrames
 using Distributed, MLBase 
 using Test
-using BenchmarkTools
 
 ####################
 # External sources #
 ####################
 include("sim_helpers.jl")
+include("l1_helpers.jl")
 
 
 #####################################################################
@@ -67,7 +67,6 @@ dat = RawData(Response(Y), Predictors(X, Z));
 # TEST 1 Lasso vs Elastic Net (𝛼=1) - ista #
 #############################################
 
-
 # Elastic net penalized regression
 Random.seed!(2021)
 est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "ista", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
@@ -83,21 +82,12 @@ Random.seed!(2021)
 est2 = mlmnet_cv(ista!, dat, λ, 10, 1, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
 smmr_Lasso = lambda_min_deprecated(est2);
 
-
-
 println("CV Lasso vs Elastic Net when α=1 test 1 - ista: ", @test smmr_Net3.AvgMSE == smmr_Lasso.AvgMSE && 
                                                             smmr_Net3.AvgPercentZero == smmr_Lasso.AvgPercentZero)
-
-@btime  MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "ista", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-
-@btime  MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "ista",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-
-@btime  mlmnet_cv(ista!, dat, λ, 10, 1, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
 
 #############################################
 # TEST 2 Lasso vs Elastic Net (𝛼=1) - fista #
 #############################################
-
 
 # Elastic net penalized regression
 Random.seed!(2021)
@@ -114,21 +104,12 @@ Random.seed!(2021)
 est2 = mlmnet_cv(fista!, dat, λ, 10, 1, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
 smmr_Lasso = lambda_min_deprecated(est2);
 
-
-
 println("CV Lasso vs Elastic Net when α=1 test 2 - fista: ", @test smmr_Net3.AvgMSE == smmr_Lasso.AvgMSE && 
                                                             smmr_Net3.AvgPercentZero == smmr_Lasso.AvgPercentZero)
-
-@btime  MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "fista", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-
-@btime  MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "fista",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-
-@btime  mlmnet_cv(fista!, dat, λ, 10, 1, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
 
 ##########################################################
 # TEST 3 Lasso vs Elastic Net (𝛼=1) - fista backtracking #
 ##########################################################
-
 
 # Elastic net penalized regression
 Random.seed!(2021)
@@ -145,22 +126,12 @@ Random.seed!(2021)
 est2 = mlmnet_cv(fista_bt!, dat, λ, 10, 1, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
 smmr_Lasso = lambda_min_deprecated(est2);
 
-
-
 println("CV Lasso vs Elastic Net when α=1 test 3 - fista_bt: ", @test smmr_Net3.AvgMSE == smmr_Lasso.AvgMSE && 
                                                             smmr_Net3.AvgPercentZero == smmr_Lasso.AvgPercentZero)
-
-@btime  MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "fista_bt", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-
-@btime  MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "fista_bt",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-
-@btime  mlmnet_cv(fista_bt!, dat, λ, 10, 1, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-
 
 ############################################
 # TEST 4 Lasso vs Elastic Net (𝛼=1) - admm #
 ############################################
-
 
 # Elastic net penalized regression
 Random.seed!(2021)
@@ -177,16 +148,8 @@ Random.seed!(2021)
 est2 = mlmnet_cv(admm!, dat, λ, 10, 1, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
 smmr_Lasso = lambda_min_deprecated(est2);
 
-
-
 println("CV Lasso vs Elastic Net when α=1 test 4 - admm: ", @test smmr_Net3.AvgMSE == smmr_Lasso.AvgMSE && 
                                                             smmr_Net3.AvgPercentZero == smmr_Lasso.AvgPercentZero)
-
-@btime  MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "admm", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-
-@btime  MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "admm",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-
-@btime  mlmnet_cv(admm!, dat, λ, 10, 1, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
 
 ##########################################
 # TEST 5 Lasso vs Elastic Net (𝛼=1) - cd #
@@ -209,12 +172,6 @@ smmr_Lasso = lambda_min_deprecated(est2);
 
 println("Lasso vs Elastic Net when α=1 test 5 - cd: ", @test smmr_Net3.AvgMSE == smmr_Lasso.AvgMSE && 
                                                              smmr_Net3.AvgPercentZero == smmr_Lasso.AvgPercentZero)
-
-@btime  MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "cd", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-
-@btime  MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "cd",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-
-@btime  mlmnet_cv(cd!, dat, λ, 10, 1, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
 
 println("Tests finished!")
 
