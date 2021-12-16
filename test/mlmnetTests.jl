@@ -1,18 +1,12 @@
 ###########
 # Library #
 ###########
-using MatrixLM
-using Distributions, Random, Statistics, LinearAlgebra, StatsBase
+# using MatrixLM
+# using Distributions, Random, Statistics, LinearAlgebra, StatsBase
+# using Random
 using MatrixLMnet
-using DataFrames
+using Helium
 using Test
-
-
-####################
-# External sources #
-####################
-include("sim_helpers.jl")
-include("l1_helpers.jl")
 
 
 ####################################################
@@ -32,36 +26,20 @@ The pairwise correlation between 𝑋ᵢ and 𝑋ⱼ was set to be 𝑐𝑜𝑟(
 Here, the Z matrix is an identity matrix.
 =#
 
-# Simulation parameters
-p = 8; # Number of predictors
-β1 = [3.5, 1.5, 0,   0, 2, 0, 0 , 0];
-β2 = [  0, 1.5, 0, 3.5, 2, 0, 0 , 2];
-σ = 3;
-n = 240;
+# Data testing directory name
+dataDir = realpath(joinpath(@__DIR__,"data"))
 
-# Generate correlation matrix 
-matCor = zeros(p,p)
-for j = 1:p, i = 1:p
-    matCor[i,j] = 0.5^abs(i-j)
-end
+# Get predictors
+X = Helium.readhe(joinpath(dataDir, "Xmat.he"))
 
-# Generate predictors
-X = simulateCorrelatedData(matCor, n);
-# Helium.writehe(X, "test/data/Xmat.he")
+# Get response
+Y = Helium.readhe(joinpath(dataDir, "Ymat.he"))
 
-# Generate response
-Y1 = X*β1 + σ*rand(Normal(0, 1), n);
-Y2 = X*β2 + σ*rand(Normal(0, 1), n);
-Y = hcat(Y1, Y2);
-# Helium.writehe(Y, "test/data/Ymat.he")
+# Get Z matrix
+Z = Helium.readhe(joinpath(dataDir, "Zmat.he"))
 
-# Generate Z matrix
-Z = 1.0*Matrix(I, 2, 2);
 
-# Helium.readhe("test/data/Xmat.he")
-# # Build raw data object from MatrixLM.jl
-# X = Helium.readhe("test/data/Xmat.he")
-# Y = Helium.readhe("test/data/Ymat.he")
+# Build raw data object from MatrixLM.jl
 dat = RawData(Response(Y), Predictors(X, Z));
 
 # Hyper parameters
@@ -75,17 +53,16 @@ dat = RawData(Response(Y), Predictors(X, Z));
 
 # Elastic net penalized regression
 est1 = MatrixLMnet.mlmnet(dat, λ, α, method = "ista", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-est_B_Net = est1.B[:, :, 3, 1];
+est_B_Net1 = est1.B[:, :, 3, 1];
 
 # Elastic net penalized regression
-est3 = MatrixLMnet.mlmnet(dat, λ, method = "ista",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-est_B_Net3 = est3.B[:, :, 3, 1];
+est2 = MatrixLMnet.mlmnet(dat, λ, method = "ista",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est_B_Net2 = est2.B[:, :, 3, 1];
 
-# Lasso penalized regression
-est2 = mlmnet(ista!, dat, λ, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-est_B_Lasso = est2.B[:, :, 3];
+# Lasso penalized regression - ista
+B_ista= Helium.readhe(joinpath(dataDir, "B_ista.he"))
 
-println("Lasso vs Elastic Net when α=1 test 1 - ista: ", @test est_B_Net3 == est_B_Lasso)
+println("Lasso vs Elastic Net when α=1 test 1 - ista: ", @test (est_B_Net1 == B_ista) && (est_B_Net2 == B_ista))
 
 #############################################
 # TEST 2 Lasso vs Elastic Net (𝛼=1) - fista #
@@ -93,17 +70,16 @@ println("Lasso vs Elastic Net when α=1 test 1 - ista: ", @test est_B_Net3 == es
 
 # Elastic net penalized regression
 est1 = MatrixLMnet.mlmnet(dat, λ, α, method = "fista", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-est_B_Net = est1.B[:, :, 3, 1];
+est_B_Net1 = est1.B[:, :, 3, 1];
 
 # Elastic net penalized regression
-est3 = MatrixLMnet.mlmnet(dat, λ, method = "fista",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-est_B_Net3 = est3.B[:, :, 3, 1];
+est2 = MatrixLMnet.mlmnet(dat, λ, method = "fista",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est_B_Net2 = est2.B[:, :, 3, 1];
 
-# Lasso penalized regression
-est2 = mlmnet(fista!, dat, λ, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-est_B_Lasso = est2.B[:, :, 3];
+# Lasso penalized regression - fista
+B_fista= Helium.readhe(joinpath(dataDir, "B_fista.he"))
 
-println("Lasso vs Elastic Net when α=1 test 2 - fista: ", @test est_B_Net3 == est_B_Lasso)
+println("Lasso vs Elastic Net when α=1 test 2 - fista: ", @test (est_B_Net1 == B_fista) && (est_B_Net2 == B_fista))
 
 ##########################################################
 # TEST 3 Lasso vs Elastic Net (𝛼=1) - fista backtracking #
@@ -111,17 +87,17 @@ println("Lasso vs Elastic Net when α=1 test 2 - fista: ", @test est_B_Net3 == e
 
 # Elastic net penalized regression
 est1 = MatrixLMnet.mlmnet(dat, λ, α, method = "fista_bt", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-est_B_Net = est1.B[:, :, 3, 1];
+est_B_Net1 = est1.B[:, :, 3, 1];
 
 # Elastic net penalized regression
-est3 = MatrixLMnet.mlmnet(dat, λ, method = "fista_bt",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-est_B_Net3 = est1.B[:, :, 3, 1];
+est2 = MatrixLMnet.mlmnet(dat, λ, method = "fista_bt",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est_B_Net2 = est2.B[:, :, 3, 1];
 
-# Lasso penalized regression
-est2 = mlmnet(fista_bt!, dat, λ, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-est_B_Lasso = est2.B[:, :, 3];
+# Lasso penalized regression - fista-bt
+B_fistabt = Helium.readhe(joinpath(dataDir, "B_fistabt.he"))
 
-println("Lasso vs Elastic Net when α=1 test 3 - fista_bt: ", @test est_B_Net3 == est_B_Lasso)
+println("Lasso vs Elastic Net when α=1 test 3 - fista-bt: ", @test (est_B_Net1 == B_fistabt) && (est_B_Net2 == B_fistabt))
+
 
 ############################################
 # TEST 4 Lasso vs Elastic Net (𝛼=1) - admm #
@@ -129,37 +105,36 @@ println("Lasso vs Elastic Net when α=1 test 3 - fista_bt: ", @test est_B_Net3 =
 
 # Elastic net penalized regression
 est1 = MatrixLMnet.mlmnet(dat, λ, α, method = "admm", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-est_B_Net = est1.B[:, :, 3, 1];
+est_B_Net1 = est1.B[:, :, 3, 1];
 
 # Elastic net penalized regression
-est3 = MatrixLMnet.mlmnet(dat, λ, method = "admm",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-est_B_Net3 = est1.B[:, :, 3, 1];
+est2 = MatrixLMnet.mlmnet(dat, λ, method = "admm",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est_B_Net2 = est2.B[:, :, 3, 1];
 
-# Lasso penalized regression
-est2 = mlmnet(admm!, dat, λ, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-est_B_Lasso = est2.B[:, :, 3];
+# Lasso penalized regression - admm
+B_admm = Helium.readhe(joinpath(dataDir, "B_admm.he"))
 
-println("Lasso vs Elastic Net when α=1 test 3 - admm: ", @test est_B_Net3 == est_B_Lasso)
+println("Lasso vs Elastic Net when α=1 test 4 - admm: ", @test (est_B_Net1 == B_admm) && (est_B_Net2 == B_admm))
+
 
 ##########################################
 # TEST 5 Lasso vs Elastic Net (𝛼=1) - cd #
 ##########################################
 
 # Elastic net penalized regression
-Random.seed!(2021)
+MatrixLMnet.Random.seed!(2021)
 est1 = MatrixLMnet.mlmnet(dat, λ, α, method = "cd", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-est_B_Net = est1.B[:, :, 3, 1];
+est_B_Net1 = est1.B[:, :, 3, 1];
 
 # Elastic net penalized regression
-Random.seed!(2021)
-est3 = MatrixLMnet.mlmnet(dat, λ, method = "cd",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-est_B_Net3 = est3.B[:, :, 3, 1];
+MatrixLMnet.Random.seed!(2021)
+est2 = MatrixLMnet.mlmnet(dat, λ, method = "cd",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est_B_Net2 = est2.B[:, :, 3, 1];
 
-# Lasso penalized regression
-Random.seed!(2021)
-est2 = mlmnet(cd!, dat, λ, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-est_B_Lasso = est2.B[:, :, 3];
+# Lasso penalized regression - cd
+B_cd = Helium.readhe(joinpath(dataDir, "B_cd.he"))
 
-println("Lasso vs Elastic Net when α=1 test 5 - cd: ", @test est_B_Net3 == est_B_Lasso)
+println("Lasso vs Elastic Net when α=1 test 5 - cd: ", @test (est_B_Net1 == B_cd) && (est_B_Net2 == B_cd))
 
-println("Tests finished!")
+
+println("Tests mlmnet finished!")

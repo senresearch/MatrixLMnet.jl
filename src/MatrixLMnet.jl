@@ -29,17 +29,6 @@ export Response, Predictors, RawData, get_X, get_Z, get_Y, contr,
 include("utilities/std_helpers.jl")
 include("mlmnet/mlmnet_helpers.jl")
 
-# Deprecated L1 algorithms
-# include("deprecated/ista.jl")
-# include("deprecated/fista.jl")
-# include("deprecated/fista_bt.jl")
-# include("deprecated/admm.jl")
-# include("deprecated/mlmnet.jl")
-# include("deprecated/mlmnet_helpers.jl")
-
-# include("deprecated/mlmnet_cv.jl")
-# include("deprecated/mlmnet_cv_summary.jl")
-
 # Optimizing algorithms
 include("methods/cd.jl")
 include("methods/ista.jl")
@@ -47,7 +36,7 @@ include("methods/fista.jl")
 include("methods/fista_bt.jl")
 include("methods/admm.jl")
 
-# Top level functions that call L1 algorithms using warm starts
+# Top level functions that call Elastic Net algorithms using warm starts
 include("mlmnet/mlmnet.jl")
 
 # Predictions and residuals
