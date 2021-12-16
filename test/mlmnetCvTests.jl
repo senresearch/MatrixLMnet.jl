@@ -60,7 +60,7 @@ smmr_Net2 = MatrixLMnet.lambda_min(est2);
 smmr_ista= Helium.readhe(joinpath(dataDir, "smmr_ista.he"))
 
 println("CV Lasso vs Elastic Net when α=1 test 1 - ista: ",
-         @test smmr_Net1.AvgMSE == smmr_ista[:,1] && smmr_Net2.AvgPercentZero == smmr_ista[:,2] &&
+         @test smmr_Net1.AvgMSE == smmr_ista[:,1] && smmr_Net1.AvgPercentZero == smmr_ista[:,2] &&
                smmr_Net2.AvgMSE == smmr_ista[:,1] && smmr_Net2.AvgPercentZero == smmr_ista[:,2] )
 
 #############################################
