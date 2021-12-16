@@ -85,14 +85,13 @@ function mlmnet_pathwise(fun::Function, X::AbstractArray{Float64,2},
     end 
 
     # Pre-allocate array for coefficients
-    # coeffs = Array{Float64}(undef, length(alphas), length(lambdas), size(X,2), size(Z,2)) # issue#10 original
-    coeffs = Array{Float64}(undef, size(X,2), size(Z,2), length(lambdas), length(alphas)) # issue#10 ✓
+    coeffs = Array{Float64}(undef, size(X,2), size(Z,2), length(lambdas), length(alphas))
 
     # Start with coefficients initalized at zero for the largest lambda value
     startB = zeros(size(X,2), size(Z,2))
 
     # Pre-compute eigenvalues and eigenvectors for ADMM
-    # if length(string(fun)) > 7 && (string(fun)[(end-7):end] == "admm!") # issue#15 ✓
+    # if length(string(fun)) > 7 && (string(fun)[(end-7):end] == "admm!")
     if string(fun) == "admm!"
         # Eigenfactorization of X
         XTX = transpose(X)*X
@@ -124,7 +123,7 @@ function mlmnet_pathwise(fun::Function, X::AbstractArray{Float64,2},
         # Get Elastic-net penalty estimates by updating the coefficients from previous 
         # iteration in place
         
-        # if length(string(fun)) <= 7 || (string(fun)[(end-7):end] != "admm!") # issue#15 ✓
+        # if length(string(fun)) <= 7 || (string(fun)[(end-7):end] != "admm!") 
         if (string(fun) != "admm!" && string(fun) != "cd")
             # ISTA, FISTA and FISTA with Backtracking (CD not supported for Elastic-net yet)
             fun(X, Y, Z, lambdas[j], alphas[i], startB, regXidx, regZidx, reg, norms; 
@@ -138,7 +137,7 @@ function mlmnet_pathwise(fun::Function, X::AbstractArray{Float64,2},
         end
 
         # Assign a slice of coeffs to the current coefficient estimates
-        coeffs[:, :, j, i] = startB  #issue#10 ✓
+        coeffs[:, :, j, i] = startB  
       end
     end
 
@@ -362,14 +361,14 @@ function mlmnet(data::RawData,
     if !isNaive
       for i in 1:length(alphas), j in 1:length(lambdas)
         lambdaL2 = lambdas[j]*(1-alphas[i])
-        coeffs[:, :, j, i] *= (1+lambdaL2) #issue#10 ✓    
+        coeffs[:, :, j, i] *= (1+lambdaL2) 
       end
     end
 
     # Back-transform coefficient estimates, if necessary. 
     # Case if including both X and Z intercepts:
     if toNormalize == true && (hasXIntercept==true) && (hasZIntercept==true)
-        backtransform!(coeffs, meansX, meansZ, normsX, normsZ, get_Y(data),  # issue# should be backtransformNet! ✓
+        backtransform!(coeffs, meansX, meansZ, normsX, normsZ, get_Y(data), 
                        data.predictors.X, data.predictors.Z)
     elseif toNormalize == true # Otherwise
         backtransform!(coeffs, hasXIntercept, hasZIntercept, meansX, meansZ, 

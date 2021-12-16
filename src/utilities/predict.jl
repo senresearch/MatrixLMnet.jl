@@ -49,7 +49,7 @@ function coef(MLMNet::Mlmnet, lambda::Float64, alpha::Float64)
     end
     
     # Return the coefficient slice for the lambda of interest
-    return MLMNet.B[:,:,idx[1],idy[1]] # issue#10 ✓
+    return MLMNet.B[:,:,idx[1],idy[1]] 
 end
 
 

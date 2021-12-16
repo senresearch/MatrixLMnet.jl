@@ -183,7 +183,7 @@ function backtransform!(B::AbstractArray{Float64,4},
     # Iterate through the first dimension of B to back-transform each 
 	# coefficient matrix. 
     for j in 1:size(B,4)
-        for i in 1:size(B,3)  # issue#10 ✓
+        for i in 1:size(B,3)  
             # Back transform the X intercepts (row main effects)
             prodX = (meansX[:,2:end]./normsX[:,2:end])*B[2:end, 2:end,i,j]
             B[1,2:end,i,j] = (B[1,2:end,i,j]-vec(prodX))./vec(normsZ[:,2:end])/
@@ -246,7 +246,7 @@ function backtransform!(B::AbstractArray{Float64,4},
 
     # Iterate through the first dimension of B to back-transform each 
 	# coefficient matrix: 
-    for j in 1:size(B,4)  # issue#10 ✓
+    for j in 1:size(B,4) 
         for i in 1:size(B,3) 
             # Back transform the X intercepts (row main effects), if necessary 
             if hasXIntercept == true 

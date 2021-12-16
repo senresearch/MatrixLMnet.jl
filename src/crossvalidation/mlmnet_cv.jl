@@ -29,7 +29,7 @@ mutable struct Mlmnet_cv
     
     Mlmnet_cv(MLMNets, lambdas, alphas, data, rowFolds, colFolds, dig) = 
         new(MLMNets, lambdas, alphas, data, rowFolds, colFolds, 
-            calc_mse(MLMNets, data, lambdas, alphas, rowFolds, colFolds), # issue change to alpha lambda
+            calc_mse(MLMNets, data, lambdas, alphas, rowFolds, colFolds),
             calc_prop_zero(MLMNets, lambdas, alphas; dig=dig))
 end
 
@@ -163,7 +163,7 @@ function mlmnet_cv(data::RawData,
                                               setStepsize=setStepsize, 
                                               funArgs...), dataFolds)
     
-    return Mlmnet_cv(MLMNets, lambdas, alphas, data, rowFolds, colFolds, dig) # issue: should be a different struct
+    return Mlmnet_cv(MLMNets, lambdas, alphas, data, rowFolds, colFolds, dig)
 end
 
 
