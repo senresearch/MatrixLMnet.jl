@@ -1,5 +1,5 @@
 """
-    update_fista2!(B, A, resid_B, grad, X, Y, Z, norms, lambda, reg, stepsize)
+    update_fista2!(B, A, resid_B, grad, X, Y, Z, norms, lambdaL1, lambdaL2, reg, stepsize)
 
 Updates coefficient estimates in place for each FISTA iteration when `X` and 
 `Z` are both standardized, but without updating the extrapolated coefficients. 
@@ -17,7 +17,8 @@ Updates coefficient estimates in place for each FISTA iteration when `X` and
 - Z = 2d array of floats consisting of the column covariates, with all 
   categorical variables coded in appropriate contrasts
 - norms = `nothing`
-- lambda = lambda penalty, a floating scalar
+- lambdaL1 = l1 penalty, a floating scalar
+- lambdaL2 = l2 penalty, a floating scalar
 - reg = 2d array of bits, indicating whether or not to regularize each of the 
   coefficients
 - stepsize = 1d array consisting of a float; step size of updates
@@ -34,16 +35,17 @@ function update_fista2!(B::AbstractArray{Float64,2},
                         X::AbstractArray{Float64,2}, 
                         Y::AbstractArray{Float64,2}, 
                         Z::AbstractArray{Float64,2}, 
-                        norms::Nothing, lambda::Float64, reg::BitArray{2}, 
+                        norms::Nothing, lambdaL1::Float64, lambdaL2::Float64,
+                        reg::BitArray{2}, 
                         stepsize::AbstractArray{Float64,1})
 
     # Cycle through all the coefficients to perform assignments
     for j = 1:size(B,2), i = 1:size(B,1)
-        B[i,j] = A[i,j] - stepsize[1] * grad[i,j] # L2 updates
+        B[i,j] = A[i,j] - stepsize[1] * grad[i,j] # RSS updates
         # Apply shrinkage to regularized coefficients
         if reg[i,j] 
-            B[i,j] = prox(A[i,j], grad[i,j], sign(B[i,j]), lambda, norms, 
-                          stepsize[1])
+            B[i,j] = prox(A[i,j], grad[i,j], sign(B[i,j]), lambdaL1, norms, 
+                          stepsize[1])/(1+2*lambdaL2*stepsize[1])
         end
     end 
     
@@ -90,7 +92,8 @@ function update_fista2!(B::AbstractArray{Float64,2},
                         Y::AbstractArray{Float64,2}, 
                         Z::AbstractArray{Float64,2}, 
                         norms::AbstractArray{Float64,2}, 
-                        lambda::Float64, reg::BitArray{2}, 
+                        lambdaL1::Float64, lambdaL2::Float64, 
+                        reg::BitArray{2}, 
                         stepsize::AbstractArray{Float64,1})
 
     # Cycle through all the coefficients to perform assignments
@@ -98,8 +101,8 @@ function update_fista2!(B::AbstractArray{Float64,2},
         B[i,j] = A[i,j] - stepsize[1] * grad[i,j]./norms[i,j] # L2 updates
         # Apply shrinkage to regularized coefficients
         if reg[i,j] 
-            B[i,j] = prox(A[i,j], grad[i,j], sign(B[i,j]), lambda, norms[i,j], 
-                          stepsize[1])
+            B[i,j] = prox(A[i,j], grad[i,j], sign(B[i,j]), lambdaL1, norms[i,j], 
+                          stepsize[1])/(1+2*lambdaL2*stepsize[1])
         end
     end 
     
@@ -132,7 +135,8 @@ Uses backtracking to update step size for FISTA.
   categorical variables coded in appropriate contrasts
 - norms = 2d array of floats consisting of the norms corresponding to each 
   coefficient or `nothing`
-- lambda = lambda penalty, a floating scalar
+- lambdaL1 = l1 penalty, a floating scalar
+- lambdaL2 = l2 penalty, a floating scalar
 - reg = 2d array of bits, indicating whether or not to regularize each of the 
   coefficients
 - iter = 1d array consisting of a single integer keeping track of how many 
@@ -154,7 +158,8 @@ function outer_update_fista_bt!(B::AbstractArray{Float64,2},
                                 X::AbstractArray{Float64,2}, 
                                 Y::AbstractArray{Float64,2}, 
                                 Z::AbstractArray{Float64,2}, 
-                                norms, lambda::Float64, reg::BitArray{2}, 
+                                norms, lambdaL1::Float64, lambdaL2::Float64,
+                                reg::BitArray{2}, 
                                 iter::AbstractArray{Int64,1}, 
                                 stepsize::AbstractArray{Float64,1}, 
                                 gamma::Float64)
@@ -188,7 +193,7 @@ function outer_update_fista_bt!(B::AbstractArray{Float64,2},
         stepsize[:] .*= gamma 
         # Try to update coefficient estimates using current step size
 		    update_fista2!(B, A, resid_B, grad, X, Y, Z, norms, 
-                       lambda, reg, stepsize)
+                       lambdaL1, lambdaL2, reg, stepsize)
     end 
 
     # If condiion was met without needing to shrink step size, perform the 
@@ -196,7 +201,7 @@ function outer_update_fista_bt!(B::AbstractArray{Float64,2},
     if looped == false
         # Update coefficents
         update_fista!(B, B_prev, A, resid, resid_B, grad, X, Y, Z, norms, 
-                      lambda, reg, iter, stepsize)
+                      lambdaL1, lambdaL2, reg, iter, stepsize)
     else 
         # Otherwise, update the extrapolated coefficients after exiting the 
         # loop
@@ -223,6 +228,7 @@ Performs FISTA with backtracking.
 - Z = 2d array of floats consisting of the column covariates, with all 
   categorical variables coded in appropriate contrasts
 - lambda = lambda penalty, a floating scalar
+- alpha = parameter (ϵ[0, 1]) determining the mix of penalties between L1 and L2
 - B = 2d array of floats consisting of starting coefficient estimates
 - regXidx = 1d array of indices corresponding to regularized X covariates
 - regZidx = 1d array of indices corresponding to regularized Z covariates
@@ -260,13 +266,17 @@ choice of `gamma` appears to be less consequential.
 
 """
 function fista_bt!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2}, 
-                   Z::AbstractArray{Float64,2}, lambda::Float64, 
+                   Z::AbstractArray{Float64,2}, lambda::Float64, alpha::Float64,
                    B::AbstractArray{Float64,2}, 
                    regXidx::AbstractArray{Int64,1}, 
                    regZidx::AbstractArray{Int64,1}, reg::BitArray{2}, norms; 
                    isVerbose::Bool=true, stepsize::Float64=0.01, 
                    gamma::Float64=0.5, thresh::Float64=10.0^(-7), 
                    maxiter::Int=10^10)
+    
+    # Re-parametrize the Elastic-net tuning parameters
+    lambdaL1 = lambda*alpha
+    lambdaL2 = lambda*(1-alpha)
     
     # Pre-allocating arrays to store residuals for extrapolated coefficients 
     # and gradient. 
@@ -287,7 +297,7 @@ function fista_bt!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
     # Placeholder to store the old criterion 
     oldcrit = 1.0 
     # Calculate the current criterion
-    crit = criterion(B[regXidx, regZidx], resid_B, lambda, crit_denom) 
+    crit = criterion(B[regXidx, regZidx], resid_B, lambdaL1, lambdaL2, crit_denom) 
     
     stepsize = [stepsize]
     iter = [0]
@@ -299,9 +309,9 @@ function fista_bt!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
         # Update the coefficient estimates while dynamically updating the 
         # step size
         outer_update_fista_bt!(B, B_prev, A, resid, resid_B, grad, X, Y, Z, 
-                               norms, lambda, reg, iter, stepsize, gamma)
+                               norms, lambdaL1, lambdaL2, reg, iter, stepsize, gamma)
         # Calculate the criterion after updating
-        crit = criterion(B[regXidx, regZidx], resid_B, lambda, crit_denom) 
+        crit = criterion(B[regXidx, regZidx], resid_B, lambdaL1, lambdaL2, crit_denom) 
     
         iter[:] = iter .+ 1 # Increment the number of iterations
         # Warning message if coefficient estimates do not converge.

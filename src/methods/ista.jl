@@ -1,8 +1,8 @@
 """
-    update_ista!(B, resid, grad, X, Y, Z, norms, lambda, reg, stepsize)
+    update_istaNet!(B, resid, grad, X, Y, Z, norms, , reg, stepsize)
 
-Updates coefficient estimates in place for each ISTA iteration when `X` and 
-`Z` are both standardized. 
+Updates coefficient estimates in place for each ISTA iteration based on the Elastic-net 
+solution, when `X` and `Z` are both standardized. 
 
 # Arguments 
 
@@ -15,7 +15,8 @@ Updates coefficient estimates in place for each ISTA iteration when `X` and
 - Z = 2d array of floats consisting of the column covariates, with all 
   categorical variables coded in appropriate contrasts
 - norms = `nothing`
-- lambda = lambda penalty, a floating scalar
+- lambdaL1 =  l1 penalty, a floating scalar
+- lambdaL1 =  l2 penalty, a floating scalar
 - reg = 2d array of bits, indicating whether or not to regularize each of the 
   coefficients
 - stepsize = 1d array consisting of a float; step size of updates
@@ -31,20 +32,21 @@ function update_ista!(B::AbstractArray{Float64,2},
                       X::AbstractArray{Float64,2}, 
                       Y::AbstractArray{Float64,2}, 
                       Z::AbstractArray{Float64,2}, 
-                      norms::Nothing, lambda::Float64, reg::BitArray{2}, 
+                      norms::Nothing, lambdaL1::Float64, lambdaL2::Float64, 
+                      reg::BitArray{2}, 
                       stepsize::AbstractArray{Float64,1})
     
     # Update gradient
-    calc_grad!(grad, X, Z, resid) 
+    calc_grad!(grad, X, Z, resid)
     
     # Cycle through all the coefficients to perform assignments
     for j = 1:size(B,2), i = 1:size(B,1)
-        b2update = B[i,j] - stepsize[1] * grad[i,j] # L2 update
-        b2sign = sign(b2update) # L2 update sign
+        b2update = B[i,j] - stepsize[1] * grad[i,j] # RSS update
+        b2sign = sign(b2update) # RSS update sign
         
         # Update the current coefficient 
-        b = reg[i,j] ? prox(B[i,j], grad[i,j], b2sign, lambda, norms, 
-                            stepsize[1]) : b2update
+        b = reg[i,j] ? prox(B[i,j], grad[i,j], b2sign, lambdaL1, norms, 
+                            stepsize[1])/(1+2*lambdaL2*stepsize[1]) : b2update
         
         # Update coefficient estimate in the current copy
         if b != B[i,j] 
@@ -58,10 +60,10 @@ end
 
 
 """
-    update_ista!(B, resid, grad, X, Y, Z, norms, lambda, reg, stepsize)
+    update_istaNet!(B, resid, grad, X, Y, Z, norms, , reg, stepsize)
 
-Updates coefficient estimates in place for each ISTA iteration when `X` and 
-`Z` are not standardized. 
+Updates coefficient estimates in place for each ISTA iteration based on the Elastic-net
+solution, when `X` and `Z` are not standardized. 
 
 # Arguments 
 
@@ -75,7 +77,8 @@ Updates coefficient estimates in place for each ISTA iteration when `X` and
   categorical variables coded in appropriate contrasts
 - norms = 2d array of floats consisting of the norms corresponding to each 
   coefficient
-- lambda = lambda penalty, a floating scalar
+- lambdaL1 =  penalty, a floating scalar
+- lambdaL2 =  penalty, a floating scalar
 - reg = 2d array of bits, indicating whether or not to regularize each of the 
   coefficients
 - stepsize = 1d array consisting of a float; step size of updates
@@ -92,7 +95,7 @@ function update_ista!(B::AbstractArray{Float64,2},
                       Y::AbstractArray{Float64,2}, 
                       Z::AbstractArray{Float64,2}, 
                       norms::AbstractArray{Float64,2}, 
-                      lambda::Float64, reg::BitArray{2}, 
+                      lambdaL1::Float64, lambdaL2::Float64, reg::BitArray{2}, 
                       stepsize::AbstractArray{Float64,1}) 
     
     # Update gradient
@@ -104,8 +107,8 @@ function update_ista!(B::AbstractArray{Float64,2},
         b2sign = sign(b2update) # L2 update signs
         
         # Update the current coefficient 
-        b = reg[i,j] ? prox(B[i,j], grad[i,j], b2sign, lambda, norms[i,j], 
-                            stepsize[1]) : b2update
+        b = reg[i,j] ? prox(B[i,j], grad[i,j], b2sign, lambdaL1, norms[i,j], 
+                            stepsize[1])/(1+2*lambdaL2*stepsize[1]) : b2update
         
         # Update coefficient estimate in the current copy    
         if b != B[i,j] 
@@ -119,10 +122,10 @@ end
 
 
 """
-    ista!(X, Y, Z, lambda, B, regXidx, regZidx, reg, norms; 
+    istaNet!(X, Y, Z, lambda, alpha, B, regXidx, regZidx, reg, norms; 
           isVerbose, stepsize, thresh, maxiter)
 
-Performs ISTA with fixed step size.
+Performs the Elastic-net version ISTA with fixed step size.
 
 # Arguments
 
@@ -131,7 +134,8 @@ Performs ISTA with fixed step size.
 - Y = 2d array of floats consisting of the multivariate response
 - Z = 2d array of floats consisting of the column covariates, with all 
   categorical variables coded in appropriate contrasts
-- lambda = lambda penalty, a floating scalar
+- lambda = penalty parameter, a floating scalar
+- alpha = parameter (ϵ[0, 1]) determining the mix of penalties between L1 and L2
 - B = 2d array of floats consisting of starting coefficient estimates
 - regXidx = 1d array of indices corresponding to regularized X covariates
 - regZidx = 1d array of indices corresponding to regularized Z covariates
@@ -168,12 +172,16 @@ and/or `Z` are very large may exceed computational limitations.
 
 """
 function ista!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2}, 
-               Z::AbstractArray{Float64,2}, lambda::Float64, 
+               Z::AbstractArray{Float64,2}, lambda::Float64, alpha::Float64, 
                B::AbstractArray{Float64,2}, 
                regXidx::AbstractArray{Int64,1}, 
                regZidx::AbstractArray{Int64,1}, reg::BitArray{2}, norms; 
                isVerbose::Bool=true, stepsize::Float64=0.01, 
                thresh::Float64=10.0^(-7), maxiter::Int=10^10)
+
+    # Re-parametrize the Elastic-net tuning parameters
+    lambdaL1 = lambda*alpha
+    lambdaL2 = lambda*(1-alpha)
 
     # Pre-allocating arrays to store residuals using and gradient. 
     resid = Array{Float64}(undef, size(Y)) 
@@ -186,8 +194,8 @@ function ista!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
     crit_denom = [size(X,1)*size(Z,1), size(X,2)*size(Z,2)] 
     # Placeholder to store the old criterion 
     oldcrit = 1.0 
-    # Calculate the current criterion
-    crit = criterion(B[regXidx, regZidx], resid, lambda, crit_denom) 
+    # Calculate the current criterion (loss function with Elastic-net penalty)
+    crit = criterion(B[regXidx, regZidx], resid, lambdaL1, lambdaL2, crit_denom) 
     
     stepsize = [stepsize]
     iter = 0
@@ -197,9 +205,9 @@ function ista!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2},
         # Store the current criterion
         oldcrit = crit 
         # Update the coefficient estimates
-        update_ista!(B, resid, grad, X, Y, Z, norms, lambda, reg, stepsize) 
+        update_ista!(B, resid, grad, X, Y, Z, norms, lambdaL1, lambdaL2, reg, stepsize) 
         # Calculate the criterion after updating
-        crit = criterion(B[regXidx, regZidx], resid, lambda, crit_denom) 
+        crit = criterion(B[regXidx, regZidx], resid, lambdaL1, lambdaL2, crit_denom) 
         
         iter += 1 # Increment the number of iterations
         # Warning message if coefficient estimates do not converge.
