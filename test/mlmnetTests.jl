@@ -62,7 +62,7 @@ B_Net_ista_2 = est_ista_2.B[:, :, 3, 1];
 # Lasso penalized regression - ista
 B_ista= Helium.readhe(joinpath(dataDir, "B_ista.he"))
 
-println("Lasso vs Elastic Net when α=1 test 1 - ista: ", @test (B_Net_ista_1 == B_ista) && (B_Net_ista_2 == B_ista))
+println("Lasso vs Elastic Net when α=1 test 1 - ista: ", @test (B_Net_ista_1 ≈ B_ista) && (B_Net_ista_2 ≈ B_ista))
 
 #############################################
 # TEST 2 Lasso vs Elastic Net (𝛼=1) - fista #
@@ -79,7 +79,7 @@ B_Net_fista_2 = est_fista_2.B[:, :, 3, 1];
 # Lasso penalized regression - fista
 B_fista= Helium.readhe(joinpath(dataDir, "B_fista.he"))
 
-println("Lasso vs Elastic Net when α=1 test 2 - fista: ", @test (B_Net_fista_1 == B_fista) && (B_Net_fista_2 == B_fista))
+println("Lasso vs Elastic Net when α=1 test 2 - fista: ", @test (B_Net_fista_1 ≈ B_fista) && (B_Net_fista_2 ≈ B_fista))
 
 ##########################################################
 # TEST 3 Lasso vs Elastic Net (𝛼=1) - fista backtracking #
@@ -96,7 +96,7 @@ B_Net_fistabt_2 = est_fistabt_2.B[:, :, 3, 1];
 # Lasso penalized regression - fista-bt
 B_fistabt = Helium.readhe(joinpath(dataDir, "B_fistabt.he"))
 
-println("Lasso vs Elastic Net when α=1 test 3 - fista-bt: ", @test (B_Net_fistabt_1 == B_fistabt) && (B_Net_fistabt_2 == B_fistabt))
+println("Lasso vs Elastic Net when α=1 test 3 - fista-bt: ", @test (B_Net_fistabt_1 ≈ B_fistabt) && (B_Net_fistabt_2 ≈ B_fistabt))
 
 
 ############################################
@@ -114,7 +114,7 @@ B_Net_admm_2 = est_admm_2.B[:, :, 3, 1];
 # Lasso penalized regression - admm
 B_admm = Helium.readhe(joinpath(dataDir, "B_admm.he"))
 
-println("Lasso vs Elastic Net when α=1 test 4 - admm: ", @test (B_Net_admm_1 == B_admm) && (B_Net_admm_2 == B_admm))
+println("Lasso vs Elastic Net when α=1 test 4 - admm: ", @test (B_Net_admm_1 ≈ B_admm) && (B_Net_admm_2 ≈ B_admm))
 
 
 ##########################################
@@ -134,7 +134,7 @@ B_Net_cd_2 = est_cd_2.B[:, :, 3, 1];
 # Lasso penalized regression - cd
 B_cd = Helium.readhe(joinpath(dataDir, "B_cd.he"))
 
-println("Lasso vs Elastic Net when α=1 test 5 - cd: ", @test (B_Net_cd_1 == B_cd) && (B_Net_cd_2 == B_cd))
+println("Lasso vs Elastic Net when α=1 test 5 - cd: ", @test (B_Net_cd_1 ≈ B_cd) && (B_Net_cd_2 ≈ B_cd))
 
 
 println("Tests mlmnet finished!")
