@@ -136,7 +136,12 @@ B_Net_cd_2 = est_cd_2.B[:, :, 3, 1];
 # Lasso penalized regression - cd
 B_cd = Helium.readhe(joinpath(dataDir, "B_cd.he"))
 
-println("Lasso vs Elastic Net when α=1 test 5 - cd: ", @test ≈(B_Net_cd_1,  B_cd; atol=1.2e-8) && ≈(B_Net_cd_2, B_cd;  atol=1.2e-4))
+println("B_cd")
+println(B_cd)
+println("B_Net_cd_1")
+println(B_Net_cd_1)
+
+println("Lasso vs Elastic Net when α=1 test 5 - cd: ", @test ≈(B_Net_cd_1,  B_cd; atol=1.2e-4) && ≈(B_Net_cd_2, B_cd;  atol=1.2e-4))
 
 
 println("Tests mlmnet finished!")
