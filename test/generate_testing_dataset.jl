@@ -10,7 +10,7 @@
 # using Distributions, Random, Statistics, LinearAlgebra, StatsBase
 # using DataFrames, MLBase, Distributed
 using MatrixLMnet #v0.1.0
-using Test
+# using Test
 using Helium
 
 
@@ -37,6 +37,8 @@ We let 𝛽₁ = (3, 1.5, 0, 0, 2, 0, 0, 0), 𝛽₂ = (0, 1.5, 0, 3.5, 2, 0, 0 
 The pairwise correlation between 𝑋ᵢ and 𝑋ⱼ was set to be 𝑐𝑜𝑟(𝑖,𝑗)=(0.5)^|𝑖−𝑗|.
 Here, the Z matrix is an identity matrix.
 =#
+
+rng = MersenneTwister(2021)
 
 # Simulation parameters
 p = 8; # Number of predictors
@@ -68,7 +70,7 @@ dat = MatrixLMnet.MatrixLM.RawData(Response(Y), Predictors(X, Z));
 # Hyper parameters
 λ = [10.0, 5.0, 3.0]
 
-rng = MersenneTwister(2021)
+
 
 ###############
 # TEST Lasso  #
