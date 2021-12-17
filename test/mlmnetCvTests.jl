@@ -46,7 +46,7 @@ rng = 2021#MatrixLMnet.Random.MersenneTwister(2021)
 
 numVersion = VERSION
 if Int(numVersion.minor) < 7
-      tolVersion=1e-1
+      tolVersion=2e-1
 else
       tolVersion=1e-6
 end 
