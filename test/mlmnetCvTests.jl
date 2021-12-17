@@ -44,6 +44,13 @@ dat = RawData(Response(Y), Predictors(X, Z));
 
 rng = 2021#MatrixLMnet.Random.MersenneTwister(2021)
 
+numVersion = VERSION
+if Int(numVersion.minor) < 7
+      tolVersion=1e-1
+else
+      tolVersion=1e-6
+end 
+
 #############################################
 # TEST 1 Lasso vs Elastic Net (𝛼=1) - ista #
 #############################################
@@ -62,8 +69,8 @@ smmr_Net2 = MatrixLMnet.lambda_min(est2);
 smmr_ista= Helium.readhe(joinpath(dataDir, "smmr_ista.he"))
 
 println("CV Lasso vs Elastic Net when α=1 test 1 - ista: ",
-         @test ≈(smmr_Net1.AvgMSE, smmr_ista[:,1]; atol=1.2e-6) && ≈(smmr_Net1.AvgPercentZero, smmr_ista[:,2], atol = 1.2e-6) &&
-         ≈(smmr_Net2.AvgMSE, smmr_ista[:,1];atol=1.2e-6) && ≈(smmr_Net2.AvgPercentZero, smmr_ista[:,2]; atol=1.2e-6))
+         @test ≈(smmr_Net1.AvgMSE, smmr_ista[:,1]; atol=tolVersion) && ≈(smmr_Net1.AvgPercentZero, smmr_ista[:,2], atol = tolVersion) &&
+         ≈(smmr_Net2.AvgMSE, smmr_ista[:,1];atol=tolVersion) && ≈(smmr_Net2.AvgPercentZero, smmr_ista[:,2]; atol=tolVersion))
 
 #############################################
 # TEST 2 Lasso vs Elastic Net (𝛼=1) - fista #
@@ -83,8 +90,8 @@ smmr_Net2 = MatrixLMnet.lambda_min(est2);
 smmr_fista= Helium.readhe(joinpath(dataDir, "smmr_fista.he"))
 
 println("CV Lasso vs Elastic Net when α=1 test 2 - fista: ",
-@test ≈(smmr_Net1.AvgMSE, smmr_fista[:,1]; atol=1.2e-6) && ≈(smmr_Net1.AvgPercentZero, smmr_fista[:,2], atol = 1.2e-6) &&
-≈(smmr_Net2.AvgMSE, smmr_fista[:,1];atol=1.2e-6) && ≈(smmr_Net2.AvgPercentZero, smmr_fista[:,2]; atol=1.2e-6))
+@test ≈(smmr_Net1.AvgMSE, smmr_fista[:,1]; atol=tolVersion) && ≈(smmr_Net1.AvgPercentZero, smmr_fista[:,2], atol = tolVersion) &&
+≈(smmr_Net2.AvgMSE, smmr_fista[:,1];atol=tolVersion) && ≈(smmr_Net2.AvgPercentZero, smmr_fista[:,2]; atol=tolVersion))
 
 ##########################################################
 # TEST 3 Lasso vs Elastic Net (𝛼=1) - fista backtracking #
@@ -104,8 +111,8 @@ smmr_Net2 = MatrixLMnet.lambda_min(est2);
 smmr_fistabt= Helium.readhe(joinpath(dataDir, "smmr_fistabt.he"))
 
 println("CV Lasso vs Elastic Net when α=1 test 3 - fista-bt: ",
-@test ≈(smmr_Net1.AvgMSE, smmr_fistabt[:,1]; atol=1.2e-6) && ≈(smmr_Net1.AvgPercentZero, smmr_fistabt[:,2], atol = 1.2e-6) &&
-≈(smmr_Net2.AvgMSE, smmr_fistabt[:,1];atol=1.2e-6) && ≈(smmr_Net2.AvgPercentZero, smmr_fistabt[:,2]; atol=1.2e-6))
+@test ≈(smmr_Net1.AvgMSE, smmr_fistabt[:,1]; atol=tolVersion) && ≈(smmr_Net1.AvgPercentZero, smmr_fistabt[:,2], atol = tolVersion) &&
+≈(smmr_Net2.AvgMSE, smmr_fistabt[:,1];atol=tolVersion) && ≈(smmr_Net2.AvgPercentZero, smmr_fistabt[:,2]; atol=tolVersion))
 
 
 ############################################
@@ -126,8 +133,8 @@ smmr_Net2 = MatrixLMnet.lambda_min(est2);
 smmr_admm = Helium.readhe(joinpath(dataDir, "smmr_admm.he"))
 
 println("CV Lasso vs Elastic Net when α=1 test 4 - admm: ",
-@test ≈(smmr_Net1.AvgMSE, smmr_admm[:,1]; atol=1.2e-6) && ≈(smmr_Net1.AvgPercentZero, smmr_admm[:,2], atol = 1.2e-6) &&
-≈(smmr_Net2.AvgMSE, smmr_admm[:,1];atol=1.2e-6) && ≈(smmr_Net2.AvgPercentZero, smmr_admm[:,2]; atol=1.2e-6))
+@test ≈(smmr_Net1.AvgMSE, smmr_admm[:,1]; atol=tolVersion) && ≈(smmr_Net1.AvgPercentZero, smmr_admm[:,2], atol = tolVersion) &&
+≈(smmr_Net2.AvgMSE, smmr_admm[:,1];atol=tolVersion) && ≈(smmr_Net2.AvgPercentZero, smmr_admm[:,2]; atol=tolVersion))
 
 ##########################################
 # TEST 5 Lasso vs Elastic Net (𝛼=1) - cd #
@@ -147,8 +154,8 @@ smmr_Net2 = MatrixLMnet.lambda_min(est2);
 smmr_cd = Helium.readhe(joinpath(dataDir, "smmr_cd.he"))
 
 println("CV Lasso vs Elastic Net when α=1 test 5 - cd: ",
-@test ≈(smmr_Net1.AvgMSE, smmr_cd[:,1]; atol=1.2e-6) && ≈(smmr_Net1.AvgPercentZero, smmr_cd[:,2], atol = 1.2e-6) &&
-≈(smmr_Net2.AvgMSE, smmr_cd[:,1];atol=1.2e-6) && ≈(smmr_Net2.AvgPercentZero, smmr_cd[:,2]; atol=1.2e-6))
+@test ≈(smmr_Net1.AvgMSE, smmr_cd[:,1]; atol=tolVersion) && ≈(smmr_Net1.AvgPercentZero, smmr_cd[:,2], atol = tolVersion) &&
+≈(smmr_Net2.AvgMSE, smmr_cd[:,1];atol=tolVersion) && ≈(smmr_Net2.AvgPercentZero, smmr_cd[:,2]; atol=tolVersion))
 
 println("Tests mlmnet_cv finished!")
 
