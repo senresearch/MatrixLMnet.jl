@@ -68,6 +68,8 @@ dat = MatrixLMnet.MatrixLM.RawData(Response(Y), Predictors(X, Z));
 # Hyper parameters
 λ = [10.0, 5.0, 3.0]
 
+rng = MersenneTwister(2021)
+
 ###############
 # TEST Lasso  #
 ###############
@@ -89,7 +91,7 @@ est = mlmnet(admm!, dat, λ, hasZIntercept = false, hasXIntercept = false, isVer
 est_B_Lasso_admm = est.B[:, :, 3];
 
 # Lasso penalized regression - cd
-Random.seed!(2021)
+Random.seed!(rng)
 est = mlmnet(cd!, dat, λ, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
 est_B_Lasso_cd = est.B[:, :, 3];
 
@@ -99,33 +101,33 @@ est_B_Lasso_cd = est.B[:, :, 3];
 
 
 # Lasso penalized regression - ista cv
-Random.seed!(2021)
+Random.seed!(rng)
 est = mlmnet_cv(ista!, dat, λ, 10, 1, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-smmr_Lasso = lambda_min(est);
+smmr_Lasso = lambda_min_deprecated(est);
 smmr_ista = hcat(smmr_Lasso.AvgMSE, smmr_Lasso.AvgPercentZero)
 
 # Lasso penalized regression - fista cv
-Random.seed!(2021)
+Random.seed!(rng)
 est = mlmnet_cv(fista!, dat, λ, 10, 1, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-smmr_Lasso = lambda_min(est);
+smmr_Lasso = lambda_min_deprecated(est);
 smmr_fista = hcat(smmr_Lasso.AvgMSE, smmr_Lasso.AvgPercentZero)
 
 # Lasso penalized regression - fista-bt cv
-Random.seed!(2021)
+Random.seed!(rng)
 est = mlmnet_cv(fista_bt!, dat, λ, 10, 1, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-smmr_Lasso = lambda_min(est);
+smmr_Lasso = lambda_min_deprecated(est);
 smmr_fistabt = hcat(smmr_Lasso.AvgMSE, smmr_Lasso.AvgPercentZero)
 
 # Lasso penalized regression - admm cv
-Random.seed!(2021)
+Random.seed!(rng)
 est = mlmnet_cv(admm!, dat, λ, 10, 1, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-smmr_Lasso = lambda_min(est);
+smmr_Lasso = lambda_min_deprecated(est);
 smmr_admm = hcat(smmr_Lasso.AvgMSE, smmr_Lasso.AvgPercentZero)
 
 # Lasso penalized regression - cd cv
-Random.seed!(2021)
+Random.seed!(rng)
 est = mlmnet_cv(cd!, dat, λ, 10, 1, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
-smmr_Lasso = lambda_min(est);
+smmr_Lasso = lambda_min_deprecated(est);
 smmr_cd = hcat(smmr_Lasso.AvgMSE, smmr_Lasso.AvgPercentZero)
 
 
