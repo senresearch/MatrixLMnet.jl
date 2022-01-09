@@ -5,4 +5,5 @@ using Test
     # include("l1_helpers.jl")
     include("mlmnetTests.jl")
     include("mlmnetCvTests.jl")
+    include("summaryCvTests.jl")
 end

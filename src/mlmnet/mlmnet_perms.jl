@@ -135,7 +135,7 @@ function mlmnet_perms(data::RawData,
     
     alphas = [1.0] # default LASSO, 𝛼 = 1
 
-    # Run L1-penalty on the permuted data
+    # Run L1-L2 penalties on the permuted data
   rslts =  mlmnet(dataPerm, lambdas, alphas; 
                             method = method, isNaive=isNaive,
                             hasXIntercept=hasXIntercept, hasZIntercept=hasZIntercept, 

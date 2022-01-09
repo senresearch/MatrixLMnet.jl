@@ -158,7 +158,7 @@ end
     
 
 Centers and normalizes X and Z predictor matrices, calculates fixed step size, performs 
-the supplied method on two descending lists of lambdas (each for L1 and L2) using ``warm starts'', 
+the supplied method on two descending lists of lambdas and alphas (each for L1 and L2) using ``warm starts'', 
 and backtransforms resulting coefficients, as is deemed necessary by the user 
 inputs.
 
