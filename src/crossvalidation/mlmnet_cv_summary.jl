@@ -93,18 +93,12 @@ function mlmnet_cv_summary(MLMNet_cv::Mlmnet_cv)
     
     # Calculate summary information across folds
 
-    # First column
-    l1s = MLMNet_cv.lambdas
-    l2s = MLMNet_cv.alphas
+    lenVecLambdas = length(MLMNet_cv.lambdas)
+    lenVecAlphas = length(MLMNet_cv.alphas)
 
-    ls = Array{Tuple, 1}(undef, length(l1s)*length(l2s))
-    id = 1
-    for l2 in l2s
-        for l1 in l1s
-            ls[id] = Tuple([l1, l2])
-            id += 1
-        end
-    end
+    λαIndex =  map((x,y) -> (x,y), 
+            repeat(collect(1:lenVecLambdas), lenVecAlphas),
+            vec(repeat(permutedims(collect(1:lenVecAlphas)), lenVecLambdas)) )
 
     # Second column
     # a 2-d matrix of average MSEs w.r.p.t each (l1, l2)
@@ -117,10 +111,12 @@ function mlmnet_cv_summary(MLMNet_cv::Mlmnet_cv)
     # a 2-d matrix of average zero proportions w.r.p.t each (l1, l2)
     avg_prop_zero = vec(calc_avg_prop_zero(MLMNet_cv))
     
-    out_df = DataFrame(𝜆_𝛼_parameters = ls,
+    out_df = DataFrame(𝜆_𝛼_Index = λαIndex,
+                       Lambda = repeat(MLMNet_cv.lambdas, lenVecAlphas),
+                       Alpha =  vec(repeat(permutedims(MLMNet_cv.alphas), lenVecLambdas)),
                        AvgMSE = avg_mse,
                        StdMSE = mseStd,
-                       AvgPercentZero =  avg_prop_zero)
+                       AvgPercentZero =  avg_prop_zero);
         
     return out_df
 end

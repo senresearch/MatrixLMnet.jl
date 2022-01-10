@@ -64,9 +64,9 @@ smmr_Net1 = MatrixLMnet.mlmnet_cv_summary(est1);
 smmr_min_Net1 = MatrixLMnet.lambda_min(est1);
 
 idxSmmr = argmin(smmr_Net1[:, :AvgMSE])
-testA = (smmr_Net1[idxSmmr, :AvgMSE] == smmr_min_Net1[1, :AvgMSE]) && 
-        (smmr_Net1[idxSmmr, :𝜆_𝛼_parameters][1] == smmr_min_Net1[1, :Lambda]) &&
-        (smmr_Net1[idxSmmr, :𝜆_𝛼_parameters][2] == smmr_min_Net1[1, :Alpha])
+test_ElasticNet = (smmr_Net1[idxSmmr, :AvgMSE] == smmr_min_Net1[1, :AvgMSE]) && 
+        (smmr_Net1[idxSmmr, :Lambda] == smmr_min_Net1[1, :Lambda]) &&
+        (smmr_Net1[idxSmmr, :Alpha] == smmr_min_Net1[1, :Alpha])
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
@@ -76,12 +76,12 @@ smmr_Net2 = MatrixLMnet.mlmnet_cv_summary(est2);
 smmr_min_Net2 = MatrixLMnet.lambda_min(est2);
 
 idxSmmr = argmin(smmr_Net2[:, :AvgMSE])
-testB = (smmr_Net2[idxSmmr, :AvgMSE] == smmr_min_Net2[1, :AvgMSE]) && 
-        (smmr_Net2[idxSmmr, :𝜆_𝛼_parameters][1] == smmr_min_Net2[1, :Lambda]) &&
-        (smmr_Net2[idxSmmr, :𝜆_𝛼_parameters][2] == smmr_min_Net2[1, :Alpha])
+test_Lasso = (smmr_Net2[idxSmmr, :AvgMSE] == smmr_min_Net2[1, :AvgMSE]) && 
+        (smmr_Net2[idxSmmr, :Lambda] == smmr_min_Net2[1, :Lambda]) &&
+        (smmr_Net2[idxSmmr, :Alpha] == smmr_min_Net2[1, :Alpha])
 
 println("Summary cross-validation test 1 - ista: ",
-         @test (testA && testB))
+         @test (test_ElasticNet && test_Lasso))
 
 
 ###########################################
@@ -96,9 +96,9 @@ smmr_Net1 = MatrixLMnet.mlmnet_cv_summary(est1);
 smmr_min_Net1 = MatrixLMnet.lambda_min(est1);
 
 idxSmmr = argmin(smmr_Net1[:, :AvgMSE])
-testA = (smmr_Net1[idxSmmr, :AvgMSE] == smmr_min_Net1[1, :AvgMSE]) && 
-        (smmr_Net1[idxSmmr, :𝜆_𝛼_parameters][1] == smmr_min_Net1[1, :Lambda]) &&
-        (smmr_Net1[idxSmmr, :𝜆_𝛼_parameters][2] == smmr_min_Net1[1, :Alpha])
+test_ElasticNet = (smmr_Net1[idxSmmr, :AvgMSE] == smmr_min_Net1[1, :AvgMSE]) && 
+        (smmr_Net1[idxSmmr, :Lambda] == smmr_min_Net1[1, :Lambda]) &&
+        (smmr_Net1[idxSmmr, :Alpha] == smmr_min_Net1[1, :Alpha])
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
@@ -108,12 +108,12 @@ smmr_Net2 = MatrixLMnet.mlmnet_cv_summary(est2);
 smmr_min_Net2 = MatrixLMnet.lambda_min(est2);
 
 idxSmmr = argmin(smmr_Net2[:, :AvgMSE])
-testB = (smmr_Net2[idxSmmr, :AvgMSE] == smmr_min_Net2[1, :AvgMSE]) && 
-        (smmr_Net2[idxSmmr, :𝜆_𝛼_parameters][1] == smmr_min_Net2[1, :Lambda]) &&
-        (smmr_Net2[idxSmmr, :𝜆_𝛼_parameters][2] == smmr_min_Net2[1, :Alpha])
+test_Lasso = (smmr_Net2[idxSmmr, :AvgMSE] == smmr_min_Net2[1, :AvgMSE]) && 
+        (smmr_Net2[idxSmmr, :Lambda] == smmr_min_Net2[1, :Lambda]) &&
+        (smmr_Net2[idxSmmr, :Alpha] == smmr_min_Net2[1, :Alpha])
 
 println("Summary cross-validation test 2 - fista: ",
-         @test (testA && testB))         
+         @test (test_ElasticNet && test_Lasso))         
 
 
 ########################################################
@@ -128,9 +128,9 @@ smmr_Net1 = MatrixLMnet.mlmnet_cv_summary(est1);
 smmr_min_Net1 = MatrixLMnet.lambda_min(est1);
 
 idxSmmr = argmin(smmr_Net1[:, :AvgMSE])
-testA = (smmr_Net1[idxSmmr, :AvgMSE] == smmr_min_Net1[1, :AvgMSE]) && 
-        (smmr_Net1[idxSmmr, :𝜆_𝛼_parameters][1] == smmr_min_Net1[1, :Lambda]) &&
-        (smmr_Net1[idxSmmr, :𝜆_𝛼_parameters][2] == smmr_min_Net1[1, :Alpha])
+test_ElasticNet = (smmr_Net1[idxSmmr, :AvgMSE] == smmr_min_Net1[1, :AvgMSE]) && 
+        (smmr_Net1[idxSmmr, :Lambda] == smmr_min_Net1[1, :Lambda]) &&
+        (smmr_Net1[idxSmmr, :Alpha] == smmr_min_Net1[1, :Alpha])
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
@@ -140,12 +140,12 @@ smmr_Net2 = MatrixLMnet.mlmnet_cv_summary(est2);
 smmr_min_Net2 = MatrixLMnet.lambda_min(est2);
 
 idxSmmr = argmin(smmr_Net2[:, :AvgMSE])
-testB = (smmr_Net2[idxSmmr, :AvgMSE] == smmr_min_Net2[1, :AvgMSE]) && 
-        (smmr_Net2[idxSmmr, :𝜆_𝛼_parameters][1] == smmr_min_Net2[1, :Lambda]) &&
-        (smmr_Net2[idxSmmr, :𝜆_𝛼_parameters][2] == smmr_min_Net2[1, :Alpha])
+test_Lasso = (smmr_Net2[idxSmmr, :AvgMSE] == smmr_min_Net2[1, :AvgMSE]) && 
+        (smmr_Net2[idxSmmr, :Lambda] == smmr_min_Net2[1, :Lambda]) &&
+        (smmr_Net2[idxSmmr, :Alpha] == smmr_min_Net2[1, :Alpha])
 
 println("Summary cross-validation test 3 - fista_bt: ",
-         @test (testA && testB))                  
+         @test (test_ElasticNet && test_Lasso))                  
 
 
 ##########################################
@@ -160,9 +160,9 @@ smmr_Net1 = MatrixLMnet.mlmnet_cv_summary(est1);
 smmr_min_Net1 = MatrixLMnet.lambda_min(est1);
 
 idxSmmr = argmin(smmr_Net1[:, :AvgMSE])
-testA = (smmr_Net1[idxSmmr, :AvgMSE] == smmr_min_Net1[1, :AvgMSE]) && 
-        (smmr_Net1[idxSmmr, :𝜆_𝛼_parameters][1] == smmr_min_Net1[1, :Lambda]) &&
-        (smmr_Net1[idxSmmr, :𝜆_𝛼_parameters][2] == smmr_min_Net1[1, :Alpha])
+test_ElasticNet = (smmr_Net1[idxSmmr, :AvgMSE] == smmr_min_Net1[1, :AvgMSE]) && 
+        (smmr_Net1[idxSmmr, :Lambda] == smmr_min_Net1[1, :Lambda]) &&
+        (smmr_Net1[idxSmmr, :Alpha] == smmr_min_Net1[1, :Alpha])
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
@@ -172,12 +172,12 @@ smmr_Net2 = MatrixLMnet.mlmnet_cv_summary(est2);
 smmr_min_Net2 = MatrixLMnet.lambda_min(est2);
 
 idxSmmr = argmin(smmr_Net2[:, :AvgMSE])
-testB = (smmr_Net2[idxSmmr, :AvgMSE] == smmr_min_Net2[1, :AvgMSE]) && 
-        (smmr_Net2[idxSmmr, :𝜆_𝛼_parameters][1] == smmr_min_Net2[1, :Lambda]) &&
-        (smmr_Net2[idxSmmr, :𝜆_𝛼_parameters][2] == smmr_min_Net2[1, :Alpha])
+test_Lasso = (smmr_Net2[idxSmmr, :AvgMSE] == smmr_min_Net2[1, :AvgMSE]) && 
+        (smmr_Net2[idxSmmr, :Lambda] == smmr_min_Net2[1, :Lambda]) &&
+        (smmr_Net2[idxSmmr, :Alpha] == smmr_min_Net2[1, :Alpha])
 
 println("Summary cross-validation test 4 - admm: ",
-         @test (testA && testB))                  
+         @test (test_ElasticNet && test_Lasso))                  
     
          
 ########################################
@@ -192,9 +192,9 @@ smmr_Net2 = MatrixLMnet.mlmnet_cv_summary(est2);
 smmr_min_Net2 = MatrixLMnet.lambda_min(est2);
 
 idxSmmr = argmin(smmr_Net2[:, :AvgMSE])
-testB = (smmr_Net2[idxSmmr, :AvgMSE] == smmr_min_Net2[1, :AvgMSE]) && 
-        (smmr_Net2[idxSmmr, :𝜆_𝛼_parameters][1] == smmr_min_Net2[1, :Lambda]) &&
-        (smmr_Net2[idxSmmr, :𝜆_𝛼_parameters][2] == smmr_min_Net2[1, :Alpha])
+test_Lasso = (smmr_Net2[idxSmmr, :AvgMSE] == smmr_min_Net2[1, :AvgMSE]) && 
+        (smmr_Net2[idxSmmr, :Lambda] == smmr_min_Net2[1, :Lambda]) &&
+        (smmr_Net2[idxSmmr, :Alpha] == smmr_min_Net2[1, :Alpha])
 
 println("Summary cross-validation test 5 - admm: ",
-         @test (testB))                           
+         @test (test_Lasso))                           
