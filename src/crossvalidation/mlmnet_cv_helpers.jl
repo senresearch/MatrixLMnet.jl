@@ -111,7 +111,7 @@ function findnotin(a::AbstractArray{Int64,1}, b::AbstractArray{Int64,1})
 end
 
 """
-    calc_mse(MLMNets, data, lambdas, rowFolds, colFolds)
+        calc_mse(MLMNets, data, lambdas, alphas, rowFolds, colFolds)
 
 Calculates test MSE for each of the CV folds for each lambda. 
 
@@ -119,10 +119,10 @@ Calculates test MSE for each of the CV folds for each lambda.
 
 - MLMNets = 1d array of Mlmnet objects resulting from running cross validation
 - data = RawData object used to generate MLMNets
-- lambdasL1 = 1d array of floats consisting of lambda penalties used to 
-  generate MLMNets
-- lambdasL2 = 1d array of floats consisting of lambda penalties used to 
-  generate MLMNets
+- lambdas = 1d array of floats consisting of the total penalties in descending 
+  order. If they are not in descending order, they will be sorted. 
+- alphas = 1d array of floats consisting of the penalty ratio that 
+  determines the mix of penalties between L1 and L2
 - rowFolds = 1d array of arrays containing booleans for the row folds
 - colFolds = 1d array of arrays containing booleans for the column folds
 
@@ -160,12 +160,12 @@ function calc_mse(MLMNets::AbstractArray{Mlmnet,1}, data::RawData,
     # Initialize array to store test MSEs 
     mse = Array{Float64}(undef, length(lambdas), length(alphas), nFolds)
     
-    # Iterate through all folds and lambdas to calculate test MSE
+    # Iterate through all folds and lambdas-alphas parameters to calculate test MSE
     for j in 1:nFolds
-        # Residuals for all lambdasL1 and lambdasL2 at fold j
+        # Residuals for all lambdas and alphas at fold j
         resids = resid(MLMNets[j], holdoutFolds[j]) 
         for i in 1:length(lambdas), k in 1:length(alphas)
-            # MSE for (lambdaL1 i, lambdaL2 k) and fold j   
+            # MSE for (lambdas i, alphas k) and fold j   
             mse[i,k,j] = mean(resids[:,:,i,k].^2) 
         end
     end
@@ -182,7 +182,7 @@ folds for each lambda.
 
 # Arguments 
 
-- MLMNets = 1d array of MlmnetDeprecated objects resulting from running cross validation
+- MLMNets = 1d array of Mlmnet objects resulting from running cross validation
 - lambdas = 1d array of floats consisting of lambda penalties used to 
   generate MLMNets
 

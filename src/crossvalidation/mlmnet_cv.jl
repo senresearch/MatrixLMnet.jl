@@ -1,12 +1,12 @@
 """
-    Mlmnet_cvDeprecated(MLMNets, lambdas, alphas, data, rowFolds, colFolds)
+    Mlmnet_cv(MLMNets, lambdas, alphas, data, rowFolds, colFolds)
 
 Type for storing the results of running cross-validation for `mlmnet`
 
 """
 mutable struct Mlmnet_cv 
     
-    # MlmnetDeprecated objects
+    # Mlmnet objects
     MLMNets::Array{Mlmnet,1} 
     # Lambda penalties
     lambdas::Array{Float64,1}
@@ -21,10 +21,10 @@ mutable struct Mlmnet_cv
     
     # These will be generated and should not be supplied as input to the 
     # constructor.
-    # Test MSE for each of the CV folds for each lambdaL1 and lambdaL2
+    # Test MSE for each of the CV folds for each lambda and alpha
     mse::Array{Float64,3} 
     # Proportion of zero interaction coefficients for each of the CV folds 
-    # for each lambdaL1 and lambdaL2
+    # for each lambda and alpha
     propZero::Array{Float64,3} 
     
     Mlmnet_cv(MLMNets, lambdas, alphas, data, rowFolds, colFolds, dig) = 
@@ -98,7 +98,7 @@ input.
 
 # Value
 
-An Mlmnet_cvDeprecated object. 
+An Mlmnet_cv object. 
 
 # Some notes
 
@@ -228,7 +228,7 @@ Calls the base `mlmnet_cv` function.
 
 # Value
 
-An Mlmnet_cvDeprecated object. 
+An Mlmnet_cv object. 
 
 # Some notes
 
@@ -326,7 +326,7 @@ input. Calls the base `mlmnet_cv` function.
 
 # Value
 
-An Mlmnet_cvDeprecated object. 
+An Mlmnet_cv object. 
 
 # Some notes
 
@@ -424,7 +424,7 @@ folds randomly generated using calls to `make_folds`. Calls the base
 
 # Value
 
-An Mlmnet_cvDeprecated object. 
+An Mlmnet_cv object. 
 
 # Some notes
 

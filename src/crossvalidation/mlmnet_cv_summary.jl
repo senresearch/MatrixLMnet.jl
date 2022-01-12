@@ -93,35 +93,31 @@ function mlmnet_cv_summary(MLMNet_cv::Mlmnet_cv)
     
     # Calculate summary information across folds
 
-    # First column
-    l1s = MLMNet_cv.lambdasL1
-    l2s = MLMNet_cv.lambdasL2
+    lenVecLambdas = length(MLMNet_cv.lambdas)
+    lenVecAlphas = length(MLMNet_cv.alphas)
 
-    ls = Array{Tuple, 1}(undef, length(l1s)*length(l2s))
-    id = 1
-    for l1 in l1s
-        for l2 in l2s
-            ls[id] = Tuple([l1, l2])
-            id += 1
-        end
-    end
+    λαIndex =  map((x,y) -> (x,y), 
+            repeat(collect(1:lenVecLambdas), lenVecAlphas),
+            vec(repeat(permutedims(collect(1:lenVecAlphas)), lenVecLambdas)) )
 
     # Second column
     # a 2-d matrix of average MSEs w.r.p.t each (l1, l2)
-    avg_mse = calc_avg_mse(MLMNet_cv) 
-    avg_mse = collect(avg_mse'[:]) # vectorize...
-
-    # Third column
-    # a 2-d matrix of average zero proportions w.r.p.t each (l1, l2)
-    avg_prop_zero = calc_avg_prop_zero(MLMNet_cv)
-    avg_prop_zero = collect(avg_prop_zero'[:]) # vectorize...
-
-
-
-    out_df = DataFrame(hcat(ls, avg_mse, avg_prop_zero))
-    # Useful names
-    # rename!(out_df, map(Meta.parse, ["(LambdaL1, LambdaL2)", "AvgMSE", "AvgPercentZero"]))
+    avg_mse = vec(calc_avg_mse(MLMNet_cv))
     
+    # Third column
+    mseStd = vec(valid_reduce2(MLMNet_cv.mse, std))
+
+    # Fourth column
+    # a 2-d matrix of average zero proportions w.r.p.t each (l1, l2)
+    avg_prop_zero = vec(calc_avg_prop_zero(MLMNet_cv))
+    
+    out_df = DataFrame(𝜆_𝛼_Index = λαIndex,
+                       Lambda = repeat(MLMNet_cv.lambdas, lenVecAlphas),
+                       Alpha =  vec(repeat(permutedims(MLMNet_cv.alphas), lenVecLambdas)),
+                       AvgMSE = avg_mse,
+                       StdMSE = mseStd,
+                       AvgPercentZero =  avg_prop_zero);
+        
     return out_df
 end
 
@@ -138,7 +134,7 @@ test MSE across folds and the MSE one that is standard error greater.
 
 # Value
 
-DataFrame from mlmnet_cv_summary restricted to the lambdas that correspond to 
+DataFrame from mlmnet_cv_summary restricted to the lambdas and alphas that correspond to 
 the minimum average test MSE across folds and the MSE that is one standard 
 error greater. 
     

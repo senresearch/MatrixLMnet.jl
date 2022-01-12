@@ -1,11 +1,11 @@
 """
     coef(MLMNet)
 
-Extract all coefficients from MlmnetDeprecated object
+Extract all coefficients from Mlmnet object
 
 # Arguments 
 
-- MLMNet = MlmnetDeprecated object
+- MLMNet = Mlmnet object
 
 # Value
 
@@ -21,7 +21,7 @@ end
 """
     coef(MLMNet, lambda, alpha)
 
-Extract coefficients from MlmnetDeprecated object at a given lambda 
+Extract coefficients from Mlmnet object at a given lambda 
 
 # Arguments 
 
@@ -56,7 +56,7 @@ end
 """
     coef_3d(MLMNet)
 
-Extract coefficients from MlmnetDeprecated object as a flattened 2d array
+Extract coefficients from Mlmnet object as a flattened 2d array
 
 # Arguments 
 
@@ -89,7 +89,7 @@ end
 """
     predict(MLMNet, lambda, alpha, newPredictors)
 
-Calculate new predictions based on MlmnetDeprecated object and given a lambda 
+Calculate new predictions based on Mlmnet object and given a lambda 
 
 # Arguments 
 
@@ -144,7 +144,7 @@ end
 """
     predict(MLMNet, newPredictors)
 
-Calculate new predictions based on MlmnetDeprecated object
+Calculate new predictions based on Mlmnet object
 
 # Arguments 
 
@@ -177,7 +177,7 @@ end
 """
     fitted(MLMNet, lambda, alpha)
 
-Calculate fitted values of an MlmnetDeprecated object, given a lambda 
+Calculate fitted values of an Mlmnet object, given a lambda 
 
 # Arguments 
 
