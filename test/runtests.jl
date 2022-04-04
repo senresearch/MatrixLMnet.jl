@@ -6,4 +6,5 @@ using Test
     include("mlmnetTests.jl")
     include("mlmnetCvTests.jl")
     include("summaryCvTests.jl")
+    include("mlmnetBICTests.jl")
 end

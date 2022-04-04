@@ -116,7 +116,7 @@ function mlmnet_cv_summary(MLMNet_cv::Mlmnet_cv)
                        Alpha =  vec(repeat(permutedims(MLMNet_cv.alphas), lenVecLambdas)),
                        AvgMSE = avg_mse,
                        StdMSE = mseStd,
-                       AvgPercentZero =  avg_prop_zero);
+                       AvgPropZero =  avg_prop_zero);
         
     return out_df
 end
@@ -166,7 +166,7 @@ function lambda_min(MLMNet_cv::Mlmnet_cv)
                 prop_zeroMean[min1StdErrIdx, min1StdErrIdy])
     out = DataFrame(vcat(out, out2), :auto)
 
-    colnames = ["Lambda", "Alpha", "AvgMSE", "AvgPercentZero"];
+    colnames = ["Lambda", "Alpha", "AvgMSE", "AvgPropZero"];
     rename!(out, Symbol.(colnames))
 
     # Add names first column
