@@ -2,7 +2,7 @@
 # Library #
 ###########
 # using Random
-using MatrixLMnet, Distributions
+using MatrixLMnet, Distributions, LinearAlgebra
 using Helium
 using Test
 
@@ -83,13 +83,13 @@ end
 # TEST BIC Validation - Estimation #
 ####################################
 
-est = mlmnet(dat, lambdas,alphas; method = "fista_bt", hasXIntercept = false, hasZIntercept=false, isVerbose = false);
+est = mlmnet(dat, λ, α; method = "fista_bt", hasXIntercept = false, hasZIntercept=false, isVerbose = false);
 
 #############################
 # TEST BIC Validation - BIC #
 #############################
 
-est_BIC =  mlmnet_bic(dat, lambdas, alphas; method = "fista_bt", hasXIntercept = false, hasZIntercept=false, isVerbose = false);
+est_BIC =  mlmnet_bic(dat, λ, α; method = "fista_bt", hasXIntercept = false, hasZIntercept=false, isVerbose = false);
 
 df_BIC = mlmnet_bic_summary(est_BIC);
 
