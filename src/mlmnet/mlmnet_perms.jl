@@ -1,14 +1,15 @@
 """
-    mlmnet_perms(data, lambdas, alphas;
-                  method = "ista", isNaive =false,
-                  permFun = shuffle_rows,
-                  hasXIntercept=true, hasZIntercept=true, 
-                  toXReg=trues(data.p), 
-                  toZReg=trues(data.q),     
-                  toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
-                  toNormalize=true, isVerbose=true, 
-                  stepsize=0.01, setStepsize=true, 
-                  funArgs...)
+    mlmnet_perms(data::RawData, 
+                      lambdas::AbstractArray{Float64,1}, alphas::AbstractArray{Float64,1};
+                      method::String = "ista", isNaive::Bool=false, 
+                      permFun::Function=shuffle_rows, 
+                      hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                      toXReg::BitArray{1}=trues(data.p), 
+                      toZReg::BitArray{1}=trues(data.q), 
+                      toXInterceptReg::Bool=false, 
+                      toZInterceptReg::Bool=false, 
+                      toNormalize::Bool=true, isVerbose::Bool=true, 
+                      stepsize::Float64=0.01, setStepsize=true, funArgs...)
 
 Permutes response matrix Y in RawData object and then calls the mlmnet core 
 function. 
@@ -105,16 +106,17 @@ end
 
 
 """
-mlmnet_perms(data, lambdas;
-             method = "ista", isNaive =false,
-             permFun = shuffle_rows,
-             hasXIntercept=true, hasZIntercept=true, 
-             toXReg=trues(data.p), 
-             toZReg=trues(data.q),     
-             toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
-             toNormalize=true, isVerbose=true, 
-             stepsize=0.01, setStepsize=true, 
-             funArgs...)
+    mlmnet_perms(data::RawData, 
+                      lambdas::AbstractArray{Float64,1};
+                      method::String = "ista", isNaive::Bool=false, 
+                      permFun::Function=shuffle_rows, 
+                      hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                      toXReg::BitArray{1}=trues(data.p), 
+                      toZReg::BitArray{1}=trues(data.q), 
+                      toXInterceptReg::Bool=false, 
+                      toZInterceptReg::Bool=false, 
+                      toNormalize::Bool=true, isVerbose::Bool=true, 
+                      stepsize::Float64=0.01, setStepsize=true, funArgs...)
 
 """
 

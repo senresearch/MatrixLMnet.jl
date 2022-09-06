@@ -1,5 +1,9 @@
 """
-    inner_update_cd!(i, j, B, resid, X, Z, norms, lambda, reg)
+    inner_update_cd!(i::Int64, j::Int64, B::AbstractArray{Float64,2}, 
+                          resid::AbstractArray{Float64,2}, 
+                          X::AbstractArray{Float64,2}, 
+                          Z::AbstractArray{Float64,2}, 
+                          norms::Nothing, lambda::Float64, reg::BitArray{2})
 
 Updates a single coefficient estimate in place (to be called by 
 `update_cd_cyclic!`, `update_cd_random!`, `update_cd_active_cyclic!`, or 
@@ -48,7 +52,12 @@ end
 
 
 """
-    inner_update_cd!(i, j, B, resid, X, Z, norms, lambda, reg)
+    inner_update_cd!(i::Int64, j::Int64, B::AbstractArray{Float64,2}, 
+                          resid::AbstractArray{Float64,2},
+                          X::AbstractArray{Float64,2}, 
+                          Z::AbstractArray{Float64,2}, 
+                          norms::AbstractArray{Float64,2}, lambda::Float64, 
+                          reg::BitArray{2})
 
 Updates a single coefficient estimate in place (to be called by 
 `update_cd_cyclic!`, `update_cd_random!`, `update_cd_active_cyclic!`, or 
@@ -99,7 +108,11 @@ end
 
 
 """
-    update_cd_cyclic!(B, resid, X, Z, norms, lambda, reg)
+    update_cd_cyclic!(B::AbstractArray{Float64,2}, 
+                           resid::AbstractArray{Float64,2}, 
+                           X::AbstractArray{Float64,2}, 
+                           Z::AbstractArray{Float64,2}, 
+                           norms, lambda::Float64, reg::BitArray{2})
 
 Cyclically updates coefficients in place for each coordinate descent iteration.
 
@@ -136,7 +149,11 @@ end
 
 
 """
-    update_cd_random!(B, resid, X, Z, norms, lambda, reg)
+    update_cd_random!(B::AbstractArray{Float64,2}, 
+                           resid::AbstractArray{Float64,2}, 
+                           X::AbstractArray{Float64,2}, 
+                           Z::AbstractArray{Float64,2}, 
+                           norms, lambda::Float64, reg::BitArray{2})
 
 Randomly updates coefficients in place for each coordinate descent iteration.
 
@@ -177,8 +194,15 @@ end
 
 
 """
-    update_cd_active_cyclic!(B, resid, X, Z, norms, lambda, reg, nonreg_idx, 
-                             active_idx)
+    update_cd_active_cyclic!(B::AbstractArray{Float64,2}, 
+                                  resid::AbstractArray{Float64,2},
+                                  X::AbstractArray{Float64,2}, 
+                                  Z::AbstractArray{Float64,2}, 
+                                  norms, lambda::Float64, reg::BitArray{2}, 
+                                  nonreg_idx::Tuple{AbstractArray{Int64,1},
+                                                    AbstractArray{Int64,1}}, 
+                                  active_idx::Tuple{AbstractArray{Int64,1},
+                                                    AbstractArray{Int64,1}})
 
 Cyclically updates active set of coefficients in place for each coordinate 
 descent iteration.
@@ -236,8 +260,15 @@ end
 
 
 """
-    update_cd_active_random!(B, resid, X, Z, norms, lambda, reg, nonreg_idx, 
-                             active_idx)
+    update_cd_active_random!(B::AbstractArray{Float64,2}, 
+                                  resid::AbstractArray{Float64,2},
+                                  X::AbstractArray{Float64,2}, 
+                                  Z::AbstractArray{Float64,2}, 
+                                  norms, lambda::Float64, reg::BitArray{2}, 
+                                  nonreg_idx::Tuple{AbstractArray{Int64,1},
+                                                    AbstractArray{Int64,1}}, 
+                                  active_idx::Tuple{AbstractArray{Int64,1},
+                                                    AbstractArray{Int64,1}})
 
 Randomly updates active set of coefficients in place for each coordinate 
 descent iteration.
@@ -288,8 +319,14 @@ end
 
 
 """
-    cd!(X, Y, Z, lambda, B, regXidx, regZidx, reg, norms; 
-        isVerbose, stepsize, isRandom, thresh, maxiter)
+    cd!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2}, 
+             Z::AbstractArray{Float64,2}, lambda::Float64, alpha::Float64,
+             B::AbstractArray{Float64,2}, 
+             regXidx::AbstractArray{Int64,1}, 
+             regZidx::AbstractArray{Int64,1}, reg::BitArray{2}, norms; 
+             isVerbose::Bool=true, stepsize::Float64=0.01, 
+             isRandom::Bool=true, thresh::Float64=10.0^(-7), 
+             maxiter::Int=10^10)
 
 Performs coordinate descent using either random or cyclic updates. Does NOT 
 take advantage of the active set; see `cd_active!`. 
@@ -392,8 +429,14 @@ end
 
 
 """
-    cd_active!(X, Y, Z, lambda, alpha, B, regXidx, regZidx, reg, norms; 
-               isVerbose, stepsize, isRandom, thresh, maxiter)
+    cd_active!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2}, 
+                    Z::AbstractArray{Float64,2}, lambda::Float64, alpha::Float64,
+                    B::AbstractArray{Float64,2}, 
+                    regXidx::AbstractArray{Int64,1}, 
+                    regZidx::AbstractArray{Int64,1}, reg::BitArray{2}, norms; 
+                    isVerbose::Bool=true, stepsize::Float64=0.01, 
+                    isRandom::Bool=true, thresh::Float64=10.0^(-7), 
+                    maxiter::Int=10^10)
 
 Performs coordinate descent, taking advantage of the active set, using either 
 random or cyclic updates. 

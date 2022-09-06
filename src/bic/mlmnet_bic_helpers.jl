@@ -1,6 +1,6 @@
 
 """
-calc_bic(MLMNet)
+calc_bic(MLMNet::Mlmnet)
 
 Calculates BIC for each model according to the lambda-alpha 
 pair parameter. 
@@ -37,7 +37,7 @@ end
 
 
 """
-        calc_mse(MLMNet)
+        calc_mse(MLMNet::Mlmnet)
 
 Calculates test MSE for each pair of lambda-alpha. 
 
@@ -71,7 +71,7 @@ end
 
 
 """
-    calc_prop_zero(MLMNet; dig)
+    calc_prop_zero(MLMNet::Mlmnet; dig::Int64=12)
 
 Calculates proportion of zero interaction coefficients for each of the CV 
 folds for each lambda. 
