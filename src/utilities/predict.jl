@@ -1,5 +1,5 @@
 """
-    coef(MLMNet)
+    coef(MLMNet::Mlmnet)
 
 Extract all coefficients from Mlmnet object
 
@@ -19,7 +19,7 @@ end
 
 
 """
-    coef(MLMNet, lambda, alpha)
+    coef(MLMNet::Mlmnet, lambda::Float64, alpha::Float64)
 
 Extract coefficients from Mlmnet object at a given lambda 
 
@@ -54,7 +54,7 @@ end
 
 
 """
-    coef_3d(MLMNet)
+    coef_3d(MLMNet::Mlmnet)
 
 Extract coefficients from Mlmnet object as a flattened 2d array
 
@@ -87,7 +87,8 @@ end
 
 
 """
-    predict(MLMNet, lambda, alpha, newPredictors)
+    predict(MLMNet::Mlmnet, lambda::Float64, alpha::Float64,
+                 newPredictors::Predictors=MLMNet.data.predictors)
 
 Calculate new predictions based on Mlmnet object and given a lambda 
 
@@ -142,7 +143,7 @@ end
 
 
 """
-    predict(MLMNet, newPredictors)
+    predict(MLMNet::Mlmnet, newPredictors::Predictors=MLMNet.data.predictors)
 
 Calculate new predictions based on Mlmnet object
 
@@ -175,7 +176,7 @@ end
 
 
 """
-    fitted(MLMNet, lambda, alpha)
+    fitted(MLMNet::Mlmnet, lambda::Float64, alpha::Float64)
 
 Calculate fitted values of an Mlmnet object, given a lambda 
 
@@ -198,7 +199,7 @@ end
 
 
 """
-    fitted(MLMNet)
+    fitted(MLMNet::Mlmnet)
 
 Calculate fitted values of an Mlmnet object
 
@@ -218,7 +219,7 @@ end
 
 
 """
-    resid(MLMNet, lambda, alpha, newData)
+    resid(MLMNet::Mlmnet, lambda::Float64, alpha::Float64, newData::RawData=MLMNet.data)
 
 Calculate residuals of an MLMNet object, given a lambda 
 
@@ -277,7 +278,7 @@ end
 
 
 """
-    resid(MLMNet, newData)
+    resid(MLMNet::Mlmnet, newData::RawData=MLMNet.data)
 
 Calculate residuals of an MLMNet object
 

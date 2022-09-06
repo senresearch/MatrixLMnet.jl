@@ -1,5 +1,5 @@
 """
-    Mlmnet(B, lambdas, alphas, data)
+    Mlmnet(B::Array{Float64, 4}, lambdas::Array{Float64, 1}, alphas::Array{Float64, 1}, data::RawData)
 
 Type for storing the results of an mlmnet (Elastic net) model fit
 
@@ -19,8 +19,15 @@ mutable struct Mlmnet
 end
 
 """
-    mlmnet_pathwise(fun, X, Y, Z, lambdas, alphas, regXidx, regZidx, 
-                    reg, norms; isVerbose, stepsize, funArgs...)
+    mlmnet_pathwise(fun::Function, X::AbstractArray{Float64,2}, 
+                         Y::AbstractArray{Float64,2}, 
+                         Z::AbstractArray{Float64,2}, 
+                         lambdas::AbstractArray{Float64,1},
+                         alphas::AbstractArray{Float64, 1},  
+                         regXidx::AbstractArray{Int64,1}, 
+                         regZidx::AbstractArray{Int64,1}, 
+                         reg::BitArray{2}, norms; isVerbose::Bool=true, 
+                         stepsize::Float64=0.01, funArgs...)
 
 Performs the supplied method on two descending lists of lambdas (for l1 and l2) 
 using ``warm starts''. 
@@ -145,16 +152,17 @@ function mlmnet_pathwise(fun::Function, X::AbstractArray{Float64,2},
 end
 
 """
-    mlmnet(data, lambdas, alphas;
-           method = "ista", 
-           isNaive =false,
-           hasXIntercept=true, hasZIntercept=true, 
-           toXReg=trues(data.p), 
-           toZReg=trues(data.q),     
-           toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
-           toNormalize=true, isVerbose=true, 
-           stepsize=0.01, setStepsize=true, 
-           funArgs...)
+    mlmnet(data::RawData, 
+                lambdas::AbstractArray{Float64,1}, alphas::AbstractArray{Float64,1};
+                method::String = "ista", 
+                isNaive::Bool=false,
+                hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                toXReg::BitArray{1}=trues(data.p), 
+                toZReg::BitArray{1}=trues(data.q),     
+                toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
+                toNormalize::Bool=true, isVerbose::Bool=true, 
+                stepsize::Float64=0.01, setStepsize::Bool=true, 
+                funArgs...)
     
 
 Centers and normalizes X and Z predictor matrices, calculates fixed step size, performs 
@@ -387,10 +395,17 @@ function mlmnet(data::RawData,
 
 
   """
-  mlmnet(data, lambdas; 
-         method, hasXIntercept, hasZIntercept, toXReg, toZReg, 
-         toXInterceptReg, toZInterceptReg, toNormalize, isVerbose, 
-         stepsize, setStepsize, funArgs...)
+      mlmnet(data::RawData, 
+              lambdas::AbstractArray{Float64,1};
+              method::String = "ista", 
+              isNaive::Bool=false,
+              hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+              toXReg::BitArray{1}=trues(data.p), 
+              toZReg::BitArray{1}=trues(data.q),     
+              toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
+              toNormalize::Bool=true, isVerbose::Bool=true, 
+              stepsize::Float64=0.01, setStepsize::Bool=true, 
+              funArgs...)
 
 """
 

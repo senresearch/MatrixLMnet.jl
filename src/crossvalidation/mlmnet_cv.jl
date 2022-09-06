@@ -1,5 +1,5 @@
 """
-    Mlmnet_cv(MLMNets, lambdas, alphas, data, rowFolds, colFolds)
+    Mlmnet_cv(MLMNets::Array{Mlmnet,1} , lambdas::Array{Float64,1}, alphas::Array{Float64,1}, data::RawData, rowFolds::Array{Array,1} , colFolds::Array{Array,1} )
 
 Type for storing the results of running cross-validation for `mlmnet`
 
@@ -35,15 +35,19 @@ end
 
 
 """
-    mlmnet_cv(data, lambdas, alphas, rowFolds, colFolds; 
-              method="ista", isNaive=false,
-              hasXIntercept=true, hasZIntercept=true, 
-              toXReg=trues(size(get_X(data), 2)), 
-              toZReg=trues(size(get_Z(data), 2)), 
-              toXInterceptReg=false, toZInterceptReg=false, 
-              toNormalize=true, isVerbose=true, 
-              stepsize=0.01, setStepsize=true, 
-              dig=12, funArgs...)
+    mlmnet_cvmlmnet_cv(data::RawData, 
+                   lambdas::AbstractArray{Float64,1},
+                   alphas::AbstractArray{Float64,1}, 
+                   rowFolds::Array{Array{Int64,1},1}, 
+                   colFolds::Array{Array{Int64,1},1}; 
+                   method::String="ista", isNaive::Bool=false,
+                   hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                   toXReg::BitArray{1}=trues(size(get_X(data), 2)), 
+                   toZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
+                   toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
+                   toNormalize::Bool=true, isVerbose::Bool=true, 
+                   stepsize::Float64=0.01, setStepsize::Bool=true, 
+                   dig::Int64=12, funArgs...)
 
 Performs cross-validation for `mlmnet` using row and column folds from user 
 input. 
@@ -168,15 +172,18 @@ end
 
 
 """
-    mlmnet_cv(data, lambdas, alphas, rowFolds, nColFolds;
-    method="ista", isNaive=false, 
-    hasXIntercept=true, hasZIntercept=true, 
-    toXReg=trues(size(get_X(data), 2)), 
-    toZReg=trues(size(get_Z(data), 2)), 
-    toXInterceptReg=false, toZInterceptReg=false, 
-    toNormalize=true, isVerbose=true, 
-    stepsize=0.01, setStepsize=true, 
-    dig=12, funArgs...)
+    mlmnet_cv(data::RawData, 
+                   lambdas::AbstractArray{Float64,1}, 
+                   alphas::AbstractArray{Float64,1},
+                   rowFolds::Array{Array{Int64,1},1}, nColFolds::Int64;
+                   method::String="ista", isNaive::Bool=false, 
+                   hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                   toXReg::BitArray{1}=trues(size(get_X(data), 2)), 
+                   toZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
+                   toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
+                   toNormalize::Bool=true, isVerbose::Bool=true, 
+                   stepsize::Float64=0.01, setStepsize::Bool=true, 
+                   dig::Int64=12, funArgs...)
 
 Performs cross-validation for `mlmnet` using row folds from user input and 
 non-overlapping column folds randomly generated using a call to `make_folds`. 
@@ -266,15 +273,18 @@ end
 
 
 """
-    mlmnet_cv(data, lambdas, alphas, nRowFolds, colFolds; 
-              method="ista", isNaive=false,
-              hasXIntercept=true, hasZIntercept=true, 
-              toXReg=trues(size(get_X(data), 2)), 
-              toZReg=trues(size(get_Z(data), 2)), 
-              toXInterceptReg=false, toZInterceptReg=false, 
-              toNormalize=true, isVerbose=true, 
-              stepsize=0.01, setStepsize=true, 
-              dig=12, funArgs...)
+    mlmnet_cv(data::RawData, 
+                   lambdas::AbstractArray{Float64,1},
+                   alphas::AbstractArray{Float64,1}, 
+                   nRowFolds::Int64, colFolds::Array{Array{Int64,1},1}; 
+                   method::String="ista", isNaive::Bool=false,
+                   hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                   toXReg::BitArray{1}=trues(size(get_X(data), 2)), 
+                   toZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
+                   toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
+                   toNormalize::Bool=true, isVerbose::Bool=true, 
+                   stepsize::Float64=0.01, setStepsize::Bool=true, 
+                   dig::Int64=12, funArgs...)
 
 Performs cross-validation for `mlmnet` using non-overlapping row folds 
 randomly generated using a call to `make_folds` and column folds from user 
@@ -364,15 +374,18 @@ end
 
 
 """
-    mlmnet_cv(data, lambdas, alphas, nRowFolds=10, nColFolds=10;
-    method="ista", isNaive=false,
-    hasXIntercept=true, hasZIntercept=true, 
-    toXReg=trues(size(get_X(data), 2)), 
-    toZReg=trues(size(get_Z(data), 2)), 
-    toXInterceptReg=false, toZInterceptReg=false, 
-    toNormalize=true, isVerbose=true, 
-    stepsize=0.01, setStepsize=true, 
-    dig=12, funArgs...)
+    mlmnet_cv(data::RawData, 
+                   lambdas::Array{Float64,1}, alphas::Array{Float64,1},
+                   nRowFolds::Int64=10, nColFolds::Int64=10;
+                   method::String="ista", 
+                   isNaive::Bool=false,
+                   hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                   toXReg::BitArray{1}=trues(size(get_X(data), 2)), 
+                   toZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
+                   toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
+                   toNormalize::Bool=true, isVerbose::Bool=true, 
+                   stepsize::Float64=0.01, setStepsize::Bool=true, 
+                   dig::Int64=12, funArgs...)
 
 Performs cross-validation for `mlmnet` using non-overlapping row and column 
 folds randomly generated using calls to `make_folds`. Calls the base 
@@ -478,15 +491,18 @@ end
 
 
 """
-    mlmnet_cv(data, lambdas, nRowFolds=10, nColFolds=10;
-              method="ista", isNaive=false,
-              hasXIntercept=true, hasZIntercept=true, 
-              toXReg=trues(size(get_X(data), 2)), 
-              toZReg=trues(size(get_Z(data), 2)), 
-              toXInterceptReg=false, toZInterceptReg=false, 
-              toNormalize=true, isVerbose=true, 
-              stepsize=0.01, setStepsize=true, 
-              dig=12, funArgs...)
+    mlmnet_cv(data::RawData, 
+                      lambdas::Array{Float64,1},
+                      nRowFolds::Int64=10, nColFolds::Int64=10;
+                      method::String="ista", 
+                      isNaive::Bool=false,
+                      hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                      toXReg::BitArray{1}=trues(size(get_X(data), 2)), 
+                      toZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
+                      toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
+                      toNormalize::Bool=true, isVerbose::Bool=true, 
+                      stepsize::Float64=0.01, setStepsize::Bool=true, 
+                      dig::Int64=12, funArgs...)
 
 Performs cross-validation for `mlmnet` using non-overlapping row and column 
 folds randomly generated using calls to `make_folds`. Calls the base 

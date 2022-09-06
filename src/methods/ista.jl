@@ -1,5 +1,13 @@
 """
-    update_istaNet!(B, resid, grad, X, Y, Z, norms, , reg, stepsize)
+    update_istaNet!(B::AbstractArray{Float64,2}, 
+                      resid::AbstractArray{Float64,2}, 
+                      grad::AbstractArray{Float64,2}, 
+                      X::AbstractArray{Float64,2}, 
+                      Y::AbstractArray{Float64,2}, 
+                      Z::AbstractArray{Float64,2}, 
+                      norms::Nothing, lambdaL1::Float64, lambdaL2::Float64, 
+                      reg::BitArray{2}, 
+                      stepsize::AbstractArray{Float64,1})
 
 Updates coefficient estimates in place for each ISTA iteration based on the Elastic-net 
 solution, when `X` and `Z` are both standardized. 
@@ -60,7 +68,15 @@ end
 
 
 """
-    update_istaNet!(B, resid, grad, X, Y, Z, norms, , reg, stepsize)
+    update_istaNet!(B::AbstractArray{Float64,2}, 
+                      resid::AbstractArray{Float64,2}, 
+                      grad::AbstractArray{Float64,2}, 
+                      X::AbstractArray{Float64,2}, 
+                      Y::AbstractArray{Float64,2}, 
+                      Z::AbstractArray{Float64,2}, 
+                      norms::AbstractArray{Float64,2}, 
+                      lambdaL1::Float64, lambdaL2::Float64, reg::BitArray{2}, 
+                      stepsize::AbstractArray{Float64,1}) 
 
 Updates coefficient estimates in place for each ISTA iteration based on the Elastic-net
 solution, when `X` and `Z` are not standardized. 
@@ -122,8 +138,13 @@ end
 
 
 """
-    istaNet!(X, Y, Z, lambda, alpha, B, regXidx, regZidx, reg, norms; 
-          isVerbose, stepsize, thresh, maxiter)
+    istaNet!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2}, 
+               Z::AbstractArray{Float64,2}, lambda::Float64, alpha::Float64, 
+               B::AbstractArray{Float64,2}, 
+               regXidx::AbstractArray{Int64,1}, 
+               regZidx::AbstractArray{Int64,1}, reg::BitArray{2}, norms; 
+               isVerbose::Bool=true, stepsize::Float64=0.01, 
+               thresh::Float64=10.0^(-7), maxiter::Int=10^10)
 
 Performs the Elastic-net version ISTA with fixed step size.
 

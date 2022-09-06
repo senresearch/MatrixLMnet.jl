@@ -1,6 +1,17 @@
 """
-    update_fista!(B, B_prev, A, resid, resid_B, grad, X, Y, Z, norms, lambda, 
-                  reg, iter, stepsize)
+    update_fista!(B::AbstractArray{Float64,2}, 
+                       B_prev::AbstractArray{Float64,2}, 
+                       A::AbstractArray{Float64,2}, 
+                       resid::AbstractArray{Float64,2}, 
+                       resid_B::AbstractArray{Float64,2}, 
+                       grad::AbstractArray{Float64,2}, 
+                       X::AbstractArray{Float64,2}, 
+                       Y::AbstractArray{Float64,2}, 
+                       Z::AbstractArray{Float64,2}, 
+                       norms::Nothing, lambdaL1::Float64, lambdaL2::Float64,
+                       reg::BitArray{2}, 
+                       iter::AbstractArray{Int64,1}, 
+                       stepsize::AbstractArray{Float64,1})
 
 Updates coefficient estimates in place for each FISTA iteration based on the Elastic-net
 silution, when `X` and `Z` are both standardized. 
@@ -78,8 +89,20 @@ end
 
 
 """
-    update_fista!(B, B_prev, A, resid, resid_B, grad, X, Y, Z, norms, lambda, 
-                  reg, iter, stepsize)
+    update_fista!(B::AbstractArray{Float64,2}, 
+                       B_prev::AbstractArray{Float64,2}, 
+                       A::AbstractArray{Float64,2}, 
+                       resid::AbstractArray{Float64,2}, 
+                       resid_B::AbstractArray{Float64,2}, 
+                       grad::AbstractArray{Float64,2}, 
+                       X::AbstractArray{Float64,2}, 
+                       Y::AbstractArray{Float64,2}, 
+                       Z::AbstractArray{Float64,2}, 
+                       norms::AbstractArray{Float64,2}, 
+                       lambdaL1::Float64, lambdaL2::Float64, 
+                       reg::BitArray{2}, 
+                       iter::AbstractArray{Int64,1}, 
+                       stepsize::AbstractArray{Float64,1})
 
 Updates coefficient estimates in place for each FISTA iteration when `X` and 
 `Z` are not standardized. 
@@ -159,8 +182,14 @@ end
 
 
 """
-    fista!(X, Y, Z, lambda, B, regXidx, regZidx, reg, norms; 
-           isVerbose, stepsize, thresh, maxiter)
+    fista!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2}, 
+                Z::AbstractArray{Float64,2}, 
+                lambda::Float64, alpha::Float64,
+                B::AbstractArray{Float64,2}, 
+                regXidx::AbstractArray{Int64,1}, 
+                regZidx::AbstractArray{Int64,1}, reg::BitArray{2}, norms; 
+                isVerbose::Bool=true, stepsize::Float64=0.01, 
+                thresh::Float64=10.0^(-7), maxiter::Int=10^10)
 
 Performs the Elastic-net version FISTA with fixed step size.
 
