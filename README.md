@@ -85,7 +85,7 @@ L<sub>1</sub> and L<sub>2</sub>-penalized estimates for matrix linear models can
 An object of type `Mlmnet` will be returned, with variables for the penalized coefficient estimates (`B`) along with the lambda and alpha penalty values used (`lambdas`, `alphas`). By default, `mlmnet` estimates both row and column main effects (X and Z intercepts), but this behavior can be suppressed by setting `hasXIntercept=false` and/or `hasZIntercept=false`; the intercepts will be regularized unless `toXInterceptReg=false` and/or `toZInterceptReg=false`. Individual `X` (row) and `Z` (column) effects can be left unregularized by manually passing in 1d boolean arrays of length `p` and `q` to indicate which effects should be regularized (`true`) or not (`false`) into `toXReg` and `toZReg`. By default, `mlmnet` centers and normalizes the columns of `X` and `Z` to have mean 0 and norm 1 (`toNormalize=true`). Additional keyword arguments include `isVerbose`, which controls message printing; `thresh`, the threshold at which the coefficients are considered to have converged; and `maxiter`, the maximum number of iterations. 
 
 ```
-est = mlmnet(dat, lambdas, alphas; method = "fista_bt")
+est = mlmnet(dat, lambdas, alphas, method = "fista_bt")
 ```
 If `alphas` argument is omitted, a Lasso regression will be applied which is equivalent to `alphas = [1]`.  
 
