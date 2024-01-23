@@ -1,0 +1,9 @@
+[deps]
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+Helium = "3f79f04f-7cac-48b4-bde1-3ad54d8f74fa"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[compat]
+Distributions = "0.25"
+Helium = "0.2"

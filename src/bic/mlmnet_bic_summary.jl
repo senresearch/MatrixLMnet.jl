@@ -2,7 +2,7 @@
 
 
 """
-    mlmnet_bic_summary(MLMNet_bic)
+    mlmnet_bic_summary(MLMNet_bic::Mlmnet_bic)
 	
 Summarizes results of BIC-validation by returning a table with: 
 

@@ -1,5 +1,5 @@
 """
-    make_folds(n, k, l)
+    make_folds(n::Int64, k::Int64=10, k2::Int64=k)
 
 Generate `k` non-overlapping folds. 
 
@@ -32,7 +32,8 @@ end
 
 
 """
-    make_folds_conds(conds, k, prop)
+    make_folds_conds(conds::AbstractArray{String,1}, 
+                         k::Int64=10, prop::Float64=1/k)
 
 Generate `k` folds for a set of conditions, making sure each level of each 
 condition is represented in each fold. 
@@ -87,7 +88,7 @@ end
 
 
 """
-    findnotin(a, b)
+    findnotin(a::AbstractArray{Int64,1}, b::AbstractArray{Int64,1})
 
 Returns elements of `b` that are not present in `a`. 
 
@@ -111,7 +112,11 @@ function findnotin(a::AbstractArray{Int64,1}, b::AbstractArray{Int64,1})
 end
 
 """
-        calc_mse(MLMNets, data, lambdas, alphas, rowFolds, colFolds)
+        calc_mse(MLMNets::AbstractArray{Mlmnet,1}, data::RawData, 
+                  lambdas::AbstractArray{Float64,1}, 
+                  alphas::AbstractArray{Float64,1},
+                  rowFolds::Array{Array{Int64,1},1}, 
+                  colFolds::Array{Array{Int64,1},1})
 
 Calculates test MSE for each of the CV folds for each lambda. 
 
@@ -175,7 +180,10 @@ end
 
 
 """
-    calc_prop_zero(MLMNets, lambdas, alphas, dig)
+    calc_prop_zero(MLMNets::AbstractArray{Mlmnet,1}, 
+                        lambdas::AbstractArray{Float64,1},
+                        alphas::AbstractArray{Float64,1}; 
+                        dig::Int64=12)
 
 Calculates proportion of zero interaction coefficients for each of the CV 
 folds for each lambda. 

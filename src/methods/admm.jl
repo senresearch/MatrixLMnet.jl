@@ -1,5 +1,5 @@
 """
-    proxNet1(v, lambda)
+    proxNet1(v::Float64, lambda::Float64)
 
 Proximal operator for the Elastic-net penalisation component updates in ADMM. 
 
@@ -21,7 +21,8 @@ function proxNet1(v::Float64, lambda::Float64)
 end
 
 """
-    proxNet2(v, rho, u, l)
+    proxNet2(v::Float64, rho::Float64, 
+             u::Float64, l::Float64)
 
 Proximal operator for the residual sum of squares component updates in ADMM. 
 
@@ -46,8 +47,24 @@ end
 
 
 """
-    update_admm!(B, B0, B2, resid, X, Y, Z, Qx, Qz, U, L, lambdaL1, lambdaL2, 
-                 regXidx, regZidx, rho, r, s, tau_incr, tau_decr, mu)
+    update_admm!update_admm!(B::AbstractArray{Float64,2}, 
+                      B0::AbstractArray{Float64,2}, 
+                      B2::AbstractArray{Float64,2}, 
+                      resid::AbstractArray{Float64,2}, 
+                      X::AbstractArray{Float64,2}, 
+                      Y::AbstractArray{Float64,2}, 
+                      Z::AbstractArray{Float64,2}, 
+                      Qx::AbstractArray{Float64,2}, 
+                      Qz::AbstractArray{Float64,2}, 
+                      U::AbstractArray{Float64,2}, 
+                      L::AbstractArray{Float64,2}, 
+                      lambdaL1::Float64, lambdaL2::Float64, 
+                      regXidx::AbstractArray{Int64,1}, 
+                      regZidx::AbstractArray{Int64,1}, 
+                      rho::AbstractArray{Float64,1}, 
+                      r::AbstractArray{Float64,2}, 
+                      s::AbstractArray{Float64,2}, 
+                      tau_incr::Float64, tau_decr::Float64, mu::Float64)
 
 Updates coefficient estimates in place for each ADMM iteration. 
 
@@ -150,9 +167,17 @@ end
 
 
 """
-    admm!(X, Y, Z, lambda, alpha, B, regXidx, regZidx, reg, norms, Qx, Qz, U, L; 
-          isVerbose, stepsize, rho, setRho, thresh, maxiter, 
-          tau_incr, tau_decr, mu)
+    admm!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2}, 
+               Z::AbstractArray{Float64,2}, lambda::Float64, alpha::Float64,
+               B::AbstractArray{Float64,2}, 
+               regXidx::AbstractArray{Int64,1}, 
+               regZidx::AbstractArray{Int64,1}, reg::BitArray{2}, norms, 
+               Qx::AbstractArray{Float64,2}, Qz::AbstractArray{Float64,2}, 
+               U::AbstractArray{Float64,2}, L::AbstractArray{Float64,2}; 
+               isVerbose::Bool=true, stepsize::Float64=0.01, 
+               rho::Float64=1.0, setRho::Bool=true, 
+               thresh::Float64=10.0^(-7), maxiter::Int=10^10, 
+               tau_incr::Float64=2.0, tau_decr::Float64=2.0, mu::Float64=10.0)
 
 Performs ADMM. 
 

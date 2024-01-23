@@ -1,5 +1,5 @@
 """
-    normalize!(A, hasIntercept)
+    normalize!(A::AbstractArray{Float64,2}, hasIntercept::Bool)
 
 Centers and normalizes the columns of A in place
 
@@ -38,7 +38,14 @@ end
 
 
 """
-    backtransform!(B, meansX, meansZ, normsX, normsZ, Y, Xold, Zold)
+    backtransform!(B::AbstractArray{Float64,2}, 
+                        meansX::AbstractArray{Float64,2}, 
+                        meansZ::AbstractArray{Float64,2}, 
+                        normsX::AbstractArray{Float64,2}, 
+                        normsZ::AbstractArray{Float64,2}, 
+                        Y::AbstractArray{Float64,2}, 
+                        Xold::AbstractArray{Float64,2}, 
+                        Zold::AbstractArray{Float64,2})
 
 Back-transform coefficient estimates B in place if X and Z were standardized 
 prior to the estimation-- when both X and Z include intercept columns. 
@@ -87,8 +94,12 @@ end
 
 
 """
-    backtransform!(B, hasXIntercept, hasZIntercept, 
-	               meansX, meansZ, normsX, normsZ)
+    backtransform!(B::AbstractArray{Float64,2}, 
+                        hasXIntercept::Bool, hasZIntercept::Bool, 
+                        meansX::AbstractArray{Float64,2}, 
+                        meansZ::AbstractArray{Float64,2}, 
+                        normsX::AbstractArray{Float64,2}, 
+                        normsZ::AbstractArray{Float64,2})
 
 Back-transform coefficient estimates B in place if X and Z were standardized 
 prior to the estimation-- when not including intercept columns for either X 
@@ -145,7 +156,14 @@ end
 
 
 """
-    backtransform!(B, meansX, meansZ, normsX, normsZ, Y, Xold, Zold)
+    backtransform!(B::AbstractArray{Float64,4}, 
+                        meansX::AbstractArray{Float64,2}, 
+                        meansZ::AbstractArray{Float64,2}, 
+                        normsX::AbstractArray{Float64,2}, 
+                        normsZ::AbstractArray{Float64,2}, 
+                        Y::AbstractArray{Float64,2}, 
+                        Xold::AbstractArray{Float64,2}, 
+                        Zold::AbstractArray{Float64,2})
 
 Back-transform coefficient estimates B in place if X and Z were standardized 
 prior to the estimation-- when both X and Z include intercept columns. 
@@ -208,8 +226,12 @@ end
 
 
 """
-    backtransform!(B, hasXIntercept, hasZIntercept, 
-                   meansX, meansZ, normsX, normsZ)
+    backtransform!(B::AbstractArray{Float64,4}, 
+                        hasXIntercept::Bool, hasZIntercept::Bool, 
+                        meansX::AbstractArray{Float64,2}, 
+                        meansZ::AbstractArray{Float64,2}, 
+                        normsX::AbstractArray{Float64,2}, 
+                        normsZ::AbstractArray{Float64,2})
 
 Back-transform coefficient estimates B in place if X and Z were standardized 
 prior to the estimation-- when not including intercept columns for either X 

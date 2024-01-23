@@ -2,7 +2,10 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: 
+      - main
+      - dev
+      - testing
 jobs:
   test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}

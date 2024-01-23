@@ -1,5 +1,14 @@
 """
-    update_fista2!(B, A, resid_B, grad, X, Y, Z, norms, lambdaL1, lambdaL2, reg, stepsize)
+    update_fista2!(B::AbstractArray{Float64,2}, 
+                        A::AbstractArray{Float64,2}, 
+                        resid_B::AbstractArray{Float64,2}, 
+                        grad::AbstractArray{Float64,2}, 
+                        X::AbstractArray{Float64,2}, 
+                        Y::AbstractArray{Float64,2}, 
+                        Z::AbstractArray{Float64,2}, 
+                        norms::Nothing, lambdaL1::Float64, lambdaL2::Float64,
+                        reg::BitArray{2}, 
+                        stepsize::AbstractArray{Float64,1})
 
 Updates coefficient estimates in place for each FISTA iteration when `X` and 
 `Z` are both standardized, but without updating the extrapolated coefficients. 
@@ -55,7 +64,17 @@ end
 
 
 """
-    update_fista2!(B, A, resid_B, grad, X, Y, Z, norms, lambda, reg, stepsize)
+    update_fista2!(B::AbstractArray{Float64,2}, 
+                        A::AbstractArray{Float64,2}, 
+                        resid_B::AbstractArray{Float64,2}, 
+                        grad::AbstractArray{Float64,2}, 
+                        X::AbstractArray{Float64,2}, 
+                        Y::AbstractArray{Float64,2}, 
+                        Z::AbstractArray{Float64,2}, 
+                        norms::AbstractArray{Float64,2}, 
+                        lambdaL1::Float64, lambdaL2::Float64, 
+                        reg::BitArray{2}, 
+                        stepsize::AbstractArray{Float64,1})
 
 Updates coefficient estimates in place for each FISTA iteration when `X` and 
 `Z` are not standardized, but without updating the extrapolated coefficients. 
@@ -112,8 +131,20 @@ end
 
 
 """
-    outer_update_fista_bt!(B, B_prev, A, resid, resid_B, grad, X, Y, Z, 
-                           norms, lambda, reg, iter, stepsize, gamma)
+    outer_update_fista_bt!(B::AbstractArray{Float64,2}, 
+                                B_prev::AbstractArray{Float64,2}, 
+                                A::AbstractArray{Float64,2}, 
+                                resid::AbstractArray{Float64,2}, 
+                                resid_B::AbstractArray{Float64,2}, 
+                                grad::AbstractArray{Float64,2}, 
+                                X::AbstractArray{Float64,2}, 
+                                Y::AbstractArray{Float64,2}, 
+                                Z::AbstractArray{Float64,2}, 
+                                norms, lambdaL1::Float64, lambdaL2::Float64,
+                                reg::BitArray{2}, 
+                                iter::AbstractArray{Int64,1}, 
+                                stepsize::AbstractArray{Float64,1}, 
+                                gamma::Float64)
 
 Uses backtracking to update step size for FISTA. 
 
@@ -215,8 +246,14 @@ end
 
 
 """
-    fista_bt!(X, Y, Z, lambda, B, regXidx, regZidx, reg, norms; 
-              isVerbose, stepsize, gamma, thresh, maxiter)
+    fista_bt!(X::AbstractArray{Float64,2}, Y::AbstractArray{Float64,2}, 
+                   Z::AbstractArray{Float64,2}, lambda::Float64, alpha::Float64,
+                   B::AbstractArray{Float64,2}, 
+                   regXidx::AbstractArray{Int64,1}, 
+                   regZidx::AbstractArray{Int64,1}, reg::BitArray{2}, norms; 
+                   isVerbose::Bool=true, stepsize::Float64=0.01, 
+                   gamma::Float64=0.5, thresh::Float64=10.0^(-7), 
+                   maxiter::Int=10^10)
 
 Performs FISTA with backtracking. 
 

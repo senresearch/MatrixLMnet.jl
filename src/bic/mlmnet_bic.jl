@@ -27,15 +27,17 @@ mutable struct Mlmnet_bic
 end
 
 """
-    mlmnet_bic(data, lambdas, alphas, rowFolds, colFolds; 
-              method="ista", isNaive=false,
-              hasXIntercept=true, hasZIntercept=true, 
-              toXReg=trues(size(get_X(data), 2)), 
-              toZReg=trues(size(get_Z(data), 2)), 
-              toXInterceptReg=false, toZInterceptReg=false, 
-              toNormalize=true, isVerbose=true, 
-              stepsize=0.01, setStepsize=true, 
-              dig=12, funArgs...)
+    mlmnet_bic(data::RawData, 
+                   lambdas::AbstractArray{Float64,1},
+                   alphas::AbstractArray{Float64,1}; 
+                   method::String="ista", isNaive::Bool=false,
+                   hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                   toXReg::BitArray{1}=trues(size(get_X(data), 2)), 
+                   toZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
+                   toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
+                   toNormalize::Bool=true, isVerbose::Bool=true, 
+                   stepsize::Float64=0.01, setStepsize::Bool=true, 
+                   dig::Int64=12, funArgs...)
 
 Performs BIC validation for `mlmnet`. 
 
