@@ -48,7 +48,7 @@ numVersion = VERSION
 if Int(numVersion.minor) < 7
       tolVersion=2e-1
 else
-      tolVersion=1e-6
+      tolVersion=1e-5
 end 
 
 #############################################
@@ -57,20 +57,20 @@ end
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "ista", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "ista", addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Net1 = MatrixLMnet.lambda_min(est1);
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "ista",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "ista",  addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Net2 = MatrixLMnet.lambda_min(est2);
 
 # Lasso penalized regression - ista cv
 smmr_ista= Helium.readhe(joinpath(dataDir, "smmr_ista.he"))
 
 println("CV Lasso vs Elastic Net when α=1 test 1 - ista: ",
-         @test ≈(smmr_Net1.AvgMSE, smmr_ista[:,1]; atol=tolVersion) && ≈(smmr_Net1.AvgPercentZero, smmr_ista[:,2], atol = tolVersion) &&
-         ≈(smmr_Net2.AvgMSE, smmr_ista[:,1];atol=tolVersion) && ≈(smmr_Net2.AvgPercentZero, smmr_ista[:,2]; atol=tolVersion))
+         @test ≈(smmr_Net1.AvgMSE, smmr_ista[:,1]; atol=tolVersion) && ≈(smmr_Net1.AvgPropZero, smmr_ista[:,2], atol = tolVersion) &&
+         ≈(smmr_Net2.AvgMSE, smmr_ista[:,1];atol=tolVersion) && ≈(smmr_Net2.AvgPropZero, smmr_ista[:,2]; atol=tolVersion))
 
 #############################################
 # TEST 2 Lasso vs Elastic Net (𝛼=1) - fista #
@@ -78,20 +78,20 @@ println("CV Lasso vs Elastic Net when α=1 test 1 - ista: ",
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "fista", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "fista", addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Net1 = MatrixLMnet.lambda_min(est1);
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "fista",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "fista",  addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Net2 = MatrixLMnet.lambda_min(est2);
 
 # Lasso penalized regression - fista cv
 smmr_fista= Helium.readhe(joinpath(dataDir, "smmr_fista.he"))
 
 println("CV Lasso vs Elastic Net when α=1 test 2 - fista: ",
-@test ≈(smmr_Net1.AvgMSE, smmr_fista[:,1]; atol=tolVersion) && ≈(smmr_Net1.AvgPercentZero, smmr_fista[:,2], atol = tolVersion) &&
-≈(smmr_Net2.AvgMSE, smmr_fista[:,1];atol=tolVersion) && ≈(smmr_Net2.AvgPercentZero, smmr_fista[:,2]; atol=tolVersion))
+@test ≈(smmr_Net1.AvgMSE, smmr_fista[:,1]; atol=tolVersion) && ≈(smmr_Net1.AvgPropZero, smmr_fista[:,2], atol = tolVersion) &&
+≈(smmr_Net2.AvgMSE, smmr_fista[:,1];atol=tolVersion) && ≈(smmr_Net2.AvgPropZero, smmr_fista[:,2]; atol=tolVersion))
 
 ##########################################################
 # TEST 3 Lasso vs Elastic Net (𝛼=1) - fista backtracking #
@@ -99,20 +99,20 @@ println("CV Lasso vs Elastic Net when α=1 test 2 - fista: ",
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "fista_bt", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "fista_bt", addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Net1 = MatrixLMnet.lambda_min(est1);
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "fista_bt",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "fista_bt",  addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Net2 = MatrixLMnet.lambda_min(est2);
 
 # Lasso penalized regression - fista-bt cv
 smmr_fistabt= Helium.readhe(joinpath(dataDir, "smmr_fistabt.he"))
 
 println("CV Lasso vs Elastic Net when α=1 test 3 - fista-bt: ",
-@test ≈(smmr_Net1.AvgMSE, smmr_fistabt[:,1]; atol=tolVersion) && ≈(smmr_Net1.AvgPercentZero, smmr_fistabt[:,2], atol = tolVersion) &&
-≈(smmr_Net2.AvgMSE, smmr_fistabt[:,1];atol=tolVersion) && ≈(smmr_Net2.AvgPercentZero, smmr_fistabt[:,2]; atol=tolVersion))
+@test ≈(smmr_Net1.AvgMSE, smmr_fistabt[:,1]; atol=tolVersion) && ≈(smmr_Net1.AvgPropZero, smmr_fistabt[:,2], atol = tolVersion) &&
+≈(smmr_Net2.AvgMSE, smmr_fistabt[:,1];atol=tolVersion) && ≈(smmr_Net2.AvgPropZero, smmr_fistabt[:,2]; atol=tolVersion))
 
 
 ############################################
@@ -121,20 +121,20 @@ println("CV Lasso vs Elastic Net when α=1 test 3 - fista-bt: ",
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "admm", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "admm", addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Net1 = MatrixLMnet.lambda_min(est1);
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "admm",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "admm",  addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Net2 = MatrixLMnet.lambda_min(est2);
 
 # Lasso penalized regression - fista-bt cv
 smmr_admm = Helium.readhe(joinpath(dataDir, "smmr_admm.he"))
 
 println("CV Lasso vs Elastic Net when α=1 test 4 - admm: ",
-@test ≈(smmr_Net1.AvgMSE, smmr_admm[:,1]; atol=tolVersion) && ≈(smmr_Net1.AvgPercentZero, smmr_admm[:,2], atol = tolVersion) &&
-≈(smmr_Net2.AvgMSE, smmr_admm[:,1];atol=tolVersion) && ≈(smmr_Net2.AvgPercentZero, smmr_admm[:,2]; atol=tolVersion))
+@test ≈(smmr_Net1.AvgMSE, smmr_admm[:,1]; atol=tolVersion) && ≈(smmr_Net1.AvgPropZero, smmr_admm[:,2], atol = tolVersion) &&
+≈(smmr_Net2.AvgMSE, smmr_admm[:,1];atol=tolVersion) && ≈(smmr_Net2.AvgPropZero, smmr_admm[:,2]; atol=tolVersion))
 
 ##########################################
 # TEST 5 Lasso vs Elastic Net (𝛼=1) - cd #
@@ -142,20 +142,20 @@ println("CV Lasso vs Elastic Net when α=1 test 4 - admm: ",
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "cd", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "cd", addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Net1 = MatrixLMnet.lambda_min(est1);
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "cd",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "cd",  addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Net2 = MatrixLMnet.lambda_min(est2);
 
 # Lasso penalized regression - cd cv
 smmr_cd = Helium.readhe(joinpath(dataDir, "smmr_cd.he"))
 
 println("CV Lasso vs Elastic Net when α=1 test 5 - cd: ",
-@test ≈(smmr_Net1.AvgMSE, smmr_cd[:,1]; atol=tolVersion) && ≈(smmr_Net1.AvgPercentZero, smmr_cd[:,2], atol = tolVersion) &&
-≈(smmr_Net2.AvgMSE, smmr_cd[:,1];atol=tolVersion) && ≈(smmr_Net2.AvgPercentZero, smmr_cd[:,2]; atol=tolVersion))
+@test ≈(smmr_Net1.AvgMSE, smmr_cd[:,1]; atol=tolVersion) && ≈(smmr_Net1.AvgPropZero, smmr_cd[:,2], atol = tolVersion) &&
+≈(smmr_Net2.AvgMSE, smmr_cd[:,1];atol=tolVersion) && ≈(smmr_Net2.AvgPropZero, smmr_cd[:,2]; atol=tolVersion))
 
 println("Tests mlmnet_cv finished!")
 

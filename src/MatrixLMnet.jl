@@ -21,8 +21,10 @@ export Response, Predictors, RawData, get_X, get_Z, get_Y, contr,
     cd!, cd_active!, ista!, fista!, fista_bt!, admm!, 
     mlmnet, Mlmnet, coef, coef_2d, predict, fitted, resid, 
     mlmnet_perms, 
-    make_folds, make_folds_conds, mlmnet_cv, Mlmnet_cv, mlmnet_cv,
-    avg_mse, lambda_min, avg_prop_zero, mlmnet_cv_summary
+    make_folds, make_folds_conds, mlmnet_cv, Mlmnet_cv,
+    avg_mse, lambda_min, avg_prop_zero, mlmnet_cv_summary,
+    mlmnet_bic, Mlmnet_bic, calc_bic, mlmnet_bic_summary
+
 
 
 # Helper functions
@@ -49,5 +51,11 @@ include("mlmnet/mlmnet_perms.jl")
 include("crossvalidation/mlmnet_cv_helpers.jl")
 include("crossvalidation/mlmnet_cv.jl")
 include("crossvalidation/mlmnet_cv_summary.jl")
+
+# BIC validation
+include("bic/mlmnet_bic_helpers.jl")
+include("bic/mlmnet_bic.jl")
+include("bic/mlmnet_bic_summary.jl")
+
 
 end

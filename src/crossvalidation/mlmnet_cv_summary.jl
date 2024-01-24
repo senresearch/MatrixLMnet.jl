@@ -1,5 +1,5 @@
 """
-    valid_reduce2(A, fun)
+    valid_reduce2(A::Array{Float64,3}, fun::Function=mean)
     
 Reduce a 2d matrix across its columns using a given function, but ignoring 
 NaN, Inf, and -Inf. 
@@ -28,7 +28,7 @@ end
 
 
 """
-    calc_avg_mse(MLMNet_cv)
+    calc_avg_mse(MLMNet_cv::Mlmnet_cv) 
 	
 Calculates average test MSE across folds. 
 
@@ -49,7 +49,7 @@ end
 
 
 """
-    calc_avg_prop_zero(MLMNet_cv)
+    calc_avg_prop_zero(MLMNet_cv::Mlmnet_cv) 
 	
 Calculates average proportion of zero interaction coefficients across folds. 
 
@@ -70,7 +70,7 @@ end
 
 
 """
-    mlmnet_cv_summary(MLMNet_cv)
+    mlmnet_cv_summary(MLMNet_cv::Mlmnet_cv) 
 	
 Summarizes results of cross-validation by returning a table with: 
 
@@ -116,14 +116,14 @@ function mlmnet_cv_summary(MLMNet_cv::Mlmnet_cv)
                        Alpha =  vec(repeat(permutedims(MLMNet_cv.alphas), lenVecLambdas)),
                        AvgMSE = avg_mse,
                        StdMSE = mseStd,
-                       AvgPercentZero =  avg_prop_zero);
+                       AvgPropZero =  avg_prop_zero);
         
     return out_df
 end
 
 
 """
-    lambda_min(MLMNet_cv)
+    lambda_min(MLMNet_cv::Mlmnet_cv)
     
 Returns summary information for lambdas corresponding to the minimum average 
 test MSE across folds and the MSE one that is standard error greater. 
@@ -166,7 +166,7 @@ function lambda_min(MLMNet_cv::Mlmnet_cv)
                 prop_zeroMean[min1StdErrIdx, min1StdErrIdy])
     out = DataFrame(vcat(out, out2), :auto)
 
-    colnames = ["Lambda", "Alpha", "AvgMSE", "AvgPercentZero"];
+    colnames = ["Lambda", "Alpha", "AvgMSE", "AvgPropZero"];
     rename!(out, Symbol.(colnames))
 
     # Add names first column

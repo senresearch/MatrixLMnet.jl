@@ -1,5 +1,5 @@
 """
-    Mlmnet(B, lambdas, alphas, data)
+    Mlmnet(B::Array{Float64, 4}, lambdas::Array{Float64, 1}, alphas::Array{Float64, 1}, data::RawData)
 
 Type for storing the results of an mlmnet (Elastic net) model fit
 
@@ -19,8 +19,15 @@ mutable struct Mlmnet
 end
 
 """
-    mlmnet_pathwise(fun, X, Y, Z, lambdas, alphas, regXidx, regZidx, 
-                    reg, norms; isVerbose, stepsize, funArgs...)
+    mlmnet_pathwise(fun::Function, X::AbstractArray{Float64,2}, 
+                         Y::AbstractArray{Float64,2}, 
+                         Z::AbstractArray{Float64,2}, 
+                         lambdas::AbstractArray{Float64,1},
+                         alphas::AbstractArray{Float64, 1},  
+                         regXidx::AbstractArray{Int64,1}, 
+                         regZidx::AbstractArray{Int64,1}, 
+                         reg::BitArray{2}, norms; isVerbose::Bool=true, 
+                         stepsize::Float64=0.01, funArgs...)
 
 Performs the supplied method on two descending lists of lambdas (for l1 and l2) 
 using ``warm starts''. 
@@ -145,16 +152,17 @@ function mlmnet_pathwise(fun::Function, X::AbstractArray{Float64,2},
 end
 
 """
-    mlmnet(data, lambdas, alphas;
-           method = "ista", 
-           isNaive =false,
-           hasXIntercept=true, hasZIntercept=true, 
-           toXReg=trues(data.p), 
-           toZReg=trues(data.q),     
-           toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
-           toNormalize=true, isVerbose=true, 
-           stepsize=0.01, setStepsize=true, 
-           funArgs...)
+    mlmnet(data::RawData, 
+                lambdas::AbstractArray{Float64,1}, alphas::AbstractArray{Float64,1};
+                method::String = "ista", 
+                isNaive::Bool=false,
+                addXIntercept::Bool=true, addZIntercept::Bool=true, 
+                toXReg::BitArray{1}=trues(data.p), 
+                toZReg::BitArray{1}=trues(data.q),     
+                toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
+                toNormalize::Bool=true, isVerbose::Bool=true, 
+                stepsize::Float64=0.01, setStepsize::Bool=true, 
+                funArgs...)
     
 
 Centers and normalizes X and Z predictor matrices, calculates fixed step size, performs 
@@ -176,9 +184,9 @@ inputs.
   default is `ista`, and the other methods are `fista`, `fista_bt`, `admm` and `cd`
 - isNaive = boolean flag indicating whether to solve the Naive or non-Naive 
   Elastic-net problem
-- hasXIntercept = boolean flag indicating whether or not to include an `X` 
+- addXIntercept = boolean flag indicating whether or not to include an `X` 
   intercept (row main effects). Defaults to `true`. 
-- hasZIntercept = boolean flag indicating whether or not to include a `Z` 
+- addZIntercept = boolean flag indicating whether or not to include a `Z` 
   intercept (column main effects). Defaults to `true`.
 - toXReg = 1d array of bit flags indicating whether or not to regularize each 
   of the `X` (row) effects. Defaults to 2d array of `true`s with length 
@@ -227,7 +235,7 @@ function mlmnet(data::RawData,
                 lambdas::AbstractArray{Float64,1}, alphas::AbstractArray{Float64,1};
                 method::String = "ista", 
                 isNaive::Bool=false,
-                hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                addXIntercept::Bool=true, addZIntercept::Bool=true, 
                 toXReg::BitArray{1}=trues(data.p), 
                 toZReg::BitArray{1}=trues(data.q),     
                 toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
@@ -255,13 +263,13 @@ function mlmnet(data::RawData,
     
     # Add X and Z intercepts if necessary
     # Update toXReg and toZReg accordingly
-    if hasXIntercept==true && data.predictors.hasXIntercept==false
+    if addXIntercept==true && data.predictors.hasXIntercept==false
         data.predictors.X = add_intercept(data.predictors.X)
         data.predictors.hasXIntercept = true
         data.p = data.p + 1
         toXReg = vcat(toXInterceptReg, toXReg)
     end
-    if hasZIntercept==true && data.predictors.hasZIntercept==false
+    if addZIntercept==true && data.predictors.hasZIntercept==false
         data.predictors.Z = add_intercept(data.predictors.Z)
         data.predictors.hasZIntercept = true
         data.q = data.q + 1
@@ -270,14 +278,14 @@ function mlmnet(data::RawData,
     
     # Remove X and Z intercepts in new predictors if necessary
     # Update toXReg and toZReg accordingly
-    if hasXIntercept==false && data.predictors.hasXIntercept==true
+    if addXIntercept==false && data.predictors.hasXIntercept==true
         data.predictors.X = remove_intercept(data.predictors.X)
         data.predictors.hasXIntercept = false
         data.p = data.p - 1
         toXReg = toXReg[2:end]
     end
 
-    if hasZIntercept==false && data.predictors.hasZIntercept==true
+    if addZIntercept==false && data.predictors.hasZIntercept==true
         data.predictors.Z = remove_intercept(data.predictors.Z)
         data.predictors.hasZIntercept = false
         data.q = data.q - 1
@@ -285,10 +293,10 @@ function mlmnet(data::RawData,
     end
     
     # Update toXReg and toZReg accordingly when intercept is already included
-    if hasXIntercept==true && data.predictors.hasXIntercept==true
+    if addXIntercept==true && data.predictors.hasXIntercept==true
         toXReg[1] = toXInterceptReg
     end
-    if hasZIntercept==true && data.predictors.hasZIntercept==true
+    if addZIntercept==true && data.predictors.hasZIntercept==true
         toZReg[1] = toZInterceptReg
     end
 	
@@ -306,8 +314,8 @@ function mlmnet(data::RawData,
         Z = copy(get_Z(data))
 
         # Centers and normalizes predictors
-        meansX, normsX, = normalize!(X, hasXIntercept) 
-        meansZ, normsZ, = normalize!(Z, hasZIntercept)
+        meansX, normsX, = normalize!(X, addXIntercept) 
+        meansZ, normsZ, = normalize!(Z, addZIntercept)
         # If X and Z are standardized, set the norm to nothing
         norms = nothing 
     else 
@@ -367,11 +375,11 @@ function mlmnet(data::RawData,
 
     # Back-transform coefficient estimates, if necessary. 
     # Case if including both X and Z intercepts:
-    if toNormalize == true && (hasXIntercept==true) && (hasZIntercept==true)
+    if toNormalize == true && (addXIntercept==true) && (addZIntercept==true)
         backtransform!(coeffs, meansX, meansZ, normsX, normsZ, get_Y(data), 
                        data.predictors.X, data.predictors.Z)
     elseif toNormalize == true # Otherwise
-        backtransform!(coeffs, hasXIntercept, hasZIntercept, meansX, meansZ, 
+        backtransform!(coeffs, addXIntercept, addZIntercept, meansX, meansZ, 
                        normsX, normsZ)
     end
 
@@ -387,10 +395,17 @@ function mlmnet(data::RawData,
 
 
   """
-  mlmnet(data, lambdas; 
-         method, hasXIntercept, hasZIntercept, toXReg, toZReg, 
-         toXInterceptReg, toZInterceptReg, toNormalize, isVerbose, 
-         stepsize, setStepsize, funArgs...)
+      mlmnet(data::RawData, 
+              lambdas::AbstractArray{Float64,1};
+              method::String = "ista", 
+              isNaive::Bool=false,
+              addXIntercept::Bool=true, addZIntercept::Bool=true, 
+              toXReg::BitArray{1}=trues(data.p), 
+              toZReg::BitArray{1}=trues(data.q),     
+              toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
+              toNormalize::Bool=true, isVerbose::Bool=true, 
+              stepsize::Float64=0.01, setStepsize::Bool=true, 
+              funArgs...)
 
 """
 
@@ -398,7 +413,7 @@ function mlmnet(data::RawData,
               lambdas::AbstractArray{Float64,1};
               method::String = "ista", 
               isNaive::Bool=false,
-              hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+              addXIntercept::Bool=true, addZIntercept::Bool=true, 
               toXReg::BitArray{1}=trues(data.p), 
               toZReg::BitArray{1}=trues(data.q),     
               toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
@@ -410,7 +425,7 @@ function mlmnet(data::RawData,
   alphas = [1.0] # default LASSO, 𝛼 = 1
 
   rslts = mlmnet(data, lambdas, alphas; method,
-                    isNaive, hasXIntercept, hasZIntercept, 
+                    isNaive, addXIntercept, addZIntercept, 
                     toXReg, toZReg,     
                     toXInterceptReg, toZInterceptReg, 
                     toNormalize, isVerbose, 

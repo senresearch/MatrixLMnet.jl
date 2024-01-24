@@ -1,14 +1,15 @@
 """
-    mlmnet_perms(data, lambdas, alphas;
-                  method = "ista", isNaive =false,
-                  permFun = shuffle_rows,
-                  hasXIntercept=true, hasZIntercept=true, 
-                  toXReg=trues(data.p), 
-                  toZReg=trues(data.q),     
-                  toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
-                  toNormalize=true, isVerbose=true, 
-                  stepsize=0.01, setStepsize=true, 
-                  funArgs...)
+    mlmnet_perms(data::RawData, 
+                      lambdas::AbstractArray{Float64,1}, alphas::AbstractArray{Float64,1};
+                      method::String = "ista", isNaive::Bool=false, 
+                      permFun::Function=shuffle_rows, 
+                      addXIntercept::Bool=true, addZIntercept::Bool=true, 
+                      toXReg::BitArray{1}=trues(data.p), 
+                      toZReg::BitArray{1}=trues(data.q), 
+                      toXInterceptReg::Bool=false, 
+                      toZInterceptReg::Bool=false, 
+                      toNormalize::Bool=true, isVerbose::Bool=true, 
+                      stepsize::Float64=0.01, setStepsize=true, funArgs...)
 
 Permutes response matrix Y in RawData object and then calls the mlmnet core 
 function. 
@@ -29,9 +30,9 @@ function.
   Elastic-net problem
 - permFun = function used to permute `Y`. Defaults to `shuffle_rows` 
   (shuffles rows of `Y`). 
-- hasXIntercept = boolean flag indicating whether or not to include an `X` 
+- addXIntercept = boolean flag indicating whether or not to include an `X` 
   intercept (row main effects). Defaults to `true`. 
-- hasZIntercept = boolean flag indicating whether or not to include a `Z` 
+- addZIntercept = boolean flag indicating whether or not to include a `Z` 
   intercept (column main effects). Defaults to `true`.
 - toXReg = 1d array of bit flags indicating whether or not to regularize each 
   of the `X` (row) effects. Defaults to 2d array of `true`s with length 
@@ -80,7 +81,7 @@ function mlmnet_perms(data::RawData,
                       lambdas::AbstractArray{Float64,1}, alphas::AbstractArray{Float64,1};
                       method::String = "ista", isNaive::Bool=false, 
                       permFun::Function=shuffle_rows, 
-                      hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                      addXIntercept::Bool=true, addZIntercept::Bool=true, 
                       toXReg::BitArray{1}=trues(data.p), 
                       toZReg::BitArray{1}=trues(data.q), 
                       toXInterceptReg::Bool=false, 
@@ -94,7 +95,7 @@ function mlmnet_perms(data::RawData,
     # Run penalty on the permuted data
     return mlmnet(dataPerm, lambdas, alphas; 
                     method = method, isNaive=isNaive,
-                    hasXIntercept=hasXIntercept, hasZIntercept=hasZIntercept, 
+                    addXIntercept=addXIntercept, addZIntercept=addZIntercept, 
                     toXReg=toXReg, toZReg=toZReg, 
                     toXInterceptReg=toXInterceptReg, toZInterceptReg=toZInterceptReg, 
                     toNormalize=toNormalize, isVerbose=isVerbose, 
@@ -105,16 +106,17 @@ end
 
 
 """
-mlmnet_perms(data, lambdas;
-             method = "ista", isNaive =false,
-             permFun = shuffle_rows,
-             hasXIntercept=true, hasZIntercept=true, 
-             toXReg=trues(data.p), 
-             toZReg=trues(data.q),     
-             toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
-             toNormalize=true, isVerbose=true, 
-             stepsize=0.01, setStepsize=true, 
-             funArgs...)
+    mlmnet_perms(data::RawData, 
+                      lambdas::AbstractArray{Float64,1};
+                      method::String = "ista", isNaive::Bool=false, 
+                      permFun::Function=shuffle_rows, 
+                      addXIntercept::Bool=true, addZIntercept::Bool=true, 
+                      toXReg::BitArray{1}=trues(data.p), 
+                      toZReg::BitArray{1}=trues(data.q), 
+                      toXInterceptReg::Bool=false, 
+                      toZInterceptReg::Bool=false, 
+                      toNormalize::Bool=true, isVerbose::Bool=true, 
+                      stepsize::Float64=0.01, setStepsize=true, funArgs...)
 
 """
 
@@ -122,7 +124,7 @@ function mlmnet_perms(data::RawData,
                       lambdas::AbstractArray{Float64,1};
                       method::String = "ista", isNaive::Bool=false, 
                       permFun::Function=shuffle_rows, 
-                      hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                      addXIntercept::Bool=true, addZIntercept::Bool=true, 
                       toXReg::BitArray{1}=trues(data.p), 
                       toZReg::BitArray{1}=trues(data.q), 
                       toXInterceptReg::Bool=false, 
@@ -138,7 +140,7 @@ function mlmnet_perms(data::RawData,
     # Run L1-L2 penalties on the permuted data
   rslts =  mlmnet(dataPerm, lambdas, alphas; 
                             method = method, isNaive=isNaive,
-                            hasXIntercept=hasXIntercept, hasZIntercept=hasZIntercept, 
+                            addXIntercept=addXIntercept, addZIntercept=addZIntercept, 
                             toXReg=toXReg, toZReg=toZReg, 
                             toXInterceptReg=toXInterceptReg, toZInterceptReg=toZInterceptReg, 
                             toNormalize=toNormalize, isVerbose=isVerbose, 

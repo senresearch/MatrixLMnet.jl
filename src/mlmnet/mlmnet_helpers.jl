@@ -1,5 +1,5 @@
 """
-    println_verbose(x, isVerbose)
+    println_verbose(x, isVerbose::Bool=true)
 
 Version of println that only prints when isVerbose flag is true
 
@@ -23,7 +23,9 @@ end
 
 
 """
-    criterion(B, resid, lambdaL1, lambdaL2, crit_denom)
+    criterion(B::AbstractArray{Float64,2}, 
+                   resid::AbstractArray{Float64,2}, 
+                   lambdaL1::Float64, lambdaL2::Float64, crit_denom::AbstractArray{Int64,1})
 
 Calculate the criterion for the Elastic-net penalty
 
@@ -51,7 +53,8 @@ end
 
 
 """
-    prox(b, gradient, b2sign, lambda, norm, stepsize)
+    prox(b::Float64, gradient::Float64, b2sign::Float64, 
+              lambda::Float64, norm::Nothing, stepsize::Float64)
 
 Proximal (soft-thresholding) operator when not incorporating the norms 
 (norms=1)
@@ -76,7 +79,28 @@ function prox(b::Float64, gradient::Float64, b2sign::Float64,
     return max(0.0, b2sign*b - stepsize * (b2sign*gradient + lambda)) * b2sign
 end
 
-# New
+
+"""
+    prox_mat(b::Float64, gradient::Float64, b2sign::Float64, 
+              lambda::Float64, norm::Nothing, stepsize::Float64)
+
+Proximal (soft-thresholding) operator when not incorporating the norms 
+(norms=1)
+
+# Arguments 
+
+- b = coefficient to update, a float
+- gradient = gradient of b, a float
+- b2sign = sign of b + stepsize*gradient, a float
+- lambda = lambda penalty , a float
+- norm = Nothing
+- stepsize = step size to multiply updates, a float
+
+# Value 
+
+A floating scalar
+
+"""
 function prox_mat(b::AbstractArray{Float64,2}, b2sign::AbstractArray{Float64,2}, lambda::Float64, 
                   norm::Nothing, stepsize::Float64)
     
@@ -143,7 +167,26 @@ function prox(b::Float64, gradient::Float64, b2sign::Float64,
              b2sign
 end
 
-# New
+
+"""
+    prox_mat(b::AbstractArray{Float64,2}, b2sign::AbstractArray{Float64,2}, 
+                  lambda::Float64, norm::AbstractArray{Float64,2}, stepsize::Float64)
+
+Proximal (soft-thresholding) operator
+
+# Arguments 
+
+- b = coefficient to update, a float
+- b2sign = sign of b + stepsize*gradient, a float
+- lambda = lambda penalty , a float
+- norm = norm corresponding to b, a float
+- stepsize = step size to multiply updates, a float
+
+# Value 
+
+A floating scalar
+
+"""
 function prox_mat(b::AbstractArray{Float64,2}, b2sign::AbstractArray{Float64,2}, 
                   lambda::Float64, norm::AbstractArray{Float64,2}, stepsize::Float64)
 
@@ -152,7 +195,8 @@ end
 
 
 """
-    prox(b, gradient, b2sign, lambda, norm)
+    prox(b::Float64, gradient::Float64, b2sign::Float64, 
+              lambda::Float64, norm::Float64)
 
 Proximal (soft-thresholding) operator when step size is 1
 
@@ -175,7 +219,24 @@ function prox(b::Float64, gradient::Float64, b2sign::Float64,
     return max(0.0, b2sign*b - (b2sign*gradient + lambda)/norm) * b2sign
 end
 
-# New
+"""
+    prox_mat(b::AbstractArray{Float64,2}, b2sign::AbstractArray{Float64,2}, 
+                  lambda::Float64, norm::AbstractArray{Float64,2})
+
+Proximal (soft-thresholding) operator
+
+# Arguments 
+
+- b = coefficient to update, a float
+- b2sign = sign of b + stepsize*gradient, a float
+- lambda = lambda penalty , a float
+- norm = norm corresponding to b, a float
+
+# Value 
+
+A floating scalar
+
+"""
 function prox_mat(b::AbstractArray{Float64,2}, b2sign::AbstractArray{Float64,2}, lambda::Float64, 
     norm::AbstractArray{Float64,2})
 
@@ -184,7 +245,10 @@ end
 
 
 """
-    calc_grad!(grad, X, Z, resid)
+    calc_grad!(grad::AbstractArray{Float64,2}, 
+                    X::AbstractArray{Float64,2}, 
+                    Z::AbstractArray{Float64,2}, 
+                    resid::AbstractArray{Float64,2})
 
 Calculate gradient in place
 
@@ -213,7 +277,8 @@ end
 
 
 """
-    calc_grad!(Xi, Zj, resid)
+    calc_grad!(Xi::AbstractArray{Float64,1}, Zj::AbstractArray{Float64,1}, 
+                   resid::AbstractArray{Float64,2})
 
 Calculate gradient at a single coefficient
 
@@ -237,7 +302,7 @@ function calc_grad(Xi::AbstractArray{Float64,1}, Zj::AbstractArray{Float64,1},
 end
 
 """
-    get_func(method)
+    get_func(method::String)
 
 Return actual module function name according to method name according to a dictionnary.
 
