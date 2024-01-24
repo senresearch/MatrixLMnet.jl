@@ -77,24 +77,24 @@ dat = MatrixLMnet.MatrixLM.RawData(Response(Y), Predictors(X, Z));
 ###############
 
 # Lasso penalized regression - ista
-est = mlmnet(ista!, dat, λ, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est = mlmnet(ista!, dat, λ, addZIntercept = false, addXIntercept = false, isVerbose = false);
 est_B_Lasso_ista = est.B[:, :, 3];
 
 # Lasso penalized regression - fista
-est = mlmnet(fista!, dat, λ, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est = mlmnet(fista!, dat, λ, addZIntercept = false, addXIntercept = false, isVerbose = false);
 est_B_Lasso_fista = est.B[:, :, 3];
 
 # Lasso penalized regression - fista backtracking
-est = mlmnet(fista_bt!, dat, λ, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est = mlmnet(fista_bt!, dat, λ, addZIntercept = false, addXIntercept = false, isVerbose = false);
 est_B_Lasso_fista_bt = est.B[:, :, 3];
 
 # Lasso penalized regression - admm
-est = mlmnet(admm!, dat, λ, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est = mlmnet(admm!, dat, λ, addZIntercept = false, addXIntercept = false, isVerbose = false);
 est_B_Lasso_admm = est.B[:, :, 3];
 
 # Lasso penalized regression - cd
 Random.seed!(rng)
-est = mlmnet(cd!, dat, λ, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est = mlmnet(cd!, dat, λ, addZIntercept = false, addXIntercept = false, isVerbose = false);
 est_B_Lasso_cd = est.B[:, :, 3];
 
 #################################
@@ -104,31 +104,31 @@ est_B_Lasso_cd = est.B[:, :, 3];
 
 # Lasso penalized regression - ista cv
 Random.seed!(rng)
-est = mlmnet_cv(ista!, dat, λ, 10, 1, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est = mlmnet_cv(ista!, dat, λ, 10, 1, addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Lasso = lambda_min_deprecated(est);
 smmr_ista = hcat(smmr_Lasso.AvgMSE, smmr_Lasso.AvgPropZero)
 
 # Lasso penalized regression - fista cv
 Random.seed!(rng)
-est = mlmnet_cv(fista!, dat, λ, 10, 1, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est = mlmnet_cv(fista!, dat, λ, 10, 1, addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Lasso = lambda_min_deprecated(est);
 smmr_fista = hcat(smmr_Lasso.AvgMSE, smmr_Lasso.AvgPropZero)
 
 # Lasso penalized regression - fista-bt cv
 Random.seed!(rng)
-est = mlmnet_cv(fista_bt!, dat, λ, 10, 1, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est = mlmnet_cv(fista_bt!, dat, λ, 10, 1, addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Lasso = lambda_min_deprecated(est);
 smmr_fistabt = hcat(smmr_Lasso.AvgMSE, smmr_Lasso.AvgPropZero)
 
 # Lasso penalized regression - admm cv
 Random.seed!(rng)
-est = mlmnet_cv(admm!, dat, λ, 10, 1, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est = mlmnet_cv(admm!, dat, λ, 10, 1, addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Lasso = lambda_min_deprecated(est);
 smmr_admm = hcat(smmr_Lasso.AvgMSE, smmr_Lasso.AvgPropZero)
 
 # Lasso penalized regression - cd cv
 Random.seed!(rng)
-est = mlmnet_cv(cd!, dat, λ, 10, 1, hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est = mlmnet_cv(cd!, dat, λ, 10, 1, addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Lasso = lambda_min_deprecated(est);
 smmr_cd = hcat(smmr_Lasso.AvgMSE, smmr_Lasso.AvgPropZero)
 

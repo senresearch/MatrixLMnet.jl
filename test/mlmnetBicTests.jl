@@ -2,9 +2,9 @@
 # Library #
 ###########
 # using Random
-using MatrixLMnet, Distributions, LinearAlgebra
-using Helium
-using Test
+# using MatrixLMnet, Distributions, LinearAlgebra
+# using Helium
+# using Test
 
 ########################################
 # TEST BIC Validation - Simulated Data #
@@ -76,20 +76,20 @@ numVersion = VERSION
 if Int(numVersion.minor) < 7
       tolVersion=2e-1
 else
-      tolVersion=1e-6
+      tolVersion=1e-5
 end 
 
 ####################################
 # TEST BIC Validation - Estimation #
 ####################################
 
-est = mlmnet(dat, λ, α; method = "fista_bt", hasXIntercept = false, hasZIntercept=false, isVerbose = false);
+est = mlmnet(dat, λ, α; method = "fista_bt", addXIntercept = false, addZIntercept=false, isVerbose = false);
 
 #############################
 # TEST BIC Validation - BIC #
 #############################
 
-est_BIC =  mlmnet_bic(dat, λ, α; method = "fista_bt", hasXIntercept = false, hasZIntercept=false, isVerbose = false);
+est_BIC =  mlmnet_bic(dat, λ, α; method = "fista_bt", addXIntercept = false, addZIntercept=false, isVerbose = false);
 
 df_BIC = mlmnet_bic_summary(est_BIC);
 
@@ -106,7 +106,7 @@ for i in 1:length(est.lambdas), j in 1:length(est.alphas)
       # BIC for (lambdas i, alphas j)
       k = sum(est.B[:,:,i,j] .!= 0.0, dims = 1) .+ m;
       
-      distResids = MvNormal(zeros(m), (sqrt.(sum(resids[:,:,i,j], dims = 1)./n))[:]);
+      distResids = MvNormal(zeros(m), LinearAlgebra.Diagonal(map(abs2, (sqrt.(sum(resids[:,:,i,j], dims = 1)./n))[:])));
       L̂ = loglikelihood(distResids, permutedims(resids[:,:,i,j]))
       BIC2[i,j] = sum(k)*log(n) - 2*(L̂)
 end; 

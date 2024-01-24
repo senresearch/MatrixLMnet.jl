@@ -41,7 +41,7 @@ end
                    rowFolds::Array{Array{Int64,1},1}, 
                    colFolds::Array{Array{Int64,1},1}; 
                    method::String="ista", isNaive::Bool=false,
-                   hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                   addXIntercept::Bool=true, addZIntercept::Bool=true, 
                    toXReg::BitArray{1}=trues(size(get_X(data), 2)), 
                    toZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
                    toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
@@ -74,9 +74,9 @@ input.
   default is `ista`, and the other methods are `fista`, `fista_bt`, `admm` and `cd`
 - isNaive = boolean flag indicating whether to solve the Naive or non-Naive 
   Elastic-net problem
-- hasXIntercept = boolean flag indicating whether or not to include an `X` 
+- addXIntercept = boolean flag indicating whether or not to include an `X` 
   intercept (row main effects). Defaults to `true`. 
-- hasZIntercept = boolean flag indicating whether or not to include a `Z` 
+- addZIntercept = boolean flag indicating whether or not to include a `Z` 
   intercept (column main effects). Defaults to `true`.
 - toXReg = 1d array of bit flags indicating whether or not to regularize each 
   of the `X` (row) effects. Defaults to 2d array of `true`s with length 
@@ -116,7 +116,7 @@ function mlmnet_cv(data::RawData,
                    rowFolds::Array{Array{Int64,1},1}, 
                    colFolds::Array{Array{Int64,1},1}; 
                    method::String="ista", isNaive::Bool=false,
-                   hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                   addXIntercept::Bool=true, addZIntercept::Bool=true, 
                    toXReg::BitArray{1}=trues(size(get_X(data), 2)), 
                    toZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
                    toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
@@ -156,8 +156,8 @@ function mlmnet_cv(data::RawData,
 
     MLMNets = Distributed.pmap(data -> mlmnet(data, lambdas, alphas;
                                               method=method, isNaive=isNaive, 
-                                              hasXIntercept=hasXIntercept, 
-                                              hasZIntercept=hasZIntercept, 
+                                              addXIntercept=addXIntercept, 
+                                              addZIntercept=addZIntercept, 
                                               toXReg=toXReg, toZReg=toZReg, 
                                               toXInterceptReg=toXInterceptReg, 
                                               toZInterceptReg=toZInterceptReg, 
@@ -177,7 +177,7 @@ end
                    alphas::AbstractArray{Float64,1},
                    rowFolds::Array{Array{Int64,1},1}, nColFolds::Int64;
                    method::String="ista", isNaive::Bool=false, 
-                   hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                   addXIntercept::Bool=true, addZIntercept::Bool=true, 
                    toXReg::BitArray{1}=trues(size(get_X(data), 2)), 
                    toZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
                    toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
@@ -207,9 +207,9 @@ Calls the base `mlmnet_cv` function.
 
 - methods = function name that applies the Elastic-net penalty estimate method;
   default is `ista`, and the other methods are `fista`, `fista_bt`, `admm` and `cd`
-- hasXIntercept = boolean flag indicating whether or not to include an `X` 
+- addXIntercept = boolean flag indicating whether or not to include an `X` 
   intercept (row main effects). Defaults to `true`. 
-- hasZIntercept = boolean flag indicating whether or not to include a `Z` 
+- addZIntercept = boolean flag indicating whether or not to include a `Z` 
   intercept (column main effects). Defaults to `true`.
 - toXReg = 1d array of bit flags indicating whether or not to regularize each 
   of the `X` (row) effects. Defaults to 2d array of `true`s with length 
@@ -248,7 +248,7 @@ function mlmnet_cv(data::RawData,
                    alphas::AbstractArray{Float64,1},
                    rowFolds::Array{Array{Int64,1},1}, nColFolds::Int64;
                    method::String="ista", isNaive::Bool=false, 
-                   hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                   addXIntercept::Bool=true, addZIntercept::Bool=true, 
                    toXReg::BitArray{1}=trues(size(get_X(data), 2)), 
                    toZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
                    toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
@@ -263,7 +263,7 @@ function mlmnet_cv(data::RawData,
     # base mlmnet_cv function
     mlmnet_cv(data, lambdas, alphas, rowFolds, colFolds; 
               method=method, isNaive=isNaive,
-              hasXIntercept=hasXIntercept, hasZIntercept=hasZIntercept, 
+              addXIntercept=addXIntercept, addZIntercept=addZIntercept, 
               toXReg=toXReg, toZReg=toZReg, 
               toXInterceptReg=toXInterceptReg, 
               toZInterceptReg=toZInterceptReg, 
@@ -278,7 +278,7 @@ end
                    alphas::AbstractArray{Float64,1}, 
                    nRowFolds::Int64, colFolds::Array{Array{Int64,1},1}; 
                    method::String="ista", isNaive::Bool=false,
-                   hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                   addXIntercept::Bool=true, addZIntercept::Bool=true, 
                    toXReg::BitArray{1}=trues(size(get_X(data), 2)), 
                    toZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
                    toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
@@ -308,9 +308,9 @@ input. Calls the base `mlmnet_cv` function.
 
 - methods = function name that applies the Elastic-net penalty estimate method;
   default is `ista`, and the other methods are `fista`, `fista_bt`, `admm` and `cd`
-- hasXIntercept = boolean flag indicating whether or not to include an `X` 
+- addXIntercept = boolean flag indicating whether or not to include an `X` 
   intercept (row main effects). Defaults to `true`. 
-- hasZIntercept = boolean flag indicating whether or not to include a `Z` 
+- addZIntercept = boolean flag indicating whether or not to include a `Z` 
   intercept (column main effects). Defaults to `true`.
 - toXReg = 1d array of bit flags indicating whether or not to regularize each 
   of the `X` (row) effects. Defaults to 2d array of `true`s with length 
@@ -349,7 +349,7 @@ function mlmnet_cv(data::RawData,
                    alphas::AbstractArray{Float64,1}, 
                    nRowFolds::Int64, colFolds::Array{Array{Int64,1},1}; 
                    method::String="ista", isNaive::Bool=false,
-                   hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                   addXIntercept::Bool=true, addZIntercept::Bool=true, 
                    toXReg::BitArray{1}=trues(size(get_X(data), 2)), 
                    toZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
                    toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
@@ -364,7 +364,7 @@ function mlmnet_cv(data::RawData,
     # base mlmnet_cv function
     mlmnet_cv(data, lambdas, alphas, rowFolds, colFolds; 
               method=method, isNaive=isNaive,
-              hasXIntercept=hasXIntercept, hasZIntercept=hasZIntercept, 
+              addXIntercept=addXIntercept, addZIntercept=addZIntercept, 
               toXReg=toXReg, toZReg=toZReg, 
               toXInterceptReg=toXInterceptReg, 
               toZInterceptReg=toZInterceptReg, 
@@ -379,7 +379,7 @@ end
                    nRowFolds::Int64=10, nColFolds::Int64=10;
                    method::String="ista", 
                    isNaive::Bool=false,
-                   hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                   addXIntercept::Bool=true, addZIntercept::Bool=true, 
                    toXReg::BitArray{1}=trues(size(get_X(data), 2)), 
                    toZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
                    toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
@@ -409,9 +409,9 @@ folds randomly generated using calls to `make_folds`. Calls the base
 
 - methods = function name that applies the Elastic-net penalty estimate method;
   default is `ista`, and the other methods are `fista`, `fista_bt`, `admm` and `cd`
-- hasXIntercept = boolean flag indicating whether or not to include an `X` 
+- addXIntercept = boolean flag indicating whether or not to include an `X` 
   intercept (row main effects). Defaults to `true`. 
-- hasZIntercept = boolean flag indicating whether or not to include a `Z` 
+- addZIntercept = boolean flag indicating whether or not to include a `Z` 
   intercept (column main effects). Defaults to `true`.
 - toXReg = 1d array of bit flags indicating whether or not to regularize each 
   of the `X` (row) effects. Defaults to 2d array of `true`s with length 
@@ -465,7 +465,7 @@ function mlmnet_cv(data::RawData,
                    nRowFolds::Int64=10, nColFolds::Int64=10;
                    method::String="ista", 
                    isNaive::Bool=false,
-                   hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                   addXIntercept::Bool=true, addZIntercept::Bool=true, 
                    toXReg::BitArray{1}=trues(size(get_X(data), 2)), 
                    toZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
                    toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
@@ -481,7 +481,7 @@ function mlmnet_cv(data::RawData,
     # function
     mlmnet_cv(data, lambdas, alphas, rowFolds, colFolds; 
               method=method, isNaive=isNaive, 
-              hasXIntercept=hasXIntercept, hasZIntercept=hasZIntercept, 
+              addXIntercept=addXIntercept, addZIntercept=addZIntercept, 
               toXReg=toXReg, toZReg=toZReg, 
               toXInterceptReg=toXInterceptReg, 
               toZInterceptReg=toZInterceptReg, 
@@ -496,7 +496,7 @@ end
                       nRowFolds::Int64=10, nColFolds::Int64=10;
                       method::String="ista", 
                       isNaive::Bool=false,
-                      hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                      addXIntercept::Bool=true, addZIntercept::Bool=true, 
                       toXReg::BitArray{1}=trues(size(get_X(data), 2)), 
                       toZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
                       toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
@@ -516,7 +516,7 @@ function mlmnet_cv(data::RawData,
                       nRowFolds::Int64=10, nColFolds::Int64=10;
                       method::String="ista", 
                       isNaive::Bool=false,
-                      hasXIntercept::Bool=true, hasZIntercept::Bool=true, 
+                      addXIntercept::Bool=true, addZIntercept::Bool=true, 
                       toXReg::BitArray{1}=trues(size(get_X(data), 2)), 
                       toZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
                       toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
@@ -532,7 +532,7 @@ function mlmnet_cv(data::RawData,
     # function
     mlmnet_cv(data, lambdas, alphas, nRowFolds, nColFolds; 
                   method=method, isNaive=isNaive, 
-                  hasXIntercept=hasXIntercept, hasZIntercept=hasZIntercept, 
+                  addXIntercept=addXIntercept, addZIntercept=addZIntercept, 
                   toXReg=toXReg, toZReg=toZReg, 
                   toXInterceptReg=toXInterceptReg, 
                   toZInterceptReg=toZInterceptReg, 
