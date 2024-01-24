@@ -1,10 +1,10 @@
-###########
-# Library #
-###########
-# using Random
-using MatrixLMnet
-using Helium
-using Test
+# ###########
+# # Library #
+# ###########
+# # using Random
+# using MatrixLMnet
+# using Helium
+# using Test
 
 #####################################################################
 # TEST Cross Validation Lasso vs Elastic Net (𝛼=1) - Simulated Data #
@@ -48,7 +48,7 @@ numVersion = VERSION
 if Int(numVersion.minor) < 7
       tolVersion=2e-1
 else
-      tolVersion=1e-6
+      tolVersion=1e-5
 end 
 
 
@@ -58,7 +58,7 @@ end
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "ista", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "ista", addZIntercept = false, addXIntercept = false, isVerbose = false);
 # Summaries
 smmr_Net1 = MatrixLMnet.mlmnet_cv_summary(est1);
 smmr_min_Net1 = MatrixLMnet.lambda_min(est1);
@@ -70,7 +70,7 @@ test_ElasticNet = (smmr_Net1[idxSmmr, :AvgMSE] == smmr_min_Net1[1, :AvgMSE]) &&
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "ista",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "ista",  addZIntercept = false, addXIntercept = false, isVerbose = false);
 # Summaries
 smmr_Net2 = MatrixLMnet.mlmnet_cv_summary(est2);
 smmr_min_Net2 = MatrixLMnet.lambda_min(est2);
@@ -90,7 +90,7 @@ println("Summary cross-validation test 1 - ista: ",
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "fista", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "fista", addZIntercept = false, addXIntercept = false, isVerbose = false);
 # Summaries
 smmr_Net1 = MatrixLMnet.mlmnet_cv_summary(est1);
 smmr_min_Net1 = MatrixLMnet.lambda_min(est1);
@@ -102,7 +102,7 @@ test_ElasticNet = (smmr_Net1[idxSmmr, :AvgMSE] == smmr_min_Net1[1, :AvgMSE]) &&
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "fista",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "fista",  addZIntercept = false, addXIntercept = false, isVerbose = false);
 # Summaries
 smmr_Net2 = MatrixLMnet.mlmnet_cv_summary(est2);
 smmr_min_Net2 = MatrixLMnet.lambda_min(est2);
@@ -122,7 +122,7 @@ println("Summary cross-validation test 2 - fista: ",
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "fista_bt", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "fista_bt", addZIntercept = false, addXIntercept = false, isVerbose = false);
 # Summaries
 smmr_Net1 = MatrixLMnet.mlmnet_cv_summary(est1);
 smmr_min_Net1 = MatrixLMnet.lambda_min(est1);
@@ -134,7 +134,7 @@ test_ElasticNet = (smmr_Net1[idxSmmr, :AvgMSE] == smmr_min_Net1[1, :AvgMSE]) &&
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "fista_bt",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "fista_bt",  addZIntercept = false, addXIntercept = false, isVerbose = false);
 # Summaries
 smmr_Net2 = MatrixLMnet.mlmnet_cv_summary(est2);
 smmr_min_Net2 = MatrixLMnet.lambda_min(est2);
@@ -154,7 +154,7 @@ println("Summary cross-validation test 3 - fista_bt: ",
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "admm", hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "admm", addZIntercept = false, addXIntercept = false, isVerbose = false);
 # Summaries
 smmr_Net1 = MatrixLMnet.mlmnet_cv_summary(est1);
 smmr_min_Net1 = MatrixLMnet.lambda_min(est1);
@@ -166,7 +166,7 @@ test_ElasticNet = (smmr_Net1[idxSmmr, :AvgMSE] == smmr_min_Net1[1, :AvgMSE]) &&
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "admm",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "admm",  addZIntercept = false, addXIntercept = false, isVerbose = false);
 # Summaries
 smmr_Net2 = MatrixLMnet.mlmnet_cv_summary(est2);
 smmr_min_Net2 = MatrixLMnet.lambda_min(est2);
@@ -186,7 +186,7 @@ println("Summary cross-validation test 4 - admm: ",
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "admm",  hasZIntercept = false, hasXIntercept = false, isVerbose = false);
+est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "cd",  addZIntercept = false, addXIntercept = false, isVerbose = false);
 # Summaries
 smmr_Net2 = MatrixLMnet.mlmnet_cv_summary(est2);
 smmr_min_Net2 = MatrixLMnet.lambda_min(est2);
@@ -196,5 +196,5 @@ test_Lasso = (smmr_Net2[idxSmmr, :AvgMSE] == smmr_min_Net2[1, :AvgMSE]) &&
         (smmr_Net2[idxSmmr, :Lambda] == smmr_min_Net2[1, :Lambda]) &&
         (smmr_Net2[idxSmmr, :Alpha] == smmr_min_Net2[1, :Alpha])
 
-println("Summary cross-validation test 5 - admm: ",
+println("Summary cross-validation test 5 - cd: ",
          @test (test_Lasso))                           

@@ -1,4 +1,6 @@
 using MatrixLMnet
+using Distributions, LinearAlgebra
+using Helium
 using Test
 
 @testset "MatrixLMnet" begin

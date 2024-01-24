@@ -36,7 +36,7 @@ rng = MatrixLMnet.Random.MersenneTwister(2021)
 #Test the dimension of results by util functions #
 ###################################################
 
-est = mlmnet(dat, λ, α, method = "cd", hasZIntercept = true, hasXIntercept = true, isVerbose = true)
+est = mlmnet(dat, λ, α, method = "cd", addZIntercept = true, addXIntercept = true, isVerbose = true)
 
 predicted = predict(est, est.data.predictors)
 
@@ -59,7 +59,7 @@ end
 
 newPredictors = Predictors(X, Z, false, false)
 predicted = predict(est, newPredictors)
-est2 = mlmnet(dat, λ, α, method = "cd", hasZIntercept = false, hasXIntercept = false, isVerbose = true)
+est2 = mlmnet(dat, λ, α, method = "cd", addZIntercept = false, addXIntercept = false, isVerbose = true)
 newPredictors2 = Predictors(hcat(ones(size(X, 1)), X), hcat(ones(size(Z, 1)), Z), true, true)
 predicted2 = predict(est2, newPredictors2)
 
