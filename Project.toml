@@ -1,7 +1,7 @@
 name = "MatrixLMnet"
 uuid = "436227dc-6146-11e9-240b-9df6ee45b799"
 authors = ["Jane Liang", "Zifan Yu", "Gregory Farage", "Saunak Sen"]
-version = "1.0.2"
+version = "1.1.0"
 
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
