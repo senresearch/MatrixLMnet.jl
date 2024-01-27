@@ -1,7 +1,10 @@
 # MatrixLMnet: Core functions for penalized estimation for matrix linear models.
 
 [![CI](https://github.com/senresearch/MatrixLMnet.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/senresearch/MatrixLMnet.jl/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/senresearch/MatrixLMnet.jl/branch/main/graph/badge.svg?token=uHM6utUQoi)](https://codecov.io/gh/GregFa/MatrixLMnet.jl)
+[![codecov](https://codecov.io/gh/senresearch/MatrixLMnet.jl/branch/main/graph/badge.svg?token=uHM6utUQoi)](https://codecov.io/gh/senresearch/MatrixLMnet.jl)
+[![MIT license](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/senresearch/MatrixLMnet.jl/blob/main/LICENSE.md)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://senresearch.github.io/MatrixLMnet.jl/stable)
+[![Pkg Status](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 
 Package for L1 and L2 penalized estimation of
  matrix linear models (bilinear models for matrix-valued data).
