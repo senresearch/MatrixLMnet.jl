@@ -15,7 +15,7 @@ makedocs(
                ],
 )
 deploydocs(;
-    repo= "https://github.com/senresearch/MatrixLM.jl",
+    repo= "https://github.com/senresearch/MatrixLMnet.jl",
     devbranch= "main",
     devurl = "stable"
 )
