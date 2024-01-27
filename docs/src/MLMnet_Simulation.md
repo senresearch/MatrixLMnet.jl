@@ -125,7 +125,7 @@ The `method` keyword argument selects the function implementing the Elastic-net 
 *Note: Any irrelevant arguments will simply be disregarded.*
 
 |Algorithm                     | Methods     | Parameter     | Default  | Description                                                                     |
-|------------------------------|-------------|---------------|----------|--------------------------------------------------------------------------------:|
+|:-----------------------------|-------------|---------------|----------|:--------------------------------------------------------------------------------|
 |**Coordinate Descent**        | "cd"        | `isRandom`    | true     | Determines the use of either random or cyclic updates                           |
 |**Active Coordinate Descent** | "cd_active" | `isRandom`    | true     | Specifies the choice between random and cyclic updates                          |
 |**ISTA** with fixed step size | "ista"      | `stepsize`    | 0.01     | Sets a fixed step size for updates                                              |
