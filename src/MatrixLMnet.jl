@@ -1,9 +1,11 @@
 module MatrixLMnet
 
+using Reexport
 
 using MatrixLM
 import MatrixLM.calc_preds, MatrixLM.calc_preds!, 
     MatrixLM.calc_resid, MatrixLM.calc_resid!
+@reexport using MatrixLM: design_matrix, @mlmformula
 
 using DataFrames
 using Distributed
