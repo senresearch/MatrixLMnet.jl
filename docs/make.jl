@@ -1,21 +1,21 @@
+push!(LOAD_PATH,"../src/")
+
 using Documenter
 using MatrixLMnet
 
-const src = "https://github.com/senresearch/MatrixLMnet.jl"
-
 makedocs(
-         sitename = "MatrixLMnet",
-         authors = "Jane W. Liang, Saunak Sen",
-         format = Documenter.HTML(),
-         modules  = [MatrixLMnet],
+        modules  = [MatrixLMnet], 
+        sitename = "MatrixLMnet",
+               
          pages=[
             "Home" => "index.md",
             "Getting Started" => "MLMnet_Simulation.md",
             #"More examples" => "moreExamples.md",
             "Types and Functions" => "functions.md"
-               ])
+               ],
+)
 deploydocs(;
-    repo= src,
+    repo= "https://github.com/senresearch/MatrixLM.jl",
     devbranch= "main",
     devurl = "stable"
 )
