@@ -155,7 +155,7 @@ function lambda_min(MLMNet_cv::Mlmnet_cv)
     mse1StdErr = mseMean[minIdx, minIdy] + mseStd[minIdx, minIdy]
     # Find the index of the lambda that is closest to being 1 SE greater than 
     # the lowest lambda, in the direction of the bigger lambdas
-    min1StdErrIdx = argmin(abs.(mseMean[1:minIdx[1], 1:minIdy[1]].-mse1StdErr))[1]
+    min1StdErrIdx = argmin(abs.(mseMean[1:minIdx[1], 1:minIdy[1]].-mse1StdErr))[1] # TODO change to maximum lambda within 1 SE greater to the min
     min1StdErrIdy = argmin(abs.(mseMean[1:minIdx[1], 1:minIdy[1]].-mse1StdErr))[2]
     
     # Pull out summary information for these two lambdas
