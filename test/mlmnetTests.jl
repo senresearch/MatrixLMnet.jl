@@ -48,9 +48,9 @@ dat = RawData(Response(Y), Predictors(X, Z));
 
 rng = MatrixLMnet.Random.MersenneTwister(2021)
 
-############################################
-# TEST 1 Lasso vs Elastic Net (𝛼=1) - ista #
-############################################
+#############################################
+# TEST 1a Lasso vs Elastic Net (𝛼=1) - ista #
+#############################################
 
 
 # Elastic net penalized regression
@@ -137,6 +137,20 @@ B_Net_cd_2 = est_cd_2.B[:, :, 3, 1];
 B_cd = Helium.readhe(joinpath(dataDir, "B_cd.he"))
 
 println("Lasso vs Elastic Net when α=1 test 5 - cd: ", @test ≈(B_Net_cd_1,  B_cd; atol=1.2e-4) && ≈(B_Net_cd_2, B_cd;  atol=1.2e-4))
+
+
+##################################
+# TEST 6 Data remains unchanged  #
+##################################
+
+# Elastic net penalized regression
+est_ista_1 = MatrixLMnet.mlmnet(dat, λ, α, method = "ista", addZIntercept = false, addXIntercept = false, isVerbose = false);
+B_Net_ista_1 = est_ista_1.B[:, :, 3, 1];
+
+println("Test that original data remains unchanged test 6: ", #TODO
+    @test (B_Net_ista_1 ≈ B_ista) && (B_Net_ista_2 ≈ B_ista))
+
+
 
 
 println("Tests mlmnet finished!")

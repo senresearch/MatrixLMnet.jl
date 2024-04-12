@@ -261,6 +261,9 @@ function mlmnet(data::RawData,
         error("toZReg does not have same length as number of columns in Z.")
     end 
     
+    # create a copy of data to preserve original values and structure
+    data = RawData(Response(data.response.Y),Predictors(data.predictors.X, data.predictors.Z))
+
     # Add X and Z intercepts if necessary
     # Update toXReg and toZReg accordingly
     if addXIntercept==true && data.predictors.hasXIntercept==false
