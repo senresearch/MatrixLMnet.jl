@@ -111,6 +111,11 @@ function findnotin(a::AbstractArray{Int64,1}, b::AbstractArray{Int64,1})
     end
 end
 
+# CHECK if [] is an argument
+# WHY not using setdiff(collect(1:n), vec)
+
+
+
 """
         calc_mse(MLMNets::AbstractArray{Mlmnet,1}, data::RawData, 
                   lambdas::AbstractArray{Float64,1}, 
