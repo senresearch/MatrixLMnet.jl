@@ -144,13 +144,11 @@ println("Lasso vs Elastic Net when α=1 test 5 - cd: ", @test ≈(B_Net_cd_1,  B
 ##################################
 
 # Elastic net penalized regression
-est_ista_1 = MatrixLMnet.mlmnet(dat, λ, α, method = "ista", addZIntercept = false, addXIntercept = false, isVerbose = false);
-B_Net_ista_1 = est_ista_1.B[:, :, 3, 1];
-
-println("Test that original data remains unchanged test 6: ", #TODO
-    @test (B_Net_ista_1 ≈ B_ista) && (B_Net_ista_2 ≈ B_ista))
+original_dat_predictors_colsize = size(dat.predictor.X, 2);
+est_ista_1 = MatrixLMnet.mlmnet(dat, λ, α, method = "ista", addZIntercept = false, addXIntercept = true, isVerbose = false);
 
 
-
+println("Test that original data remains unchanged test 6: ", 
+    @test original_dat_predictors_colsize == size(dat.predictor.X, 2))
 
 println("Tests mlmnet finished!")
