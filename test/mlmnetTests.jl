@@ -4,9 +4,9 @@
 # # using MatrixLM
 # # using Distributions, Random, Statistics, LinearAlgebra, StatsBase
 # # using Random
-# using MatrixLMnet
-# using Helium
-# using Test
+using MatrixLMnet
+using Helium
+using Test
 
 
 ####################################################
@@ -144,11 +144,11 @@ println("Lasso vs Elastic Net when α=1 test 5 - cd: ", @test ≈(B_Net_cd_1,  B
 ##################################
 
 # Elastic net penalized regression
-original_dat_predictors_colsize = size(dat.predictor.X, 2);
+original_dat_predictors_colsize = size(dat.predictors.X, 2);
 est_ista_1 = MatrixLMnet.mlmnet(dat, λ, α, method = "ista", addZIntercept = false, addXIntercept = true, isVerbose = false);
 
 
 println("Test that original data remains unchanged test 6: ", 
-    @test original_dat_predictors_colsize == size(dat.predictor.X, 2))
+    @test original_dat_predictors_colsize == size(dat.predictors.X, 2))
 
 println("Tests mlmnet finished!")
