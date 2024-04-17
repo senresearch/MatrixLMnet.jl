@@ -32,9 +32,9 @@ dat = RawData(Response(Y), Predictors(X, Z));
 rng = MatrixLMnet.Random.MersenneTwister(2021)
 
 
-###################################################
-#Test the dimension of results by util functions #
-###################################################
+######################################################
+# TEST 1: the dimension of results by util functions #
+######################################################
 
 est = mlmnet(dat, λ, α, method = "cd", addZIntercept = true, addXIntercept = true, isVerbose = true)
 
@@ -53,9 +53,9 @@ coef = MatrixLMnet.coef_3d(est)
 end
 
 
-################################
-#Test2: test predict function ##
-################################
+#################################
+# TEST 2: test predict function #
+#################################
 
 newPredictors = Predictors(X, Z, false, false)
 predicted = predict(est, newPredictors)
@@ -64,3 +64,7 @@ newPredictors2 = Predictors(hcat(ones(size(X, 1)), X), hcat(ones(size(Z, 1)), Z)
 predicted2 = predict(est2, newPredictors2)
 
 @test size(predicted[:,:,1,1] ) == size(predicted2[:,:,1,1] )
+
+
+
+println("Tests utilities finished!")
