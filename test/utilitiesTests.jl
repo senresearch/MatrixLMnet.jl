@@ -67,4 +67,109 @@ predicted2 = predict(est2, newPredictors2)
 
 
 
+#######################################
+# TEST 3: test backtransform function #
+#######################################
+
+using MatrixLMnet: normalize!, mean, norm, mlmnet_test
+
+flag_intercept = true
+
+# MLM
+# mlmdata = RawData(Response(Y[:,2]|> x->reshape(x,:,1)), 
+    # Predictors(X, Z[1,1]|> x ->reshape([x], :,1)));
+mlmdata = RawData(Response(Y), Predictors(X, Z));
+mlm_est = MatrixLMnet.MatrixLM.mlm(
+    mlmdata, 
+    addXIntercept = flag_intercept, 
+    addZIntercept = false
+);
+
+
+
+# MLMnet
+# mlmdata = RawData(Response(Y[:,2]|> x->reshape(x,:,1)), 
+#     Predictors(X, Z[1,1]|> x ->reshape([x], :,1)));
+mlmdata = RawData(Response(Y), Predictors(X, Z));
+mlmnet_est = mlmnet(
+    mlmdata, 
+    [0.0], [0.0], # lambda and alpha are set to 0
+    method = "fista", stepsize = 0.01, 
+    toNormalize = true,
+    isNaive = false,
+    addZIntercept = false, addXIntercept = flag_intercept, 
+    toXInterceptReg = false,
+    isVerbose = false,
+    thresh = 1e-16 
+);
+
+
+mlmnet_est_test = mlmnet_test(
+    mlmdata, 
+    [0.0], [0.0], # lambda and alpha are set to 0
+    method = "fista", stepsize = 0.01, 
+    toNormalize = true,
+    isNaive = false,
+    addZIntercept = false, addXIntercept = flag_intercept, 
+    toXInterceptReg = false,
+    isVerbose = false,
+    thresh = 1e-16 
+);
+
+
+
+
+
+B_t = copy(mlmnet_est_test.B)
+
+
+hcat(mlm_est.B, mlmnet_est.B, B_t)
+
+
+isXinterceptexist = true
+
+(meansX[:,2:end]./normsX[:,2:end])
+
+(meansX[:,2:end]./normsX[:,2:end])*B_t[2:end,:,1,1]
+
+(B_t[1,:,1,1]./normsX[:,1]) - vec((meansX[:,2:end]./normsX[:,2:end])*B_t[2:end,:,1,1])
+
+if isXinterceptexist == true
+    prodX = (meansX[:,2:end]./normsX[:,2:end])*B_t[2:end,:,1,1]
+    B_t[1,:,1,1] = (B_t[1,:,1,1]./normsX[:,1]) - vec(prodX)
+end
+
+# Back transform the interactions, if necessary
+if isXinterceptexist == true
+    B_t[2:end,:,1,1] = B_t[2:end,:,1,1]./permutedims(normsX[:,2:end])
+end
+
+hcat(mlm_est.B, mlmnet_est.B, B_t)
+
+
+
+# Centers and normalizes predictors
+meansX, normsX, = normalize!(hcat(ones(240), copy(get_X(mlmdata))), true) 
+meansZ, normsZ, = normalize!(copy(get_Z(mlmdata)), false)
+
+
+
+
+B_t[2:end,1,1,1] = B_t[2:end,1,1,1]./normsX[2:end]
+
+B_t[1,1,1,1]./normsX[1]
+ B_t[2:end,1,1,1]
+
+mean(Y[:,2]) .- meansX*mlmnet_est.B[:,:,1,1]
+
+meansX[:,2:end]./normsX[:,2:end]
+B_t[2:end,2:end,1,1]
+B_t[1,2:end,1,1]
+
+prodX = (meansX[:,2:end]./normsX[:,2:end])*B_t[2:end,2:end,1,1]
+B_t[1,2:end,1,1] = (B_t[1,2:end,1,1]-vec(prodX))./vec(normsZ[:,2:end])/
+                                        normsX[1,1]
+
+
+
 println("Tests utilities finished!")
