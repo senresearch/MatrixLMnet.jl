@@ -21,7 +21,7 @@ function normalize!(A::AbstractArray{Float64,2}, hasIntercept::Bool)
     if hasIntercept == true 
         means = mean(A, dims=1)
         A[:,2:end] = A[:,2:end].-transpose(means[2:end]) 
-    else # Otherwise, subtract the column means from all columns
+    else # If no intercept do not center.
         means = Array{Float64}(undef, 1, size(A,2))
     end
     

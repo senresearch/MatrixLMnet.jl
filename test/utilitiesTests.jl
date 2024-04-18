@@ -116,7 +116,9 @@ mlmnet_est_test = mlmnet_test(
     thresh = 1e-16 
 );
 
-
+# Centers and normalizes predictors
+meansX, normsX, = normalize!(hcat(ones(240), copy(get_X(mlmdata))), true) 
+meansZ, normsZ, = normalize!(copy(get_Z(mlmdata)), false)
 
 
 
@@ -128,11 +130,6 @@ hcat(mlm_est.B, mlmnet_est.B, B_t)
 
 isXinterceptexist = true
 
-(meansX[:,2:end]./normsX[:,2:end])
-
-(meansX[:,2:end]./normsX[:,2:end])*B_t[2:end,:,1,1]
-
-(B_t[1,:,1,1]./normsX[:,1]) - vec((meansX[:,2:end]./normsX[:,2:end])*B_t[2:end,:,1,1])
 
 if isXinterceptexist == true
     prodX = (meansX[:,2:end]./normsX[:,2:end])*B_t[2:end,:,1,1]
