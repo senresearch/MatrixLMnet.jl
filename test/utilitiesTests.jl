@@ -125,10 +125,28 @@ meansZ, normsZ, = normalize!(copy(get_Z(mlmdata)), false)
 B_t = copy(mlmnet_est_test.B)
 
 
-hcat(mlm_est.B, mlmnet_est.B, B_t)
+hcat(mlm_est.B,  B_t, mlmnet_est.B,)
 
 
 isXinterceptexist = true
+isZinterceptexist = false
+
+# reverse scale from X and Z normalization
+B_t[:,:,1,1] = (B_t[:,:,1,1]./permutedims(normsX))./normsZ 
+
+# Back transform the X intercepts (row main effects)
+if isXinterceptexist == true
+    # B̂intercept = Ȳ - X̄ B̂coef. Since X centered, B̂intercept|Xcentered = Ȳ      
+    B_t[1,:,1,1] = B_t[1,:,1,1] - meansX[:,2:end]*B_t[2:end,:,1,1]
+end
+
+# Back transform the Z intercepts (column main effects)
+if isZinterceptexist == true
+    # B̂intercept = Ȳ - Z̄ B̂coef. Since X centered, B̂intercept|Xcentered = Ȳ      
+    B_t[:,1,1,1] = B_t[:,1,1,1] - B_t[:,2:end,1,1]*permutedims(meansZ[:,2:end])
+end
+
+
 
 
 if isXinterceptexist == true
@@ -136,37 +154,10 @@ if isXinterceptexist == true
     B_t[1,:,1,1] = (B_t[1,:,1,1]./normsX[:,1]) - vec(prodX)
 end
 
-# Back transform the interactions, if necessary
-if isXinterceptexist == true
-    B_t[2:end,:,1,1] = B_t[2:end,:,1,1]./permutedims(normsX[:,2:end])
-end
+
+
 
 hcat(mlm_est.B, mlmnet_est.B, B_t)
-
-
-
-# Centers and normalizes predictors
-meansX, normsX, = normalize!(hcat(ones(240), copy(get_X(mlmdata))), true) 
-meansZ, normsZ, = normalize!(copy(get_Z(mlmdata)), false)
-
-
-
-
-B_t[2:end,1,1,1] = B_t[2:end,1,1,1]./normsX[2:end]
-
-B_t[1,1,1,1]./normsX[1]
- B_t[2:end,1,1,1]
-
-mean(Y[:,2]) .- meansX*mlmnet_est.B[:,:,1,1]
-
-meansX[:,2:end]./normsX[:,2:end]
-B_t[2:end,2:end,1,1]
-B_t[1,2:end,1,1]
-
-prodX = (meansX[:,2:end]./normsX[:,2:end])*B_t[2:end,2:end,1,1]
-B_t[1,2:end,1,1] = (B_t[1,2:end,1,1]-vec(prodX))./vec(normsZ[:,2:end])/
-                                        normsX[1,1]
-
 
 
 println("Tests utilities finished!")
