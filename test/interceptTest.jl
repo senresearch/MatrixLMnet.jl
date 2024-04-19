@@ -77,3 +77,59 @@ mlmnet_est = mlmnet(
 
 hcat(mlm_est.B, mlmnet_est.B)
 
+
+
+###################################
+# TEST backtransform - Agren Data #
+###################################
+
+using CSV, DataFrames
+
+###################
+# Load Agren Data #
+###################
+
+# Read in X (genotype probabilities). The first row is a header. 
+file_X = joinpath(@__DIR__,"data","exp_pro","ArabidopsisFitnessQTLdata","agren_genoprobs.csv");
+X = Matrix(CSV.read(file_X, DataFrame));
+size(X)
+
+
+# Read in Y (phenotypes). The first row is a header. he first column is IDs. 
+file_Y = joinpath(@__DIR__,"data","exp_pro","ArabidopsisFitnessQTLdata","agren_phe.csv");
+Y = Matrix(CSV.read(file_Y, DataFrame)[:,2:end]);
+
+# Take the log of Y
+Y = log.(Y)
+
+# Normalize Y
+meanY, normY = MatrixLMnet.normalize!(Y, false);
+
+# # Standardize Y 
+# Y = (Y.-mean(Y, dims=1)) ./ std(Y, dims=1);
+
+size(Y)
+
+# Create Z matrix, indicating country (Italy/Sweden). 
+Z = reshape([1, -1, 1, -1, 1, -1], 6, 1)
+
+# Put together RawData object for MLM 
+MLMData = RawData(Response(Y), Predictors(X, Z))
+
+#########################
+# Processing Agren Data #
+#########################
+
+isXinterceptexist = true
+isZinterceptexist = true
+
+
+# MLM
+# mlmdata = RawData(Response(Y[:,2]|> x->reshape(x,:,1)), 
+    # Predictors(X, Z[1,1]|> x ->reshape([x], :,1)));
+    mlm_agren = RawData(Response(Y), Predictors(X, Z));
+    mlm_est = MatrixLMnet.MatrixLM.mlm(
+        mlm_agren, 
+        addXIntercept = isXinterceptexist, 
+        addZIntercept = isZinterceptexist
+    );
