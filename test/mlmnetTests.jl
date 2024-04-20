@@ -4,9 +4,9 @@
 # # using MatrixLM
 # # using Distributions, Random, Statistics, LinearAlgebra, StatsBase
 # # using Random
-# using MatrixLMnet
-# using Helium
-# using Test
+using MatrixLMnet
+using Helium
+using Test
 
 
 ####################################################
@@ -48,9 +48,9 @@ dat = RawData(Response(Y), Predictors(X, Z));
 
 rng = MatrixLMnet.Random.MersenneTwister(2021)
 
-############################################
-# TEST 1 Lasso vs Elastic Net (𝛼=1) - ista #
-############################################
+#############################################
+# TEST 1a Lasso vs Elastic Net (𝛼=1) - ista #
+#############################################
 
 
 # Elastic net penalized regression
@@ -138,5 +138,17 @@ B_cd = Helium.readhe(joinpath(dataDir, "B_cd.he"))
 
 println("Lasso vs Elastic Net when α=1 test 5 - cd: ", @test ≈(B_Net_cd_1,  B_cd; atol=1.2e-4) && ≈(B_Net_cd_2, B_cd;  atol=1.2e-4))
 
+
+##################################
+# TEST 6 Data remains unchanged  #
+##################################
+
+# Elastic net penalized regression
+original_dat_predictors_colsize = size(dat.predictors.X, 2);
+est_ista_1 = MatrixLMnet.mlmnet(dat, λ, α, method = "ista", addZIntercept = false, addXIntercept = true, isVerbose = false);
+
+
+println("Test that original data remains unchanged test 6: ", 
+    @test original_dat_predictors_colsize == size(dat.predictors.X, 2))
 
 println("Tests mlmnet finished!")

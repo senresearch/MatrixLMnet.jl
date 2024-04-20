@@ -261,6 +261,11 @@ function mlmnet(data::RawData,
         error("toZReg does not have same length as number of columns in Z.")
     end 
     
+    # create a copy of data to preserve original values and structure
+    data_old = RawData(Response(data.response.Y),Predictors(data.predictors.X, data.predictors.Z))
+    data = RawData(Response(data.response.Y),Predictors(data.predictors.X, data.predictors.Z))
+
+
     # Add X and Z intercepts if necessary
     # Update toXReg and toZReg accordingly
     if addXIntercept==true && data.predictors.hasXIntercept==false
@@ -378,6 +383,7 @@ function mlmnet(data::RawData,
     if toNormalize == true && (addXIntercept==true) && (addZIntercept==true)
         backtransform!(coeffs, meansX, meansZ, normsX, normsZ, get_Y(data), 
                        data.predictors.X, data.predictors.Z)
+                      #  data_old.predictors.X, data_old.predictors.Z)
     elseif toNormalize == true # Otherwise
         backtransform!(coeffs, addXIntercept, addZIntercept, meansX, meansZ, 
                        normsX, normsZ)
@@ -433,6 +439,178 @@ function mlmnet(data::RawData,
                     funArgs...)
   
   return rslts
+end
+
+
+
+
+
+
+
+####TO DELETE
+function mlmnet_test(data::RawData, 
+  lambdas::AbstractArray{Float64,1}, alphas::AbstractArray{Float64,1};
+  method::String = "ista", 
+  isNaive::Bool=false,
+  addXIntercept::Bool=true, addZIntercept::Bool=true, 
+  toXReg::BitArray{1}=trues(data.p), 
+  toZReg::BitArray{1}=trues(data.q),     
+  toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
+  toNormalize::Bool=true, isVerbose::Bool=true, 
+  stepsize::Float64=0.01, setStepsize::Bool=true, 
+  funArgs...)
+
+# Get the function according to the selected method             
+# fun = get_func(method);
+
+try
+get_func(method);
+catch e
+return error("Unknown method name, possible methods are : \"ista\", \"fista\", \"fista_bt\", and \"admm\".")
+end
+fun = get_func(method);
+
+# Ensure that toXReg and toZReg have same length as columns of X and Z
+if length(toXReg) != data.p
+error("toXReg does not have same length as number of columns in X.")
+end
+if length(toZReg) != data.q
+error("toZReg does not have same length as number of columns in Z.")
+end 
+
+# create a copy of data to preserve original values and structure
+data_old = RawData(Response(data.response.Y),Predictors(data.predictors.X, data.predictors.Z))
+data = RawData(Response(data.response.Y),Predictors(data.predictors.X, data.predictors.Z))
+
+
+# Add X and Z intercepts if necessary
+# Update toXReg and toZReg accordingly
+if addXIntercept==true && data.predictors.hasXIntercept==false
+data.predictors.X = add_intercept(data.predictors.X)
+data.predictors.hasXIntercept = true
+data.p = data.p + 1
+toXReg = vcat(toXInterceptReg, toXReg)
+end
+if addZIntercept==true && data.predictors.hasZIntercept==false
+data.predictors.Z = add_intercept(data.predictors.Z)
+data.predictors.hasZIntercept = true
+data.q = data.q + 1
+toZReg = vcat(toZInterceptReg, toZReg)
+end
+
+# Remove X and Z intercepts in new predictors if necessary
+# Update toXReg and toZReg accordingly
+if addXIntercept==false && data.predictors.hasXIntercept==true
+data.predictors.X = remove_intercept(data.predictors.X)
+data.predictors.hasXIntercept = false
+data.p = data.p - 1
+toXReg = toXReg[2:end]
+end
+
+if addZIntercept==false && data.predictors.hasZIntercept==true
+data.predictors.Z = remove_intercept(data.predictors.Z)
+data.predictors.hasZIntercept = false
+data.q = data.q - 1
+toZReg = toZReg[2:end]
+end
+
+# Update toXReg and toZReg accordingly when intercept is already included
+if addXIntercept==true && data.predictors.hasXIntercept==true
+toXReg[1] = toXInterceptReg
+end
+if addZIntercept==true && data.predictors.hasZIntercept==true
+toZReg[1] = toZInterceptReg
+end
+
+# Matrix to keep track of which coefficients to regularize.
+reg = toXReg.*transpose(toZReg) 
+# Indices corresponding to regularized X covariates. 
+regXidx = findall(toXReg) 
+# Indices corresponding to regularized Z covariates. 
+regZidx = findall(toZReg) 
+
+# Centers and normalizes predictors, if necessary. 
+if (toNormalize==true)
+# If predictors will be standardized, copy the predictor matrices.
+X = copy(get_X(data))
+Z = copy(get_Z(data))
+
+# Centers and normalizes predictors
+meansX, normsX, = normalize!(X, addXIntercept) 
+meansZ, normsZ, = normalize!(Z, addZIntercept)
+# If X and Z are standardized, set the norm to nothing
+norms = nothing 
+else 
+# If not standardizing, create pointers for the predictor matrices
+X = data.predictors.X
+Z = data.predictors.Z
+
+# Calculate the norm matrix
+# 2d array of norms corresponding to each coefficient
+norms = transpose(sum(X.^2, dims=1)).*sum(Z.^2, dims=1) 
+end
+
+# If chosen method is ista!/fista! with fixed step size and setStepsize is 
+# true, compute the step size:
+# if length(string(fun)) > 7 && (string(fun)[(end-7):end] == "istaNet!") && #to delete
+#    setStepsize == true
+if (string(fun) == "ista!" || string(fun) == "fista!") && 
+setStepsize == true
+
+# Calculate and store transpose(X)*X
+XTX = transpose(X)*X
+# Calculate and store transpose(Z)*Z
+ZTZ = transpose(Z)*Z 
+
+# Step size is the reciprocal of the maximum eigenvalue of kron(Z, X)
+if toNormalize==true
+# Standardizing X and Z results in complex eigenvalues
+
+# Hack is to square the singular values to get the eigenvalues
+eig_X = (svd(XTX).S).^2
+eig_Z = (svd(ZTZ).S).^2
+
+stepsize = 1/max(maximum(eig_X) * maximum(eig_Z), 
+               minimum(eig_X) * minimum(eig_Z))
+else 
+stepsize = 1/max(eigmax(XTX) * eigmax(ZTZ),
+               eigmin(XTX) * eigmin(ZTZ))
+end
+
+println_verbose(string("Fixed step size set to ", stepsize), 
+          isVerbose) 
+end
+
+# Run the specified Elastic-net penalty method on the supplied inputs. 
+coeffs = mlmnet_pathwise(fun, X, get_Y(data), Z, lambdas, alphas, regXidx, 
+               regZidx, reg, norms; isVerbose=isVerbose, 
+               stepsize=stepsize, funArgs...)
+
+# Perform the direct scaling transformation to undo double-shrinkage 
+# in the Naive Elastic-net solutions:
+if !isNaive
+for i in 1:length(alphas), j in 1:length(lambdas)
+lambdaL2 = lambdas[j]*(1-alphas[i])
+coeffs[:, :, j, i] *= (1+lambdaL2) 
+end
+end
+
+# # Back-transform coefficient estimates, if necessary. 
+# # Case if including both X and Z intercepts:
+# if toNormalize == true && (addXIntercept==true) && (addZIntercept==true)
+# backtransform!(coeffs, meansX, meansZ, normsX, normsZ, get_Y(data), 
+#          data.predictors.X, data.predictors.Z)
+#         #  data_old.predictors.X, data_old.predictors.Z)
+# elseif toNormalize == true # Otherwise
+# backtransform!(coeffs, addXIntercept, addZIntercept, meansX, meansZ, 
+#          normsX, normsZ)
+# end
+
+# lambdasL1 = lambdas.*alphas;
+# lambdasL2 = lambdas.*(1 .- alphas);
+
+# return Mlmnet(coeffs, lambdas, alphas, lambdasL1, lambdasL2, data)
+return Mlmnet(coeffs, lambdas, alphas, data)
 end
 
 
