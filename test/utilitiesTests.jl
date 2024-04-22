@@ -210,5 +210,49 @@ mlmnet_est = mlmnet(
 
 println("Backtransform test  α=0 and λ=0 test 3-d: ", @test isapprox(mlm_est.B, mlmnet_est.B, atol = 1e-5))
 
+###################################
+# TEST 3: test normalize function #
+###################################
+
+
+
+function is_normalized(A)
+    for col in eachcol(A)
+        if norm(col) ≈ 1.0 || all(iszero, col)
+            continue
+        else
+            return false
+        end
+    end
+    return true
+end
+
+using MatrixLMnet: normalize!, norm, mean
+
+@testset "With Intercept" begin
+    A = hcat(ones(10), rand(Float64, 10, 3) * 100)
+    original_A = copy(A)
+    means, norms = normalize!(A, true)
+    
+    # Check normalization
+    @test is_normalized(A)
+    @test means == mean(original_A, dims=1)
+    @test !(A[:, 1] ≈ zeros(size(A, 1), 1))
+    @test ones(1, size(A, 2)) ≈  mapslices(col -> norm(col), A, dims = 1)
+end
+
+# @testset "Without Intercept" begin
+    A = rand(Float64, 10, 3) * 100
+    original_A = copy(A)
+    means, norms = normalize!(A, false)
+    
+    # Check normalization
+    @test is_normalized(A)
+    @test means == mean(original_A, dims=1)
+    @test ones(1, size(A, 2)) ≈  mapslices(col -> norm(col), A, dims = 1)
+# end
+
+
+
 
 println("Tests utilities finished!")
