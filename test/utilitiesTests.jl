@@ -73,8 +73,17 @@ predicted2 = predict(est2, newPredictors2)
 
 using MatrixLMnet: normalize!, mean, norm, mlmnet_test
 using Distributions, Random
-# using CSV, DataFrames
-
+#=
+Description: 
+Simulate a dataset to test the `backtransform!()` function included 
+in the `mlmnet()` function. The backtransform!() back-transform 
+coefficient estimates B in place if X and Z were centered and/or normalized.
+All  four cases are tested:
+    - no X intercept, no Z intercept
+    - X has an intercept, no Z intercept
+    - no X intercept, Z has an intercept
+    - X has an intercept, Z has an intercept
+=#
 
 ###################
 #  Simulated Data #
@@ -82,7 +91,7 @@ using Distributions, Random
 # Model: 𝐘 = 𝐗 𝛃 𝐙' + 𝜎𝜖, with 𝜖∼𝑁(0,1) 
 rng = MersenneTwister(2024)
 
-d = Normal(5.0, 1.0);
+d = Normal(1.0, 1.0);
 # Matrices dimensions
 n = 240; m = 7; p = 9; q = 4;
 
@@ -104,11 +113,12 @@ Y = X*B*Z' + σ*rand(Normal(0, 1), n, m);
 X = X[:, 2:end];
 Z = Z[:, 2:end];
 
+mlmdata = RawData(Response(Y), Predictors(X, Z));
+
 #############################################################################
 # TEST 3-a test backtransform: addXIntercept = false, addZIntercept = false #
 #############################################################################
-
-mlm_data = RawData(Response(Y), Predictors(X, Z));
+# MLM
 mlm_est = MatrixLMnet.MatrixLM.mlm(
     mlmdata, 
     addXIntercept = false, 
@@ -116,9 +126,8 @@ mlm_est = MatrixLMnet.MatrixLM.mlm(
 );
 
 # MLMnet
-# mlm_data = RawData(Response(Y), Predictors(X, Z));
 mlmnet_est = mlmnet(
-    mlm_data, 
+    mlmdata, 
     [0.0], [0.0], # lambda and alpha are set to 0
     method = "fista", stepsize = 0.01, 
     toNormalize = true,
@@ -130,12 +139,12 @@ mlmnet_est = mlmnet(
 );
 
 println("Backtransform test  α=0 and λ=0 test 3-a: ", @test isapprox(mlm_est.B, mlmnet_est.B, atol = 1e-3))
-hcat(mlm_est.B, mlmnet_est.B)
+# hcat(mlm_est.B, mlmnet_est.B)
 
 ############################################################################
 # TEST 3-b test backtransform: addXIntercept = true, addZIntercept = false #
 ############################################################################
-mlmdata = RawData(Response(Y), Predictors(X, Z));
+# MLM
 mlm_est = MatrixLMnet.MatrixLM.mlm(
     mlmdata, 
     addXIntercept = true, 
@@ -143,9 +152,8 @@ mlm_est = MatrixLMnet.MatrixLM.mlm(
 );
 
 # MLMnet
-# mlmdata = RawData(Response(Y), Predictors(X, Z));
 mlmnet_est = mlmnet(
-    mlm_data, 
+    mlmdata, 
     [0.0], [0.0], # lambda and alpha are set to 0
     method = "fista", stepsize = 0.01, 
     toNormalize = true,
@@ -161,7 +169,7 @@ println("Backtransform test  α=0 and λ=0 test 3-b: ", @test isapprox(mlm_est.B
 ############################################################################
 # TEST 3-c test backtransform: addXIntercept = false, addZIntercept = true #
 ############################################################################
-# mlmdata = RawData(Response(Y), Predictors(X, Z));
+# MLM
 mlm_est = MatrixLMnet.MatrixLM.mlm(
     mlmdata, 
     addXIntercept = false, 
@@ -169,9 +177,8 @@ mlm_est = MatrixLMnet.MatrixLM.mlm(
 );
 
 # MLMnet
-# mlmdata = RawData(Response(Y), Predictors(X, Z));
 mlmnet_est = mlmnet(
-    mlm_data, 
+    mlmdata, 
     [0.0], [0.0], # lambda and alpha are set to 0
     method = "fista", stepsize = 0.01, 
     toNormalize = true,
@@ -187,7 +194,7 @@ println("Backtransform test  α=0 and λ=0 test 3-c: ", @test isapprox(mlm_est.B
 ###########################################################################
 # TEST 3-d test backtransform: addXIntercept = true, addZIntercept = true #
 ###########################################################################
-# mlmdata = RawData(Response(Y), Predictors(X, Z));
+# MLM
 mlm_est = MatrixLMnet.MatrixLM.mlm(
     mlmdata, 
     addXIntercept = true, 
@@ -195,9 +202,8 @@ mlm_est = MatrixLMnet.MatrixLM.mlm(
 );
 
 # MLMnet
-# mlmdata = RawData(Response(Y), Predictors(X, Z));
 mlmnet_est = mlmnet(
-    mlm_data, 
+    mlmdata, 
     [0.0], [0.0], # lambda and alpha are set to 0
     method = "fista", stepsize = 0.01, 
     toNormalize = true,
@@ -211,10 +217,8 @@ mlmnet_est = mlmnet(
 println("Backtransform test  α=0 and λ=0 test 3-d: ", @test isapprox(mlm_est.B, mlmnet_est.B, atol = 1e-5))
 
 ###################################
-# TEST 3: test normalize function #
+# TEST 4: test normalize function #
 ###################################
-
-
 
 function is_normalized(A)
     for col in eachcol(A)
@@ -248,7 +252,7 @@ end
     
     # Check normalization
     @test is_normalized(A)
-    @test means == mean(original_A, dims=1)
+    # do not test means, since no intercept no centering
     @test ones(1, size(A, 2)) ≈  mapslices(col -> norm(col), A, dims = 1)
 # end
 

@@ -9,4 +9,5 @@ using Test
     include("mlmnetCvTests.jl")
     include("summaryCvTests.jl")
     include("mlmnetBicTests.jl")
+    include("utilitiesTests.jl")
 end
