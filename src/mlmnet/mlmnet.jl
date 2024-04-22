@@ -262,7 +262,6 @@ function mlmnet(data::RawData,
     end 
     
     # create a copy of data to preserve original values and structure
-    data_old = RawData(Response(data.response.Y),Predictors(data.predictors.X, data.predictors.Z))
     data = RawData(Response(data.response.Y),Predictors(data.predictors.X, data.predictors.Z))
 
 
@@ -380,11 +379,7 @@ function mlmnet(data::RawData,
 
     # Back-transform coefficient estimates, if necessary. 
     # Case if including both X and Z intercepts:
-    if toNormalize == true && (addXIntercept==true) && (addZIntercept==true)
-        backtransform!(coeffs, meansX, meansZ, normsX, normsZ, get_Y(data), 
-                       data.predictors.X, data.predictors.Z)
-                      #  data_old.predictors.X, data_old.predictors.Z)
-    elseif toNormalize == true # Otherwise
+    if toNormalize == true 
         backtransform!(coeffs, addXIntercept, addZIntercept, meansX, meansZ, 
                        normsX, normsZ)
     end

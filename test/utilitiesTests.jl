@@ -72,92 +72,143 @@ predicted2 = predict(est2, newPredictors2)
 #######################################
 
 using MatrixLMnet: normalize!, mean, norm, mlmnet_test
+using Distributions, Random
+# using CSV, DataFrames
 
-flag_intercept = true
 
-# MLM
-# mlmdata = RawData(Response(Y[:,2]|> x->reshape(x,:,1)), 
-    # Predictors(X, Z[1,1]|> x ->reshape([x], :,1)));
-mlmdata = RawData(Response(Y), Predictors(X, Z));
+###################
+#  Simulated Data #
+###################
+# Model: 𝐘 = 𝐗 𝛃 𝐙' + 𝜎𝜖, with 𝜖∼𝑁(0,1) 
+rng = MersenneTwister(2024)
+
+d = Normal(5.0, 1.0);
+# Matrices dimensions
+n = 240; m = 7; p = 9; q = 4;
+
+# Simulate the coefficients matrix B
+list_coefs = [0,1,1.5,2,2.5,3,.5]
+B = rand(list_coefs, p, q)
+
+# Simulate predictors
+X = hcat(ones(n), rand(d, n, p-1));
+
+# Simulate Z
+list_Z_coefs = [0,1]
+Z = hcat(ones(m), rand(list_Z_coefs, m, q-1))
+
+# Simulate Y 
+σ = 3;
+Y = X*B*Z' + σ*rand(Normal(0, 1), n, m);
+
+X = X[:, 2:end];
+Z = Z[:, 2:end];
+
+#############################################################################
+# TEST 3-a test backtransform: addXIntercept = false, addZIntercept = false #
+#############################################################################
+
+mlm_data = RawData(Response(Y), Predictors(X, Z));
 mlm_est = MatrixLMnet.MatrixLM.mlm(
     mlmdata, 
-    addXIntercept = flag_intercept, 
+    addXIntercept = false, 
     addZIntercept = false
 );
 
+# MLMnet
+# mlm_data = RawData(Response(Y), Predictors(X, Z));
+mlmnet_est = mlmnet(
+    mlm_data, 
+    [0.0], [0.0], # lambda and alpha are set to 0
+    method = "fista", stepsize = 0.01, 
+    toNormalize = true,
+    isNaive = false,
+    addXIntercept = false, 
+    addZIntercept = false, 
+    isVerbose = false,
+    thresh = 1e-16 
+);
 
+println("Backtransform test  α=0 and λ=0 test 3-a: ", @test isapprox(mlm_est.B, mlmnet_est.B, atol = 1e-3))
+hcat(mlm_est.B, mlmnet_est.B)
+
+############################################################################
+# TEST 3-b test backtransform: addXIntercept = true, addZIntercept = false #
+############################################################################
+mlmdata = RawData(Response(Y), Predictors(X, Z));
+mlm_est = MatrixLMnet.MatrixLM.mlm(
+    mlmdata, 
+    addXIntercept = true, 
+    addZIntercept = false
+);
 
 # MLMnet
-# mlmdata = RawData(Response(Y[:,2]|> x->reshape(x,:,1)), 
-#     Predictors(X, Z[1,1]|> x ->reshape([x], :,1)));
-mlmdata = RawData(Response(Y), Predictors(X, Z));
+# mlmdata = RawData(Response(Y), Predictors(X, Z));
 mlmnet_est = mlmnet(
-    mlmdata, 
+    mlm_data, 
     [0.0], [0.0], # lambda and alpha are set to 0
     method = "fista", stepsize = 0.01, 
     toNormalize = true,
-    isNaive = false,
-    addZIntercept = false, addXIntercept = flag_intercept, 
-    toXInterceptReg = false,
+    isNaive = true,
+    addXIntercept = true, 
+    addZIntercept = false, 
     isVerbose = false,
     thresh = 1e-16 
 );
 
+println("Backtransform test  α=0 and λ=0 test 3-b: ", @test isapprox(mlm_est.B, mlmnet_est.B, atol = 1e-3))
 
-mlmnet_est_test = mlmnet_test(
+############################################################################
+# TEST 3-c test backtransform: addXIntercept = false, addZIntercept = true #
+############################################################################
+# mlmdata = RawData(Response(Y), Predictors(X, Z));
+mlm_est = MatrixLMnet.MatrixLM.mlm(
     mlmdata, 
+    addXIntercept = false, 
+    addZIntercept = true
+);
+
+# MLMnet
+# mlmdata = RawData(Response(Y), Predictors(X, Z));
+mlmnet_est = mlmnet(
+    mlm_data, 
     [0.0], [0.0], # lambda and alpha are set to 0
     method = "fista", stepsize = 0.01, 
     toNormalize = true,
-    isNaive = false,
-    addZIntercept = false, addXIntercept = flag_intercept, 
-    toXInterceptReg = false,
+    isNaive = true,
+    addXIntercept = false, 
+    addZIntercept = true, 
     isVerbose = false,
     thresh = 1e-16 
 );
 
-# Centers and normalizes predictors
-meansX, normsX, = normalize!(hcat(ones(240), copy(get_X(mlmdata))), true) 
-meansZ, normsZ, = normalize!(copy(get_Z(mlmdata)), false)
+println("Backtransform test  α=0 and λ=0 test 3-c: ", @test isapprox(mlm_est.B, mlmnet_est.B, atol = 1e-3))
 
+###########################################################################
+# TEST 3-d test backtransform: addXIntercept = true, addZIntercept = true #
+###########################################################################
+# mlmdata = RawData(Response(Y), Predictors(X, Z));
+mlm_est = MatrixLMnet.MatrixLM.mlm(
+    mlmdata, 
+    addXIntercept = true, 
+    addZIntercept = true
+);
 
+# MLMnet
+# mlmdata = RawData(Response(Y), Predictors(X, Z));
+mlmnet_est = mlmnet(
+    mlm_data, 
+    [0.0], [0.0], # lambda and alpha are set to 0
+    method = "fista", stepsize = 0.01, 
+    toNormalize = true,
+    isNaive = true,
+    addXIntercept = true, 
+    addZIntercept = true, 
+    isVerbose = false,
+    thresh = 1e-16 
+);
 
-B_t = copy(mlmnet_est_test.B)
-
-
-hcat(mlm_est.B,  B_t, mlmnet_est.B,)
-
-
-isXinterceptexist = true
-isZinterceptexist = false
-
-# reverse scale from X and Z normalization
-B_t[:,:,1,1] = (B_t[:,:,1,1]./permutedims(normsX))./normsZ 
-
-# Back transform the X intercepts (row main effects)
-if isXinterceptexist == true
-    # B̂intercept = Ȳ - X̄ B̂coef. Since X centered, B̂intercept|Xcentered = Ȳ      
-    B_t[1,:,1,1] = B_t[1,:,1,1] - meansX[:,2:end]*B_t[2:end,:,1,1]
-end
-
-# Back transform the Z intercepts (column main effects)
-if isZinterceptexist == true
-    # B̂intercept = Ȳ - Z̄ B̂coef. Since X centered, B̂intercept|Xcentered = Ȳ      
-    B_t[:,1,1,1] = B_t[:,1,1,1] - B_t[:,2:end,1,1]*permutedims(meansZ[:,2:end])
-end
-
-
-
-
-if isXinterceptexist == true
-    prodX = (meansX[:,2:end]./normsX[:,2:end])*B_t[2:end,:,1,1]
-    B_t[1,:,1,1] = (B_t[1,:,1,1]./normsX[:,1]) - vec(prodX)
-end
-
-
-
-
-hcat(mlm_est.B, mlmnet_est.B, B_t)
+println("Backtransform test  α=0 and λ=0 test 3-d: ", @test isapprox(mlm_est.B, mlmnet_est.B, atol = 1e-5))
 
 
 println("Tests utilities finished!")

@@ -157,76 +157,6 @@ end
 
 """
     backtransform!(B::AbstractArray{Float64,4}, 
-                        meansX::AbstractArray{Float64,2}, 
-                        meansZ::AbstractArray{Float64,2}, 
-                        normsX::AbstractArray{Float64,2}, 
-                        normsZ::AbstractArray{Float64,2}, 
-                        Y::AbstractArray{Float64,2}, 
-                        Xold::AbstractArray{Float64,2}, 
-                        Zold::AbstractArray{Float64,2})
-
-Back-transform coefficient estimates B in place if X and Z were standardized 
-prior to the estimation-- when both X and Z include intercept columns. 
-
-# Arguments 
-
-- B = 4d array of coefficient estimates B
-- meansX = 2d array of column means of X, obtained prior to standardizing X
-- meansZ = 2d array of column means of Z, obtained prior to standardizing Z
-- normsX = 2d array of column norms of X, obtained prior to standardizing X
-- normsZ = 2d array of column norms of Z, obtained prior to standardizing Z
-- Y = 2d array of response matrix Y
-- Xold = 2d array row covariates X prior to standardization
-- Zold = 2d array column covariates Z prior to standardization
-
-# Value 
-
-None; back-transforms B in place
-
-# Some notes
-
-B is a 4d array in which each coefficient matrix is stored along the third and fourth
-dimension. 
-
-"""
-function backtransform!(B::AbstractArray{Float64,4}, 
-                        meansX::AbstractArray{Float64,2}, 
-                        meansZ::AbstractArray{Float64,2}, 
-                        normsX::AbstractArray{Float64,2}, 
-                        normsZ::AbstractArray{Float64,2}, 
-                        Y::AbstractArray{Float64,2}, 
-                        Xold::AbstractArray{Float64,2}, 
-                        Zold::AbstractArray{Float64,2})
-
-    # Iterate through the first dimension of B to back-transform each 
-	# coefficient matrix. 
-    for j in 1:size(B,4)
-        for i in 1:size(B,3)  
-            # Back transform the X intercepts (row main effects)
-            prodX = (meansX[:,2:end]./normsX[:,2:end])*B[2:end, 2:end,i,j]
-            B[1,2:end,i,j] = (B[1,2:end,i,j]-vec(prodX))./vec(normsZ[:,2:end])/
-                                                    normsX[1,1]
-            
-            # Back transform the Z intercepts (column main effects)
-            prodZ = B[2:end,2:end,i,j]*transpose(meansZ[:,2:end]./normsZ[:,2:end])
-            B[2:end,1,i,j] = (B[2:end,1,i,j]-prodZ)./transpose(normsX[:,2:end])/
-                                                normsZ[1,1]
-            
-            # Back transform the interactions
-            B[2:end,2:end,i,j] = B[2:end,2:end,i,j]./transpose(normsX[:,2:end])./
-                                                normsZ[:,2:end]
-            
-            # Re-estimate intercept
-            B[1,1,i,j] = 0
-            B[1,1,i,j] = mean(Y-Xold*B[:,:,i,j]*transpose(Zold))
-        end
-    end
-end
-
-
-
-"""
-    backtransform!(B::AbstractArray{Float64,4}, 
                         addXIntercept::Bool, addZIntercept::Bool, 
                         meansX::AbstractArray{Float64,2}, 
                         meansZ::AbstractArray{Float64,2}, 
@@ -270,31 +200,22 @@ function backtransform!(B::AbstractArray{Float64,4},
 	# coefficient matrix: 
     for j in 1:size(B,4) 
         for i in 1:size(B,3) 
-            # Back transform the X intercepts (row main effects), if necessary 
-            if addXIntercept == true 
-                prodX = (meansX[:,2:end]./normsX[:,2:end])*B[2:end,2:end,i,j]
-                B[1,2:end,i,j] = (B[1,2:end,i,j]-vec(prodX))./vec(normsZ[:,2:end])/
-                                                        normsX[1,1]
+
+            # reverse scale from X and Z normalization
+            B[:,:,i,j] = (B[:,:,i,j]./permutedims(normsX))./normsZ 
+
+            # Back transform the X intercepts (row main effects)
+            if addXIntercept == true
+                # B̂intercept = Ȳ - X̄ B̂coef. Since X centered, B̂intercept|Xcentered = Ȳ      
+                B[1,:,i,j] = B[1,:,i,j] - vec(meansX[:,2:end]*B[2:end,:,i,j])
             end
-        
-            # Back transform the Z intercepts (column main effects), if necessary
-            if addZIntercept == true 
-                prodZ = B[2:end,2:end,i,j]*transpose(meansZ[:,2:end]./
-                    normsZ[:,2:end])
-                B[2:end,1,i,j] = (B[2:end,1,i,j]-prodZ)./transpose(normsX[:,2:end])/
-                                                    normsZ[1,1]
+
+            # Back transform the Z intercepts (column main effects)
+            if addZIntercept == true
+                # B̂intercept = Ȳ - Z̄ B̂coef. Since X centered, B̂intercept|Xcentered = Ȳ      
+                B[:,1,i,j] = B[:,1,i,j] - B[:,2:end,i,j]*permutedims(meansZ[:,2:end])
             end
-        
-            # Back transform the interactions, if necessary
-            if (addXIntercept == true) || (addZIntercept == true) 
-                B[2:end,2:end,i,j] = B[2:end,2:end,i,j]./transpose(normsX[:,2:end])./
-                                                    normsZ[:,2:end]
-            end
-        
-            # Back transform the interactions if not including any main effects
-            if (addXIntercept == false) && (addZIntercept == false) 
-                B[:,:,i,j] = B[:,:,i,j]./transpose(normsX)./normsZ
-            end
+            
         end
     end
 end
