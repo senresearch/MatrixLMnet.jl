@@ -56,7 +56,7 @@ row_folds = [mrow_folds[:,i] for i in 1:size(mrow_folds, 2)]
 mcol_folds = Helium.readhe(joinpath(dataDir, "col_folds.he"))
 col_folds = [mcol_folds[:,i] for i in 1:size(mcol_folds, 2)]
 
-rng = MatrixLMnet.Random.Xoshiro(2021);
+rng = MatrixLMnet.Random.MersenneTwister(2021);
 #############################################
 # TEST 1 Lasso vs Elastic Net (𝛼=1) - ista #
 #############################################
