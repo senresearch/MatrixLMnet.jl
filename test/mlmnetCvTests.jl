@@ -143,12 +143,12 @@ println("CV Lasso vs Elastic Net when α=1 test 4 - admm: ",
 ##########################################
 
 # Elastic net penalized regression
-MatrixLMnet.Random.seed!(rng)
+MatrixLMnet.Random.seed!(rng, 2024)
 est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, row_folds, col_folds, method = "cd", addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Net1 = MatrixLMnet.lambda_min(est1);
 
 # Elastic net penalized regression
-MatrixLMnet.Random.seed!(rng)
+MatrixLMnet.Random.seed!(rng, 2024)
 est2 = MatrixLMnet.mlmnet_cv(dat, λ, row_folds, col_folds, method = "cd",  addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Net2 = MatrixLMnet.lambda_min(est2);
 
