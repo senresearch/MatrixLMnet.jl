@@ -540,3 +540,57 @@ function mlmnet_cv(data::RawData,
                   stepsize=stepsize, setStepsize=setStepsize, dig=dig, funArgs...)
 
 end
+
+
+"""
+    mlmnet_cv(data::RawData, 
+                      lambdas::Array{Float64,1},
+                      rowFolds::Array{Array{Int64,1},1}, 
+                      colFolds::Array{Array{Int64,1},1}
+                      method::String="ista", 
+                      isNaive::Bool=false,
+                      addXIntercept::Bool=true, addZIntercept::Bool=true, 
+                      toXReg::BitArray{1}=trues(size(get_X(data), 2)), 
+                      toZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
+                      toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
+                      toNormalize::Bool=true, isVerbose::Bool=true, 
+                      stepsize::Float64=0.01, setStepsize::Bool=true, 
+                      dig::Int64=12, funArgs...)
+
+Performs cross-validation for `mlmnet` using non-overlapping row and column 
+folds randomly generated using calls to `make_folds`. Calls the base 
+`mlmnet_cv` function. 
+
+
+"""
+
+function mlmnet_cv(data::RawData, 
+                      lambdas::Array{Float64,1},
+                      rowFolds::Array{Array{Int64,1},1}, 
+                      colFolds::Array{Array{Int64,1},1};
+                      method::String="ista", 
+                      isNaive::Bool=false,
+                      addXIntercept::Bool=true, addZIntercept::Bool=true, 
+                      toXReg::BitArray{1}=trues(size(get_X(data), 2)), 
+                      toZReg::BitArray{1}=trues(size(get_Z(data), 2)), 
+                      toXInterceptReg::Bool=false, toZInterceptReg::Bool=false, 
+                      toNormalize::Bool=true, isVerbose::Bool=true, 
+                      stepsize::Float64=0.01, setStepsize::Bool=true, 
+                      dig::Int64=12, funArgs...)
+
+
+
+    alphas = [1.0]
+
+    # Pass in randomly generated row and column folds to the base mlmnet_cv 
+    # function
+    mlmnet_cv(data, lambdas, alphas, rowFolds, colFolds; 
+                  method=method, isNaive=isNaive, 
+                  addXIntercept=addXIntercept, addZIntercept=addZIntercept, 
+                  toXReg=toXReg, toZReg=toZReg, 
+                  toXInterceptReg=toXInterceptReg, 
+                  toZInterceptReg=toZInterceptReg, 
+                  isVerbose=isVerbose, toNormalize=toNormalize, 
+                  stepsize=stepsize, setStepsize=setStepsize, dig=dig, funArgs...)
+
+end

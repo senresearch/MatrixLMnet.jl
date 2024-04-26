@@ -7,9 +7,10 @@
 ###########
 # Library #
 ###########
-# using Distributions, Random, Statistics, LinearAlgebra, StatsBase
+using Distributions, Random, Statistics, LinearAlgebra, StatsBase
+# using StableRNGs
 # using DataFrames, MLBase, Distributed
-using MatrixLMnet #v0.1.0
+using MatrixLMnet #v1.1.1
 # using Test
 using Helium
 
@@ -38,7 +39,7 @@ The pairwise correlation between 𝑋ᵢ and 𝑋ⱼ was set to be 𝑐𝑜𝑟(
 Here, the Z matrix is an identity matrix.
 =#
 
-rng = MersenneTwister(2021)
+rng = MatrixLMnet.Random.Xoshiro(2021);
 
 # Simulation parameters
 p = 8; # Number of predictors
@@ -69,7 +70,7 @@ dat = MatrixLMnet.MatrixLM.RawData(Response(Y), Predictors(X, Z));
 
 # Hyper parameters
 λ = [10.0, 5.0, 3.0]
-
+α =[1.0]
 
 
 ###############
@@ -77,59 +78,64 @@ dat = MatrixLMnet.MatrixLM.RawData(Response(Y), Predictors(X, Z));
 ###############
 
 # Lasso penalized regression - ista
-est = mlmnet(ista!, dat, λ, addZIntercept = false, addXIntercept = false, isVerbose = false);
+est = mlmnet(dat, λ, method = "ista", addZIntercept = false, addXIntercept = false, isVerbose = false);
 est_B_Lasso_ista = est.B[:, :, 3];
 
 # Lasso penalized regression - fista
-est = mlmnet(fista!, dat, λ, addZIntercept = false, addXIntercept = false, isVerbose = false);
+est = mlmnet(dat, λ, method = "fista", addZIntercept = false, addXIntercept = false, isVerbose = false);
 est_B_Lasso_fista = est.B[:, :, 3];
 
 # Lasso penalized regression - fista backtracking
-est = mlmnet(fista_bt!, dat, λ, addZIntercept = false, addXIntercept = false, isVerbose = false);
+MatrixLMnet.Random.seed!(rng, 2024)
+est = mlmnet(dat, λ, method = "fista_bt", addZIntercept = false, addXIntercept = false, isVerbose = false); 
 est_B_Lasso_fista_bt = est.B[:, :, 3];
 
 # Lasso penalized regression - admm
-est = mlmnet(admm!, dat, λ, addZIntercept = false, addXIntercept = false, isVerbose = false);
+est = mlmnet(dat, λ, method = "admm", addZIntercept = false, addXIntercept = false, isVerbose = false);
 est_B_Lasso_admm = est.B[:, :, 3];
 
 # Lasso penalized regression - cd
-Random.seed!(rng)
-est = mlmnet(cd!, dat, λ, addZIntercept = false, addXIntercept = false, isVerbose = false);
+MatrixLMnet.Random.seed!(rng, 2024)
+est = mlmnet(dat, λ, method = "cd", addZIntercept = false, addXIntercept = false, isVerbose = false);
 est_B_Lasso_cd = est.B[:, :, 3];
 
 #################################
 # TEST Lasso - Crossvalidation  #
 #################################
 
+# Generate random row and column folds
+nRowFolds = 10
+nColFolds = 1
+
+MatrixLMnet.Random.seed!(rng, 2024)
+rowFolds = make_folds(dat.n, nRowFolds, max(nRowFolds, nColFolds))
+
+MatrixLMnet.Random.seed!(rng, 2024)
+colFolds = make_folds(dat.m, nColFolds, max(nRowFolds, nColFolds))
 
 # Lasso penalized regression - ista cv
-Random.seed!(rng)
-est = mlmnet_cv(ista!, dat, λ, 10, 1, addZIntercept = false, addXIntercept = false, isVerbose = false);
-smmr_Lasso = lambda_min_deprecated(est);
+est = mlmnet_cv(dat, λ, rowFolds, colFolds; method = "ista", addZIntercept = false, addXIntercept = false, isVerbose = false); 
+smmr_Lasso = lambda_min(est);
 smmr_ista = hcat(smmr_Lasso.AvgMSE, smmr_Lasso.AvgPropZero)
 
 # Lasso penalized regression - fista cv
-Random.seed!(rng)
-est = mlmnet_cv(fista!, dat, λ, 10, 1, addZIntercept = false, addXIntercept = false, isVerbose = false);
-smmr_Lasso = lambda_min_deprecated(est);
+est = mlmnet_cv(dat, λ, rowFolds, colFolds; method = "fista", addZIntercept = false, addXIntercept = false, isVerbose = false); 
+smmr_Lasso = lambda_min(est);
 smmr_fista = hcat(smmr_Lasso.AvgMSE, smmr_Lasso.AvgPropZero)
 
 # Lasso penalized regression - fista-bt cv
-Random.seed!(rng)
-est = mlmnet_cv(fista_bt!, dat, λ, 10, 1, addZIntercept = false, addXIntercept = false, isVerbose = false);
-smmr_Lasso = lambda_min_deprecated(est);
+est = mlmnet_cv(dat, λ, rowFolds, colFolds; method = "fista_bt", addZIntercept = false, addXIntercept = false, isVerbose = false); 
+smmr_Lasso = lambda_min(est);
 smmr_fistabt = hcat(smmr_Lasso.AvgMSE, smmr_Lasso.AvgPropZero)
 
 # Lasso penalized regression - admm cv
-Random.seed!(rng)
-est = mlmnet_cv(admm!, dat, λ, 10, 1, addZIntercept = false, addXIntercept = false, isVerbose = false);
-smmr_Lasso = lambda_min_deprecated(est);
+est = mlmnet_cv(dat, λ, rowFolds, colFolds; method = "admm", addZIntercept = false, addXIntercept = false, isVerbose = false); 
+smmr_Lasso = lambda_min(est);
 smmr_admm = hcat(smmr_Lasso.AvgMSE, smmr_Lasso.AvgPropZero)
 
 # Lasso penalized regression - cd cv
-Random.seed!(rng)
-est = mlmnet_cv(cd!, dat, λ, 10, 1, addZIntercept = false, addXIntercept = false, isVerbose = false);
-smmr_Lasso = lambda_min_deprecated(est);
+est = mlmnet_cv(dat, λ, rowFolds, colFolds; method = "cd", addZIntercept = false, addXIntercept = false, isVerbose = false); 
+smmr_Lasso = lambda_min(est);
 smmr_cd = hcat(smmr_Lasso.AvgMSE, smmr_Lasso.AvgPropZero)
 
 
@@ -144,6 +150,22 @@ dataDir = realpath(joinpath(@__DIR__,"data"))
 Helium.writehe(X, joinpath(dataDir, "Xmat.he"))
 Helium.writehe(Y, joinpath(dataDir, "Ymat.he"))
 Helium.writehe(Z, joinpath(dataDir, "Zmat.he"))
+
+
+# Save folding indexes
+mrowFolds = Matrix{Int64}(undef, length(rowFolds[1]), length(rowFolds))
+for i in 1:length(rowFolds)
+    mrowFolds[:,i] = rowFolds[i]
+end 
+ 
+mcolFolds = Matrix{Int64}(undef, length(colFolds[1]), length(colFolds))
+for i in 1:length(colFolds)
+    mcolFolds[:,i] = colFolds[i]
+end 
+
+Helium.writehe(mrowFolds, joinpath(dataDir, "row_folds.he"))
+Helium.writehe(mcolFolds, joinpath(dataDir, "col_folds.he"))
+
 
 # Save estimates results
 Helium.writehe(est_B_Lasso_ista, joinpath(dataDir, "B_ista.he"))

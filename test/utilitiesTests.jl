@@ -38,7 +38,7 @@ rng = MatrixLMnet.Random.MersenneTwister(2021)
 
 est = mlmnet(dat, λ, α, method = "cd", addZIntercept = true, addXIntercept = true, isVerbose = true)
 
-predicted = predict(est, est.data.predictors)
+predicted = MatrixLMnet.predict(est, est.data.predictors)
 
 #Test the function predict
 #println(size(predicted[:,:,1,1] ))
@@ -58,10 +58,10 @@ end
 #################################
 
 newPredictors = Predictors(X, Z, false, false)
-predicted = predict(est, newPredictors)
+predicted = MatrixLMnet.predict(est, newPredictors)
 est2 = mlmnet(dat, λ, α, method = "cd", addZIntercept = false, addXIntercept = false, isVerbose = true)
 newPredictors2 = Predictors(hcat(ones(size(X, 1)), X), hcat(ones(size(Z, 1)), Z), true, true)
-predicted2 = predict(est2, newPredictors2)
+predicted2 = MatrixLMnet.predict(est2, newPredictors2)
 
 @test size(predicted[:,:,1,1] ) == size(predicted2[:,:,1,1] )
 

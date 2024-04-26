@@ -42,8 +42,6 @@ dat = RawData(Response(Y), Predictors(X, Z));
 λ = [10.0, 5.0, 3.0]
 α = [1.0]
 
-rng = 2021#MatrixLMnet.Random.MersenneTwister(2021)
-
 numVersion = VERSION
 if Int(numVersion.minor) < 7
       tolVersion=2e-1
@@ -51,18 +49,25 @@ else
       tolVersion=1e-5
 end 
 
+# Folding indices
+mrow_folds = Helium.readhe(joinpath(dataDir, "row_folds.he"))
+row_folds = [mrow_folds[:,i] for i in 1:size(mrow_folds, 2)]
+
+mcol_folds = Helium.readhe(joinpath(dataDir, "col_folds.he"))
+col_folds = [mcol_folds[:,i] for i in 1:size(mcol_folds, 2)]
+
+rng = MatrixLMnet.Random.Xoshiro(2021);
 #############################################
 # TEST 1 Lasso vs Elastic Net (𝛼=1) - ista #
 #############################################
 
 # Elastic net penalized regression
-MatrixLMnet.Random.seed!(rng)
-est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "ista", addZIntercept = false, addXIntercept = false, isVerbose = false);
+est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, row_folds, col_folds, method = "ista", addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Net1 = MatrixLMnet.lambda_min(est1);
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "ista",  addZIntercept = false, addXIntercept = false, isVerbose = false);
+est2 = MatrixLMnet.mlmnet_cv(dat, λ, row_folds, col_folds, method = "ista",  addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Net2 = MatrixLMnet.lambda_min(est2);
 
 # Lasso penalized regression - ista cv
@@ -77,13 +82,11 @@ println("CV Lasso vs Elastic Net when α=1 test 1 - ista: ",
 #############################################
 
 # Elastic net penalized regression
-MatrixLMnet.Random.seed!(rng)
-est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "fista", addZIntercept = false, addXIntercept = false, isVerbose = false);
+est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, row_folds, col_folds, method = "fista", addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Net1 = MatrixLMnet.lambda_min(est1);
 
 # Elastic net penalized regression
-MatrixLMnet.Random.seed!(rng)
-est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "fista",  addZIntercept = false, addXIntercept = false, isVerbose = false);
+est2 = MatrixLMnet.mlmnet_cv(dat, λ, row_folds, col_folds, method = "fista",  addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Net2 = MatrixLMnet.lambda_min(est2);
 
 # Lasso penalized regression - fista cv
@@ -99,12 +102,12 @@ println("CV Lasso vs Elastic Net when α=1 test 2 - fista: ",
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "fista_bt", addZIntercept = false, addXIntercept = false, isVerbose = false);
+est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, row_folds, col_folds, method = "fista_bt", addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Net1 = MatrixLMnet.lambda_min(est1);
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "fista_bt",  addZIntercept = false, addXIntercept = false, isVerbose = false);
+est2 = MatrixLMnet.mlmnet_cv(dat, λ, row_folds, col_folds, method = "fista_bt",  addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Net2 = MatrixLMnet.lambda_min(est2);
 
 # Lasso penalized regression - fista-bt cv
@@ -120,13 +123,12 @@ println("CV Lasso vs Elastic Net when α=1 test 3 - fista-bt: ",
 ############################################
 
 # Elastic net penalized regression
-MatrixLMnet.Random.seed!(rng)
-est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "admm", addZIntercept = false, addXIntercept = false, isVerbose = false);
+est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, row_folds, col_folds, method = "admm", addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Net1 = MatrixLMnet.lambda_min(est1);
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "admm",  addZIntercept = false, addXIntercept = false, isVerbose = false);
+est2 = MatrixLMnet.mlmnet_cv(dat, λ, row_folds, col_folds, method = "admm",  addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Net2 = MatrixLMnet.lambda_min(est2);
 
 # Lasso penalized regression - fista-bt cv
@@ -142,12 +144,12 @@ println("CV Lasso vs Elastic Net when α=1 test 4 - admm: ",
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, 10, 1, method = "cd", addZIntercept = false, addXIntercept = false, isVerbose = false);
+est1 = MatrixLMnet.mlmnet_cv(dat, λ, α, row_folds, col_folds, method = "cd", addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Net1 = MatrixLMnet.lambda_min(est1);
 
 # Elastic net penalized regression
 MatrixLMnet.Random.seed!(rng)
-est2 = MatrixLMnet.mlmnet_cv(dat, λ, 10, 1, method = "cd",  addZIntercept = false, addXIntercept = false, isVerbose = false);
+est2 = MatrixLMnet.mlmnet_cv(dat, λ, row_folds, col_folds, method = "cd",  addZIntercept = false, addXIntercept = false, isVerbose = false);
 smmr_Net2 = MatrixLMnet.lambda_min(est2);
 
 # Lasso penalized regression - cd cv
