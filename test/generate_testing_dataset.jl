@@ -8,7 +8,7 @@
 # Library #
 ###########
 using Distributions, Random, Statistics, LinearAlgebra, StatsBase
-# using StableRNGs
+using StableRNGs
 # using DataFrames, MLBase, Distributed
 using MatrixLMnet #v1.1.1
 # using Test
@@ -39,7 +39,7 @@ The pairwise correlation between 𝑋ᵢ and 𝑋ⱼ was set to be 𝑐𝑜𝑟(
 Here, the Z matrix is an identity matrix.
 =#
 
-rng = MatrixLMnet.Random.MersenneTwister(2021);
+rng = rng = StableRNG(123) # MatrixLMnet.Random.MersenneTwister(2021);
 
 # Simulation parameters
 p = 8; # Number of predictors
@@ -124,6 +124,7 @@ smmr_Lasso = lambda_min(est);
 smmr_fista = hcat(smmr_Lasso.AvgMSE, smmr_Lasso.AvgPropZero)
 
 # Lasso penalized regression - fista-bt cv
+MatrixLMnet.Random.seed!(rng, 2024)
 est = mlmnet_cv(dat, λ, rowFolds, colFolds; method = "fista_bt", addZIntercept = false, addXIntercept = false, isVerbose = false); 
 smmr_Lasso = lambda_min(est);
 smmr_fistabt = hcat(smmr_Lasso.AvgMSE, smmr_Lasso.AvgPropZero)

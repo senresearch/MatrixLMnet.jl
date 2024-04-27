@@ -1,4 +1,5 @@
 using MatrixLMnet
+using StableRNGs
 using Distributions, LinearAlgebra
 using Helium
 using Test

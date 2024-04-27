@@ -46,7 +46,7 @@ dat = RawData(Response(Y), Predictors(X, Z));
 λ = [10.0, 5.0, 3.0]
 α = [1.0]
 
-rng = MatrixLMnet.Random.MersenneTwister(2021);
+rng = StableRNG(123) # MatrixLMnet.Random.MersenneTwister(2021);
 
 #############################################
 # TEST 1a Lasso vs Elastic Net (𝛼=1) - ista #
