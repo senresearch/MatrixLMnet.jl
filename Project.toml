@@ -1,7 +1,7 @@
 name = "MatrixLMnet"
 uuid = "436227dc-6146-11e9-240b-9df6ee45b799"
 authors = ["Jane Liang", "Zifan Yu", "Gregory Farage", "Saunak Sen"]
-version = "1.1.0"
+version = "1.1.1"
 
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
@@ -24,7 +24,8 @@ julia = "1.6.4, 1"
 [extras]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Helium = "3f79f04f-7cac-48b4-bde1-3ad54d8f74fa"
+StableRNGs = "860ef19b-820b-49d6-a774-d7a799459cd3"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Distributions", "Helium", "Test"]
+test = ["Distributions", "Helium", "StableRNGs", "Test"]

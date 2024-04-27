@@ -1,4 +1,5 @@
 using MatrixLMnet
+using StableRNGs
 using Distributions, LinearAlgebra
 using Helium
 using Test
@@ -9,4 +10,6 @@ using Test
     include("mlmnetCvTests.jl")
     include("summaryCvTests.jl")
     include("mlmnetBicTests.jl")
+    include("utilitiesTests.jl")
+    include("mlmnetCV_helpersTests.jl")
 end
