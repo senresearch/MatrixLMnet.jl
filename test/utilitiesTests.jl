@@ -71,7 +71,7 @@ predicted2 = MatrixLMnet.predict(est2, newPredictors2)
 # TEST 3: test backtransform function #
 #######################################
 
-using MatrixLMnet: normalize!, mean, norm, mlmnet_test
+using MatrixLMnet: normalize!, mean, norm
 using Distributions, Random
 #=
 Description: 
