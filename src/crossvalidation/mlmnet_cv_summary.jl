@@ -152,12 +152,19 @@ function lambda_min(MLMNet_cv::Mlmnet_cv)
     minIdy = argmin(mseMean)[2]
     
     # Compute standard error across folds for the minimum MSE
-    mse1StdErr = mseMean[minIdx, minIdy] + mseStd[minIdx, minIdy]
+    mse1StdErr = mseMean[minIdx, minIdy] + mseStd[minIdx, minIdy]./sqrt(length(MLMNet_cv.rowFolds))
     # Find the index of the lambda that is closest to being 1 SE greater than 
     # the lowest lambda, in the direction of the bigger lambdas
-    min1StdErrIdx = argmin(abs.(mseMean[1:minIdx[1], 1:minIdy[1]].-mse1StdErr))[1]
-    min1StdErrIdy = argmin(abs.(mseMean[1:minIdx[1], 1:minIdy[1]].-mse1StdErr))[2]
+    # the “one-standard-error rule” recommended by Hastie, Tibshirani, and Wainwright (2015, 13–14) 
+    # instead of the λ that minimizes the CV function. The one-standard-error rule selects, for each α, 
+    # the largest λ for which the CV function is within a standard error of the minimum of the CV function. 
+    # Then, from among these (α,λ) pairs, the one with the smallest value of the CV function is selected.
+    mse1tmp = mse1StdErr .-mseMean;
+    idxMin1StdErr =  minimize_rows(findall(mse1tmp .>= 0)) 
     
+    min1StdErrIdx = idxMin1StdErr[argmin(mseMean[idxMin1StdErr])][1]
+    min1StdErrIdy = idxMin1StdErr[argmin(mseMean[idxMin1StdErr])][2]
+
     # Pull out summary information for these two lambdas
     out = hcat(MLMNet_cv.lambdas[minIdx], MLMNet_cv.alphas[minIdy], 
                mseMean[minIdx, minIdy], prop_zeroMean[minIdx, minIdy])

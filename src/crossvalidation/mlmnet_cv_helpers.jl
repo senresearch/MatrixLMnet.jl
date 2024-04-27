@@ -111,6 +111,11 @@ function findnotin(a::AbstractArray{Int64,1}, b::AbstractArray{Int64,1})
     end
 end
 
+# CHECK if [] is an argument
+# WHY not using setdiff(collect(1:n), vec)
+
+
+
 """
         calc_mse(MLMNets::AbstractArray{Mlmnet,1}, data::RawData, 
                   lambdas::AbstractArray{Float64,1}, 
@@ -233,4 +238,51 @@ function calc_prop_zero(MLMNets::AbstractArray{Mlmnet,1},
     end
 
     return propZero
+end
+"""
+    minimize_rows(indices::Vector{CartesianIndex{2}})
+
+Processes a vector of `CartesianIndex` objects representing positions in a 2D matrix 
+and returns a new vector of CartesianIndex objects. Each element in the resulting vector 
+should represent the smallest row index for each unique column index.
+
+# Arguments 
+
+- indices = 1d array of `CartesianIndex` objects representing positions in a 2D matrix
+
+# Value
+
+1d array of `CartesianIndex` objects representing the smallest row index for each unique 
+column index.
+
+# Example
+```julia
+julia> input_indices = [CartesianIndex(1, 1), CartesianIndex(2, 1), CartesianIndex(3, 2), CartesianIndex(1, 2)]
+
+julia> output_indices = minimize_rows(input_indices)
+2-element Vector{CartesianIndex{2}}:
+ CartesianIndex(1, 2)
+ CartesianIndex(1, 1)
+```
+"""
+function minimize_rows(indices::Vector{CartesianIndex{2}})
+    # Dictionary to hold the minimum row index for each column
+    min_rows = Dict{Int, Int}()
+    
+    for index in indices
+        col = index[2]
+        row = index[1]
+        
+        # Update the dictionary with the minimum row for each column
+        if haskey(min_rows, col)
+            min_rows[col] = min(min_rows[col], row)
+        else
+            min_rows[col] = row
+        end
+    end
+
+    # Create a vector of CartesianIndices from the dictionary
+    result_indices = [CartesianIndex(min_rows[col], col) for col in keys(min_rows)]
+    
+    return result_indices
 end
