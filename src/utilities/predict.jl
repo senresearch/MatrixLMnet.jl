@@ -114,13 +114,13 @@ function predict(MLMNet::Mlmnet, lambda::Float64, alpha::Float64,
        newPredictors.hasXIntercept==false
         newPredictors.X = add_intercept(newPredictors.X)
         newPredictors.hasXIntercept = true
-        println("Adding X intercept to newPredictors.")
+        # println("Adding X intercept to newPredictors.")
   	end
     if MLMNet.data.predictors.hasZIntercept==true && 
        newPredictors.hasZIntercept==false
         newPredictors.Z = add_intercept(newPredictors.Z)
         newPredictors.hasZIntercept = true
-        println("Adding Z intercept to newPredictors.")
+        # println("Adding Z intercept to newPredictors.")
   	end
 
     # Remove X and Z intercepts in new predictors if necessary
@@ -245,14 +245,14 @@ function resid(MLMNet::Mlmnet, lambda::Float64, alpha::Float64, newData::RawData
         newData.predictors.X = add_intercept(newData.predictors.X)
         newData.predictors.hasXIntercept = true
         newData.p = newData.p + 1
-        println("Adding X intercept to newData.")
+        # println("Adding X intercept to newData.")
     end
     if MLMNet.data.predictors.hasZIntercept==true && 
        newData.predictors.hasZIntercept==false
         newData.predictors.Z = add_intercept(newData.predictors.Z)
         newData.predictors.hasZIntercept = true
         newData.q = newData.q + 1
-        println("Adding Z intercept to newData.")
+        # println("Adding Z intercept to newData.")
     end
     
     # Remove X and Z intercepts in new data if necessary
