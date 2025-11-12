@@ -10,6 +10,9 @@ using Test
     include("mlmnetCvTests.jl")
     include("summaryCvTests.jl")
     include("mlmnetBicTests.jl")
+    include("cdTests.jl")
+    include("ista_fista_updatesTests.jl")
+    include("mlmnetHelpersTests.jl")
     include("utilitiesTests.jl")
     include("mlmnetCV_helpersTests.jl")
 end

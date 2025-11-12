@@ -1,6 +1,6 @@
-# ###########
-# # Library #
-# ###########
+###########
+# Library #
+###########
 # # using MatrixLM
 # # using Distributions, Random, Statistics, LinearAlgebra, StatsBase
 # # using Random

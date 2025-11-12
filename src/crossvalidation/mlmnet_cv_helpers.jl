@@ -261,8 +261,8 @@ julia> input_indices = [CartesianIndex(1, 1), CartesianIndex(2, 1), CartesianInd
 
 julia> output_indices = minimize_rows(input_indices)
 2-element Vector{CartesianIndex{2}}:
- CartesianIndex(1, 2)
  CartesianIndex(1, 1)
+ CartesianIndex(1, 2)
 ```
 """
 function minimize_rows(indices::Vector{CartesianIndex{2}})
@@ -282,7 +282,7 @@ function minimize_rows(indices::Vector{CartesianIndex{2}})
     end
 
     # Create a vector of CartesianIndices from the dictionary
-    result_indices = [CartesianIndex(min_rows[col], col) for col in keys(min_rows)]
+    result_indices = [CartesianIndex(min_rows[col], col) for col in sort(keys(min_rows) .|> Int)]
     
     return result_indices
 end
